@@ -42,7 +42,7 @@ public:
     //!
     //! @param params       Parameter set.
     //! @param weight           Weight of the BXDF
-    Hair(const ClosureTypeHair& params, const Spectrum& weight);
+    Hair(RenderContext& rc, const ClosureTypeHair& params, const Spectrum& weight);
 
     //! Constructor
     //!
@@ -51,7 +51,7 @@ public:
     //! @param aRoughness       Azimuthal Roughness.
     //! @param ior              Index of Refraction inside hair.
     //! @param weight           Weight of the BXDF
-    Hair(const Spectrum& absorption, const float lRoughness, const float aRoughness, const float ior, const Spectrum& weight, bool doubleSided = false);
+    Hair(RenderContext& rc, const Spectrum& absorption, const float lRoughness, const float aRoughness, const float ior, const Spectrum& weight, bool doubleSided = false);
 
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.

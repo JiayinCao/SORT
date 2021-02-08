@@ -38,7 +38,7 @@ public:
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
     //! @return     The evaluted BRDF value.
-    Spectrum f( const Vector& wo , const Vector& wi ) const;
+    Spectrum f( const Vector& wo , const Vector& wi , RenderContext& rc) const;
 
     //! @brief Importance sampling for the bxdf.
     //!
@@ -53,7 +53,7 @@ public:
     //! @param bs   Sample for bsdf that holds some random variables.
     //! @param pdf  Probability density of the selected direction.
     //! @return     The evaluted BRDF value.
-    Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
+    Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf , RenderContext& rc) const;
 
     //! @brief Evalute the pdf of an existance direction given the Incident direction.
     //!
@@ -62,7 +62,7 @@ public:
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
     //! @return     The probability of choosing the out-going direction based on the Incident direction.
-    float pdf( const Vector& wo , const Vector& wi ) const;
+    float pdf( const Vector& wo , const Vector& wi , RenderContext& rc) const;
 
     //! Load brdf data from Fourier Bxdf file.
     //!
@@ -130,14 +130,14 @@ public:
     //!
     //! @param params       Parameter set.
     //! @param weight       Weight of this BRDF
-    FourierBxdf(const ClosureTypeFourier& params, const Spectrum& weight);
+    FourierBxdf(RenderContext& rc, const ClosureTypeFourier& params, const Spectrum& weight);
 
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
     //! @return     The evaluted BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const override{
-        return m_data->f(wo,wi);
+        return m_data->f(wo,wi,rc);
     }
 
     //! @brief Importance sampling for the bxdf.
@@ -154,7 +154,7 @@ public:
     //! @param pdf  Probability density of the selected direction.
     //! @return     The evaluted BRDF value.
     Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override{
-        return m_data->sample_f( wo , wi , bs , pdf ) * absCosTheta(wi);
+        return m_data->sample_f( wo , wi , bs , pdf , rc) * absCosTheta(wi);
     }
 
     //! @brief Evalute the pdf of an existance direction given the Incident direction.
@@ -165,7 +165,7 @@ public:
     //! @param wi   Incident direction in shading coordinate.
     //! @return     The probability of choosing the out-going direction based on the Incident direction.
     float pdf( const Vector& wo , const Vector& wi ) const override{
-        return m_data->pdf( wo , wi );
+        return m_data->pdf( wo , wi , rc);
     }
 
 private:

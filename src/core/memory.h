@@ -102,6 +102,7 @@ SORT_FORCEINLINE ::MemoryAllocator& GetStaticAllocator() {
 #define SORT_CLEAR_MEMPOOL()        GetStaticAllocator().Reset()
 
 #define SORT_MALLOC_PROXY(A, T)     new (A->Allocate<T>()) T
+#define SORT_MALLOC_ARRAY_PROXY(A, T,cnt) new (A->Allocate<T>(cnt)) T 
 
 //! @brief  A helper utility function that allocate memory with alignment.
 //!

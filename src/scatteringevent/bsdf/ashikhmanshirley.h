@@ -42,8 +42,8 @@ public:
     //! @param param            Parameter set.
     //! @param weight           Weight of the BXDF
     //! @param doubleSided      Whether the BRDF is two sided.
-    AshikhmanShirley(const ClosureTypeAshikhmanShirley& params, const Spectrum& weight, bool doubleSided = false)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, doubleSided) , D(params.base_color), S(params.specular), distribution(params.roughnessU, params.roughnessV) {}
+    AshikhmanShirley(RenderContext& rc, const ClosureTypeAshikhmanShirley& params, const Spectrum& weight, bool doubleSided = false)
+        : Bxdf(rc, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, doubleSided) , D(params.base_color), S(params.specular), distribution(params.roughnessU, params.roughnessV) {}
 
     //! Constructor.
     //!
@@ -52,8 +52,8 @@ public:
     //! @param roughnessU       Roughness along one axis.
     //! @param roughnessV       Roughness along the other axis
     //! @param weight           Weight of the BXDF
-    AshikhmanShirley(const Spectrum& diffuse, const float specular, const float roughnessU, const float roughnessV, const Spectrum& weight, const Vector& n , bool doubleSided = false)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , D(diffuse), S(specular), distribution(roughnessU, roughnessV) {}
+    AshikhmanShirley(RenderContext& rc, const Spectrum& diffuse, const float specular, const float roughnessU, const float roughnessV, const Spectrum& weight, const Vector& n , bool doubleSided = false)
+        : Bxdf(rc, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , D(diffuse), S(specular), distribution(roughnessU, roughnessV) {}
 
     //! Evaluate the BRDF.
     //!

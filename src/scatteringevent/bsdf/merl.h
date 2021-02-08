@@ -75,7 +75,7 @@ public:
     //!
     //! @param params       Parameter set.
     //! @param weight       Weight of this BRDF
-    Merl(const ClosureTypeMERL& params, const Spectrum& weight, bool doubleSided = false);
+    Merl(RenderContext& rc, const ClosureTypeMERL& params, const Spectrum& weight, bool doubleSided = false);
 
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.

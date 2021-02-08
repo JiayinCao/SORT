@@ -33,12 +33,12 @@ DECLARE_CLOSURE_TYPE_END(ClosureTypeTransparent)
 class Transparent : public Bxdf{
 public:
     //! @brief      Default constructor
-    Transparent() : Bxdf(FULL_WEIGHT, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), DIR_UP, true), A(WHITE_SPECTRUM) {}
+    Transparent(RenderContext& rc) : Bxdf(rc, FULL_WEIGHT, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), DIR_UP, true), A(WHITE_SPECTRUM) {}
 
     //! @brief      Constructor taken attenuation.
     //!
     //! @param      Parameter set.
-    Transparent(const ClosureTypeTransparent& param, const Spectrum& weight) : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), DIR_UP, true), A(param.attenuation) {}
+    Transparent(RenderContext& rc, const ClosureTypeTransparent& param, const Spectrum& weight) : Bxdf(rc, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), DIR_UP, true), A(param.attenuation) {}
 
     //! @brief      Constructor from parameter set.
     //!

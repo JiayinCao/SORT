@@ -129,7 +129,7 @@ Spectrum MerlData::f( const Vector& Wo , const Vector& Wi ) const
     return Spectrum( r , g , b );
 }
 
- Merl::Merl(const ClosureTypeMERL& params, const Spectrum& weight, bool doubleSided)
-     : Bxdf(weight, BXDF_ALL, params.normal, doubleSided), m_data((MerlData*)params.merl_data)
+ Merl::Merl(RenderContext& rc, const ClosureTypeMERL& params, const Spectrum& weight, bool doubleSided)
+     : Bxdf(rc, weight, BXDF_ALL, params.normal, doubleSided), m_data((MerlData*)params.merl_data)
  {
  }

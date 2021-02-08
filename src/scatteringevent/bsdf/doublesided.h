@@ -37,7 +37,7 @@ public:
     //! @param bxdf0        Bxdf0.
     //! @param bxdf1        Bxdf1.
     //! @param weight       Weight of the BXDF.
-    DoubleSided(const ScatteringEvent* se0 , const ScatteringEvent* se1 , const Spectrum& weight ) : Bxdf(weight, (BXDF_TYPE)(BXDF_ALL_TYPES), DIR_UP, false), m_se0(se0), m_se1(se1) {}
+    DoubleSided(RenderContext& rc, const ScatteringEvent* se0 , const ScatteringEvent* se1 , const Spectrum& weight ) : Bxdf(rc, weight, (BXDF_TYPE)(BXDF_ALL_TYPES), DIR_UP, false), m_se0(se0), m_se1(se1) {}
 
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.

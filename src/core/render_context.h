@@ -17,8 +17,6 @@
 
 #pragma once
 
-#include <tsl_version.h>
-#include <tsl_system.h>
 #include <memory>
 #include "core/define.h"
 #include "core/memory.h"
@@ -37,18 +35,15 @@
 struct RenderContext{
     //! Memory allocator for small piece of memory
     std::unique_ptr<MemoryAllocator>                m_memory_arena;
-    //! Shading context for shader execution
-    std::shared_ptr<Tsl_Namespace::ShadingContext>  m_shading_context;
 
     //! @brief  Initialize the render context, only needs to be done once.
     void Init(){
         m_memory_arena = std::make_unique<MemoryAllocator>();
-        m_shading_context = Tsl_Namespace::ShadingSystem::get_instance().make_shading_context();
     }
 
     //! @brief  If the render context is initialized
     bool IsInitialized() const {
-        return m_memory_arena && m_shading_context;
+        return m_memory_arena != nullptr;
     }
 
     //! @brief  Reset the context so that it can be shared with future job instance

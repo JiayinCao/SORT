@@ -24,8 +24,8 @@ IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeOrenNayar, Tsl_float, roughness)
 IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeOrenNayar, Tsl_float3, normal)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeOrenNayar)
 
-OrenNayar::OrenNayar(const ClosureTypeOrenNayar& params, const Spectrum& weight, bool doubleSided ):
-    Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, doubleSided), R(params.base_color) {
+OrenNayar::OrenNayar(RenderContext& rc, const ClosureTypeOrenNayar& params, const Spectrum& weight, bool doubleSided ):
+    Bxdf(rc, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, doubleSided), R(params.base_color) {
     // roughness ranges from 0 to infinity
     auto sigma = params.roughness;
     sigma = std::max(0.0f, sigma);
@@ -35,8 +35,8 @@ OrenNayar::OrenNayar(const ClosureTypeOrenNayar& params, const Spectrum& weight,
     B = 0.45f * sigma2 / (sigma2 + 0.09f);
 }
 
-OrenNayar::OrenNayar(const Spectrum& reflectance, float sigma, const Spectrum& weight, const Vector& n, bool doubleSided) :
-    Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), R(reflectance){
+OrenNayar::OrenNayar(RenderContext& rc, const Spectrum& reflectance, float sigma, const Spectrum& weight, const Vector& n, bool doubleSided) :
+    Bxdf(rc, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), R(reflectance){
     // roughness ranges from 0 to infinity
     sigma = std::max(0.0f, sigma);
 

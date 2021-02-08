@@ -23,6 +23,8 @@
 #include "math/vector3.h"
 #include "scatteringevent/scatteringunit.h"
 
+struct RenderContext;
+
 //! @brief BXDF type.
 enum BXDF_TYPE{
     BXDF_NONE = 0,
@@ -51,14 +53,14 @@ public:
     //!
     //! @param ew       Evaluation weight of the bxdf.
     //! @param type     Type of the bxdf, currently not wisely used.
-    Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n, bool doubleSided = false);
+    Bxdf(RenderContext& rc, const Spectrum& w, BXDF_TYPE type, Vector n, bool doubleSided = false);
 
     //! @brief  Constructor.
     //!
     //! @param ew       Evaluation weight of the bxdf.
     //! @param sw       Sampling weight of the bxdf;
     //! @param type     Type of the bxdf, currently not wisely used.
-    Bxdf(const Spectrum& w, const float sw, BXDF_TYPE type, Vector n, bool doubleSided = false);
+    Bxdf(RenderContext& rc, const Spectrum& w, const float sw, BXDF_TYPE type, Vector n, bool doubleSided = false);
 
     //! @brief  Virtual destructor.
     virtual ~Bxdf() = default;
@@ -210,4 +212,5 @@ protected:
     Vector      btn;                        /**< Bi-tangent at the point to be evaluated. */
     mutable Vector      gnormal;            /**< Geometry normal. */
     const bool  doubleSided = false;        /**< Whether the bxdf is double sided. */
+    RenderContext&  rc;
 };

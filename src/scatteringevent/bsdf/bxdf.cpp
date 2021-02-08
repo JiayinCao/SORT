@@ -19,8 +19,8 @@
 #include "core/samplemethod.h"
 #include "sampler/sample.h"
 
-Bxdf::Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n , bool doubleSided) 
-    : ScatteringUnit(w), m_type(type), gnormal( DIR_UP ), doubleSided(doubleSided){
+Bxdf::Bxdf(RenderContext& rc, const Spectrum& w, BXDF_TYPE type, Vector n , bool doubleSided) 
+    : ScatteringUnit(w), m_type(type), gnormal( DIR_UP ), doubleSided(doubleSided), rc(rc){
     // Handle the special case where normal map is not applied, in which case, btn and tn will be invalid.
     if( DIR_UP == n ){
         nn = n;
@@ -35,8 +35,8 @@ Bxdf::Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n , bool doubleSided)
     gnormal = bsdfToBxdf( DIR_UP );
 }
 
-Bxdf::Bxdf(const Spectrum& ew, const float sw , BXDF_TYPE type, Vector n , bool doubleSided) 
-    : ScatteringUnit(ew, sw), m_type(type), gnormal( DIR_UP ), doubleSided(doubleSided){
+Bxdf::Bxdf(RenderContext& rc, const Spectrum& ew, const float sw , BXDF_TYPE type, Vector n , bool doubleSided) 
+    : ScatteringUnit(ew, sw), m_type(type), gnormal( DIR_UP ), doubleSided(doubleSided), rc(rc){
     // Handle the special case where normal map is not applied, in which case, btn and tn will be invalid.
     if( DIR_UP == n ){
         nn = n;

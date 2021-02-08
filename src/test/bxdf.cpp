@@ -33,6 +33,7 @@
 #include "scatteringevent/bsdf/hair.h"
 #include "scatteringevent/bsdf/fabric.h"
 
+#if 0
 // A physically based BRDF should obey the rule of reciprocity
 void checkReciprocity(const Bxdf* bxdf) {
     spinlock_mutex mutex;
@@ -290,3 +291,6 @@ TEST(BXDF, DISABLED_HairSamplingConsistance) {
         }
     }
 }
+
+
+#endif

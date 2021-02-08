@@ -156,7 +156,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                     // Fresnel is totally ignored here due to two reasons, the lack of visual differences and most importantly,
                     // there will be a discontinuity introduced when mean free path approaches zero.
                     ScatteringEvent se(pInter->intersection);
-                    se.AddBxdf( SORT_MALLOC_PROXY(rc.m_memory_arena, Lambert)( WHITE_SPECTRUM , FULL_WEIGHT , DIR_UP ) );
+                    se.AddBxdf( SORT_MALLOC_PROXY(rc.m_memory_arena, Lambert)(rc, WHITE_SPECTRUM , FULL_WEIGHT , DIR_UP ) );
 
                     // Accumulate the contribution from direct illumination
                     total_bssrdf += SampleOneLight( se , r , intersection , scene , material , ms , rc ) * pInter->weight;
@@ -224,7 +224,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                     //  - the lack of visual differences 
                     //  - more importantly, there will be a discontinuity introduced when mean free path approaches zero.
                     ScatteringEvent se(pInter->intersection, SE_Flag( SE_EVALUATE_ALL | SE_REPLACE_BSSRDF ));
-                    se.AddBxdf( SORT_MALLOC_PROXY(rc.m_memory_arena, Lambert)( WHITE_SPECTRUM , FULL_WEIGHT , DIR_UP ) );
+                    se.AddBxdf( SORT_MALLOC_PROXY(rc.m_memory_arena, Lambert)(rc, WHITE_SPECTRUM , FULL_WEIGHT , DIR_UP ) );
 
                     // Counts the light from indirect illumination recursively
                     float pdf = 0.0f;

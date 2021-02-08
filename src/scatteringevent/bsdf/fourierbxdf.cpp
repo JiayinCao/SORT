@@ -22,6 +22,7 @@
 #include "core/samplemethod.h"
 #include "sampler/sample.h"
 #include "material/matmanager.h"
+#include "core/render_context.h"
 
 IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeFourier)
 IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeFourier, Tsl_resource, measured_data)
@@ -89,7 +90,7 @@ bool FourierBxdfData::LoadResource( const std::string filename ){
 }
 
 // evaluate bxdf
-Spectrum FourierBxdfData::f( const Vector& wo , const Vector& wi ) const
+Spectrum FourierBxdfData::f( const Vector& wo , const Vector& wi , RenderContext& rc) const
 {
     const auto muI = cosTheta( -wi );
     const auto muO = cosTheta( wo );
@@ -101,7 +102,7 @@ Spectrum FourierBxdfData::f( const Vector& wo , const Vector& wi ) const
         !getCatmullRomWeights( muO , offsetO , weightsO ) )
         return 0.0f;
 
-    auto ak = (float*)SORT_MALLOC_ARRAY(float, bsdfTable.nMax * bsdfTable.nChannels );
+    auto ak = (float*)SORT_MALLOC_ARRAY_PROXY(rc.m_memory_arena, float, bsdfTable.nMax * bsdfTable.nChannels );
     memset( ak , 0 , sizeof( float ) * bsdfTable.nMax * bsdfTable.nChannels );
     auto nMax = blendCoefficients( ak , bsdfTable.nChannels , offsetI, offsetO, weightsI, weightsO );
 
@@ -121,7 +122,7 @@ Spectrum FourierBxdfData::f( const Vector& wo , const Vector& wi ) const
     return Spectrum( R * scale , G * scale , B * scale ).Clamp( 0.0f , FLT_MAX );
 }
 
-Spectrum FourierBxdfData::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
+Spectrum FourierBxdfData::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf, RenderContext& rc ) const
 {
     auto muO = cosTheta(wo);
     float pdfMu;
@@ -135,7 +136,7 @@ Spectrum FourierBxdfData::sample_f( const Vector& wo , Vector& wi , const BsdfSa
         return 0.0f;
     }
 
-    auto ak = (float*)SORT_MALLOC_ARRAY(float, bsdfTable.nMax * bsdfTable.nChannels );
+    auto ak = (float*)SORT_MALLOC_ARRAY_PROXY(rc.m_memory_arena, float, bsdfTable.nMax * bsdfTable.nChannels );
     memset( ak , 0 , sizeof( float ) * bsdfTable.nMax * bsdfTable.nChannels );
     auto nMax = blendCoefficients( ak , bsdfTable.nChannels , offsetI, offsetO, weightsI, weightsO );
 
@@ -168,7 +169,7 @@ Spectrum FourierBxdfData::sample_f( const Vector& wo , Vector& wi , const BsdfSa
     return Spectrum( R * scale , G * scale , B * scale ).Clamp( 0.0f , FLT_MAX );
 }
 
-float FourierBxdfData::pdf( const Vector& wo , const Vector& wi ) const
+float FourierBxdfData::pdf( const Vector& wo , const Vector& wi, RenderContext& rc) const
 {
     auto muI = cosTheta(-wi) , muO = cosTheta(wo);
     auto cosPhi = cosDPhi( -wi , wo );
@@ -179,7 +180,7 @@ float FourierBxdfData::pdf( const Vector& wo , const Vector& wi ) const
         !getCatmullRomWeights( muO , offsetO , weightsO ) )
         return 0.0f;
 
-    auto ak = (float*)SORT_MALLOC_ARRAY(float, bsdfTable.nMax );
+    auto ak = (float*)SORT_MALLOC_ARRAY_PROXY(rc.m_memory_arena, float, bsdfTable.nMax );
     memset( ak , 0 , sizeof( float ) * bsdfTable.nMax );
     auto nMax = blendCoefficients( ak , 1 , offsetI, offsetO, weightsI, weightsO );
 
@@ -406,6 +407,6 @@ int FourierBxdfData::blendCoefficients( float* ak , int channel , int offsetI , 
     return nMax;
 }
 
-FourierBxdf::FourierBxdf(const ClosureTypeFourier& params, const Spectrum& weight)
-    : Bxdf(weight, BXDF_ALL, params.normal, true), m_data((const FourierBxdfData*)(params.measured_data)) {
+FourierBxdf::FourierBxdf(RenderContext& rc, const ClosureTypeFourier& params, const Spectrum& weight)
+    : Bxdf(rc, weight, BXDF_ALL, params.normal, true), m_data((const FourierBxdfData*)(params.measured_data)) {
 }

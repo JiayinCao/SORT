@@ -254,7 +254,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
     const auto Cspec0 = slerp(specular * SchlickR0FromEta( ior_ex / ior_in ) * slerp(Spectrum(1.0f), Ctint, specularTint), basecolor, metallic);
     if (!Cspec0.IsBlack() && evaluate_reflection) {
         const FresnelSchlick<Spectrum> fresnel(Cspec0);
-        const MicroFacetReflection mf(WHITE_SPECTRUM, &fresnel, &ggx, FULL_WEIGHT, nn);
+        const MicroFacetReflection mf(rc, WHITE_SPECTRUM, &fresnel, &ggx, FULL_WEIGHT, nn);
         ret += mf.f(wo, wi);
     }
 
@@ -262,7 +262,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
     if (clearcoat > 0.0f && evaluate_reflection) {
         const ClearcoatGGX cggx(sqrt(slerp(0.1f, 0.001f, clearcoatGloss)));
         const FresnelSchlick<float> fresnel(0.04f);
-        const MicroFacetReflection mf_clearcoat(WHITE_SPECTRUM, &fresnel, &cggx, FULL_WEIGHT, nn);
+        const MicroFacetReflection mf_clearcoat(rc, WHITE_SPECTRUM, &fresnel, &cggx, FULL_WEIGHT, nn);
         ret += clearcoat * mf_clearcoat.f(wo, wi);
     }
 
@@ -275,19 +275,19 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
             const auto rv = SQR(rscaled) * aspect;
             const GGX scaledDist(ru, rv);
 
-            MicroFacetRefraction mr(basecolor.Sqrt(), &scaledDist, ior_ex, ior_in, FULL_WEIGHT, nn);
+            MicroFacetRefraction mr(rc, basecolor.Sqrt(), &scaledDist, ior_ex, ior_in, FULL_WEIGHT, nn);
             ret += specTrans * (1.0f - metallic) * mr.f(wo, wi);
         } else {
             // Microfacet Models for Refraction through Rough Surfaces
             // https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf
-            MicroFacetRefraction mr(basecolor, &ggx, ior_ex, ior_in, FULL_WEIGHT, nn);
+            MicroFacetRefraction mr(rc, basecolor, &ggx, ior_ex, ior_in, FULL_WEIGHT, nn);
             ret += specTrans * (1.0f - metallic) * mr.f(wo, wi);
         }
     }
 
     // Diffuse transmission
     if ( thinSurface && diffTrans > 0.0f && diffuseWeight > 0.0f ) {
-        LambertTransmission lambert_transmission(basecolor , 1.0f, nn);
+        LambertTransmission lambert_transmission(rc, basecolor, 1.0f, nn);
         ret += diffTrans * diffuseWeight * lambert_transmission.f(wo, wi) ;
     }
 
@@ -343,12 +343,12 @@ Spectrum DisneyBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
             const auto ru = SQR(rscaled) / aspect;
             const auto rv = SQR(rscaled) * aspect;
             const GGX scaledDist(ru, rv);
-            MicroFacetRefraction mr(WHITE_SPECTRUM, &scaledDist, ior_ex, ior_in, FULL_WEIGHT, nn);
+            MicroFacetRefraction mr(rc, WHITE_SPECTRUM, &scaledDist, ior_ex, ior_in, FULL_WEIGHT, nn);
             mr.sample_f(wo, wi, bs, pPdf);
         }
         else {
             // Sampling the transmission BTDF
-            MicroFacetRefraction mr(WHITE_SPECTRUM, &ggx, ior_ex, ior_in, FULL_WEIGHT, nn);
+            MicroFacetRefraction mr(rc, WHITE_SPECTRUM, &ggx, ior_ex, ior_in, FULL_WEIGHT, nn);
             mr.sample_f(wo, wi, bs, pPdf);
         }
     }else if (r <= dr_w) {
@@ -361,7 +361,7 @@ Spectrum DisneyBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
         }
     }else // if( r <= dt_w )
     {
-        LambertTransmission lambert_transmission(basecolor, diffTrans, nn);
+        LambertTransmission lambert_transmission(rc, basecolor, diffTrans, nn);
         lambert_transmission.sample_f(wo, wi, bs, pPdf);
     }
 
@@ -408,12 +408,12 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
             const auto rv = SQR(rscaled) * aspect;
             const GGX scaledDist(ru, rv);
 
-            MicroFacetRefraction mr(WHITE_SPECTRUM, &scaledDist, ior_ex, ior_in, FULL_WEIGHT, nn);
+            MicroFacetRefraction mr(rc, WHITE_SPECTRUM, &scaledDist, ior_ex, ior_in, FULL_WEIGHT, nn);
             total_pdf += specular_transmission_weight * mr.pdf(wo, wi);
         }
         else {
             // Sampling the transmission BTDF
-            MicroFacetRefraction mr(WHITE_SPECTRUM, &ggx, ior_ex, ior_in, FULL_WEIGHT, nn);
+            MicroFacetRefraction mr(rc, WHITE_SPECTRUM, &ggx, ior_ex, ior_in, FULL_WEIGHT, nn);
             total_pdf += specular_transmission_weight * mr.pdf(wo, wi);
         }
     }
@@ -426,7 +426,7 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
         }
     }
     if (diffuse_transmission_weight > 0.0f) {
-        LambertTransmission lambert_transmission(basecolor, diffTrans, nn);
+        LambertTransmission lambert_transmission(rc, basecolor, diffTrans, nn);
         total_pdf += diffuse_transmission_weight * lambert_transmission.pdf(wo, wi);
     }
 

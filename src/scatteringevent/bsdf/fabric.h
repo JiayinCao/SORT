@@ -39,8 +39,8 @@ public:
     //! @param weight       Weight of this BRDF
     //! @param n            Normal, usually from normal map, in local coordinate.
     //! @param doubleSided  Whether the BRDF is double sided.
-    Fabric(const Spectrum& bc, const float r , const Spectrum& weight, const Vector& n, bool doubleSided = false)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), baseColor(bc), roughness(r) {
+    Fabric(RenderContext& rc, const Spectrum& bc, const float r , const Spectrum& weight, const Vector& n, bool doubleSided = false)
+        : Bxdf(rc, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), baseColor(bc), roughness(r) {
     }
 
     //! Constructor from parameter set.
@@ -48,8 +48,8 @@ public:
     //! @param param        All parameters.
     //! @param weight       Weight of this BRDF.
     //! @param doubleSided  Whether the material is double-sided.
-    Fabric( const ClosureTypeFabric& param , const Spectrum& weight , bool doubleSided = false)
-        : Fabric( param.base_color , param.roughness , weight , param.normal ) {
+    Fabric(RenderContext& rc, const ClosureTypeFabric& param , const Spectrum& weight , bool doubleSided = false)
+        : Fabric( rc, param.base_color , param.roughness , weight , param.normal ) {
     }
 
     //! Evaluate the BRDF

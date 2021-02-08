@@ -20,6 +20,7 @@
 #include "sampler/sample.h"
 #include "math/utils.h"
 #include "core/memory.h"
+#include "core/render_context.h"
 #include "scatteringevent/bsdf/fresnel.h"
 
 IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeMirror)
@@ -273,38 +274,38 @@ float GGX::G1( const Vector& v ) const {
     return 2.0f / ( 1.0f + sqrt( 1.0f + alpha2 * tan_theta_sq ) );
 }
 
-Microfacet::Microfacet(const MF_Dist_Type distType, float ru , float rv , const Spectrum& w, const BXDF_TYPE t , const Vector& n , bool doubleSided ) :
-    Bxdf(w, t, n, doubleSided ) {
+Microfacet::Microfacet(RenderContext& rc, const MF_Dist_Type distType, float ru , float rv , const Spectrum& w, const BXDF_TYPE t , const Vector& n , bool doubleSided ) :
+    Bxdf(rc, w, t, n, doubleSided ) {
     if(distType == MF_DIST_GGX)
-        distribution = SORT_MALLOC(GGX)( ru , rv );
+        distribution = SORT_MALLOC_PROXY(rc.m_memory_arena, GGX)( ru , rv );
     else if(distType == MF_DIST_BECKMANN)
-        distribution = SORT_MALLOC(Beckmann)( ru , rv );
+        distribution = SORT_MALLOC_PROXY(rc.m_memory_arena, Beckmann)( ru , rv );
     else if(distType == MF_DIST_BLINN)
-        distribution = SORT_MALLOC(Blinn)( ru , rv );
+        distribution = SORT_MALLOC_PROXY(rc.m_memory_arena, Blinn)( ru , rv );
 }
 
-MicroFacetReflection::MicroFacetReflection(const ClosureTypeMicrofacetReflectionGGX& params, const Spectrum& weight, bool doubleSided):
-    Microfacet(MF_DIST_GGX, params.roughness_u, params.roughness_v, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, false),
-    R(params.base_color), fresnel(SORT_MALLOC(FresnelConductor)(params.eta, params.absorption)) {
+MicroFacetReflection::MicroFacetReflection(RenderContext& rc, const ClosureTypeMicrofacetReflectionGGX& params, const Spectrum& weight, bool doubleSided):
+    Microfacet(rc, MF_DIST_GGX, params.roughness_u, params.roughness_v, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, false),
+    R(params.base_color), fresnel(SORT_MALLOC_PROXY(rc.m_memory_arena, FresnelConductor)(params.eta, params.absorption)) {
 }
 
-MicroFacetReflection::MicroFacetReflection(const ClosureTypeMicrofacetReflectionBlinn& params, const Spectrum& weight, bool doubleSided) :
-    Microfacet(MF_DIST_BLINN, params.roughness_u, params.roughness_v, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, false),
-    R(params.base_color), fresnel(SORT_MALLOC(FresnelConductor)(params.eta, params.absorption)) {
+MicroFacetReflection::MicroFacetReflection(RenderContext& rc, const ClosureTypeMicrofacetReflectionBlinn& params, const Spectrum& weight, bool doubleSided) :
+    Microfacet(rc, MF_DIST_BLINN, params.roughness_u, params.roughness_v, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, false),
+    R(params.base_color), fresnel(SORT_MALLOC_PROXY(rc.m_memory_arena, FresnelConductor)(params.eta, params.absorption)) {
 }
 
-MicroFacetReflection::MicroFacetReflection(const ClosureTypeMicrofacetReflectionBeckmann& params, const Spectrum& weight, bool doubleSided) :
-    Microfacet(MF_DIST_BECKMANN, params.roughness_u, params.roughness_v, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, false),
-    R(params.base_color), fresnel(SORT_MALLOC(FresnelConductor)(params.eta, params.absorption)) {
+MicroFacetReflection::MicroFacetReflection(RenderContext& rc, const ClosureTypeMicrofacetReflectionBeckmann& params, const Spectrum& weight, bool doubleSided) :
+    Microfacet(rc, MF_DIST_BECKMANN, params.roughness_u, params.roughness_v, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, false),
+    R(params.base_color), fresnel(SORT_MALLOC_PROXY(rc.m_memory_arena, FresnelConductor)(params.eta, params.absorption)) {
 }
 
-MicroFacetReflection::MicroFacetReflection(const ClosureTypeMicrofacetReflectionDielectric& params, const Spectrum& weight, bool doubleSided) :
-     Microfacet(MF_DIST_GGX, params.roughness_u, params.roughness_v, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, false),
-     R(params.base_color), fresnel(SORT_MALLOC(FresnelDielectric)(params.iorI, params.iorT)) {
+MicroFacetReflection::MicroFacetReflection(RenderContext& rc, const ClosureTypeMicrofacetReflectionDielectric& params, const Spectrum& weight, bool doubleSided) :
+     Microfacet(rc, MF_DIST_GGX, params.roughness_u, params.roughness_v, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, false),
+     R(params.base_color), fresnel(SORT_MALLOC_PROXY(rc.m_memory_arena, FresnelDielectric)(params.iorI, params.iorT)) {
 }
 
-MicroFacetReflection::MicroFacetReflection(const ClosureTypeMirror& params, const Spectrum& weight, bool doubleSided ):
-    Microfacet(MF_DIST_GGX, 0.0f, 0.0f, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, false), R(params.base_color), fresnel(SORT_MALLOC(FresnelNo)()) {
+MicroFacetReflection::MicroFacetReflection(RenderContext& rc, const ClosureTypeMirror& params, const Spectrum& weight, bool doubleSided ):
+    Microfacet(rc, MF_DIST_GGX, 0.0f, 0.0f, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, false), R(params.base_color), fresnel(SORT_MALLOC_PROXY(rc.m_memory_arena, FresnelNo)()) {
 }
 
 Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const {
@@ -345,18 +346,18 @@ float MicroFacetReflection::pdf( const Vector& wo , const Vector& wi ) const {
     return distribution->Pdf(h) / (4.0f * EoH);
 }
 
-MicroFacetRefraction::MicroFacetRefraction(const ClosureTypeMicrofacetRefractionGGX&params, const Spectrum& weight):
-    Microfacet( MF_DIST_GGX , params.roughness_u , params.roughness_v , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, true),
+MicroFacetRefraction::MicroFacetRefraction(RenderContext& rc, const ClosureTypeMicrofacetRefractionGGX&params, const Spectrum& weight):
+    Microfacet(rc, MF_DIST_GGX , params.roughness_u , params.roughness_v , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, true),
     T(params.transmittance), etaI(params.etaI) , etaT(params.etaT) , fresnel( params.etaI , params.etaT ) {
 }
 
-MicroFacetRefraction::MicroFacetRefraction(const ClosureTypeMicrofacetRefractionBlinn& params, const Spectrum& weight) :
-    Microfacet(MF_DIST_BLINN, params.roughness_u, params.roughness_v, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, true),
+MicroFacetRefraction::MicroFacetRefraction(RenderContext& rc, const ClosureTypeMicrofacetRefractionBlinn& params, const Spectrum& weight) :
+    Microfacet(rc, MF_DIST_BLINN, params.roughness_u, params.roughness_v, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, true),
     T(params.transmittance), etaI(params.etaI), etaT(params.etaT), fresnel(params.etaI, params.etaT) {
 }
 
-MicroFacetRefraction::MicroFacetRefraction(const ClosureTypeMicrofacetRefractionBeckmann& params, const Spectrum& weight) :
-    Microfacet(MF_DIST_BECKMANN, params.roughness_u, params.roughness_v, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, true),
+MicroFacetRefraction::MicroFacetRefraction(RenderContext& rc, const ClosureTypeMicrofacetRefractionBeckmann& params, const Spectrum& weight) :
+    Microfacet(rc, MF_DIST_BECKMANN, params.roughness_u, params.roughness_v, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, true),
     T(params.transmittance), etaI(params.etaI), etaT(params.etaT), fresnel(params.etaI, params.etaT) {
 }
 

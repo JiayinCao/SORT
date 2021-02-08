@@ -46,8 +46,8 @@ public:
     //! @param weight       Weight of this BRDF
     //! @param n            Normal, usually from normal map, in local coordinate.
     //! @param doubleSided  Whether the BRDF is double sided.
-    DistributionBRDF(const Spectrum& s, const float r , const float specular , const float st , const Spectrum& weight, const Vector& n, bool doubleSided = false)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), R(s), alpha(convert(r)), alphaSqr(alpha*alpha), specular(specular), specularTint(st) {
+    DistributionBRDF(RenderContext& rc, const Spectrum& s, const float r , const float specular , const float st , const Spectrum& weight, const Vector& n, bool doubleSided = false)
+        : Bxdf(rc, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), R(s), alpha(convert(r)), alphaSqr(alpha*alpha), specular(specular), specularTint(st) {
     }
 
     //! Constructor from parameter set.
@@ -55,8 +55,8 @@ public:
     //! @param param        All parameters.
     //! @param weight       Weight of this BRDF.
     //! @param doubleSided  Whether the material is double-sided.
-    DistributionBRDF( const ClosureTypeDistributionBRDF& param , const Spectrum& weight , bool doubleSided = false)
-        : DistributionBRDF( param.base_color, param.roughness , param.specular , param.specular_tint , weight , param.normal ) {
+    DistributionBRDF(RenderContext& rc, const ClosureTypeDistributionBRDF& param , const Spectrum& weight , bool doubleSided = false)
+        : DistributionBRDF(rc, param.base_color, param.roughness , param.specular , param.specular_tint , weight , param.normal ) {
     }
 
     //! Evaluate the BRDF

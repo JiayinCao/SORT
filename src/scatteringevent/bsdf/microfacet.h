@@ -211,13 +211,13 @@ public:
     //! @param rv           Roughness along V axis.
     //! @param w            Weight of the bxdf
     //! @param t            Type of the bxdf
-    Microfacet(const MF_Dist_Type distType, float ru , float rv , const Spectrum& w, const BXDF_TYPE t , const Vector& n , bool doubleSided );
+    Microfacet(RenderContext& rc, const MF_Dist_Type distType, float ru , float rv , const Spectrum& w, const BXDF_TYPE t , const Vector& n , bool doubleSided );
 
     //! @brief Constructor
     //! @param d        Normal distribution term
     //! @param w        Weight of the bxdf
     //! @param t        Type of the bxdf
-    Microfacet(const MicroFacetDistribution* d, const Spectrum& w, const BXDF_TYPE t , const Vector& n , bool doubleSided) : Bxdf(w, t, n, doubleSided) , distribution(d) {}
+    Microfacet(RenderContext& rc, const MicroFacetDistribution* d, const Spectrum& w, const BXDF_TYPE t , const Vector& n , bool doubleSided) : Bxdf(rc, w, t, n, doubleSided) , distribution(d) {}
 
 protected:
     const MicroFacetDistribution* distribution = nullptr; /**< Normal distribution of micro facets. */
@@ -231,35 +231,35 @@ public:
     //! @param  params          Parameter set.
     //! @param  weight          Weight of this bxdf.
     //! @param  doubleSided     Whether the material is double sided
-    MicroFacetReflection(const ClosureTypeMirror& params, const Spectrum& weight, bool doubleSided = false);
+    MicroFacetReflection(RenderContext& rc, const ClosureTypeMirror& params, const Spectrum& weight, bool doubleSided = false);
 
     //! @brief Constructor from parameter set
     //!
     //! @param  params          Parameter set.
     //! @param  weight          Weight of this BRDF.
     //! @param  doubleSided     Whether the BRDF is double sided.
-    MicroFacetReflection(const ClosureTypeMicrofacetReflectionGGX &params, const Spectrum& weight , bool doubleSided = false );
+    MicroFacetReflection(RenderContext& rc, const ClosureTypeMicrofacetReflectionGGX &params, const Spectrum& weight , bool doubleSided = false );
 
     //! @brief Constructor from parameter set
     //!
     //! @param  params          Parameter set.
     //! @param  weight          Weight of this BRDF.
     //! @param  doubleSided     Whether the BRDF is double sided.
-    MicroFacetReflection(const ClosureTypeMicrofacetReflectionBlinn& params, const Spectrum& weight, bool doubleSided = false);
+    MicroFacetReflection(RenderContext& rc, const ClosureTypeMicrofacetReflectionBlinn& params, const Spectrum& weight, bool doubleSided = false);
 
     //! @brief Constructor from parameter set
     //!
     //! @param  params          Parameter set.
     //! @param  weight          Weight of this BRDF.
     //! @param  doubleSided     Whether the BRDF is double sided.
-    MicroFacetReflection(const ClosureTypeMicrofacetReflectionBeckmann& params, const Spectrum& weight, bool doubleSided = false);
+    MicroFacetReflection(RenderContext& rc, const ClosureTypeMicrofacetReflectionBeckmann& params, const Spectrum& weight, bool doubleSided = false);
 
     //! @brief Constructor from parameter set
     //!
     //! @param  params          Parameter set.
     //! @param  weight          Weight of this BRDF.
     //! @param  doubleSided     Whether the BRDF is double sided.
-    MicroFacetReflection(const ClosureTypeMicrofacetReflectionDielectric& params, const Spectrum& weight, bool doubleSided = false);
+    MicroFacetReflection(RenderContext& rc, const ClosureTypeMicrofacetReflectionDielectric& params, const Spectrum& weight, bool doubleSided = false);
 
     // //! @brief Constructor a mirror
     // //!
@@ -272,8 +272,8 @@ public:
     //! @param f                Fresnel term.
     //! @param d                NDF term.
     //! @param w                Weight of this BRDF
-    MicroFacetReflection(const Spectrum &reflectance, const Fresnel* f, const MicroFacetDistribution* d, const Spectrum& weight , const Vector& n , bool doubleSided = false ) :
-        Microfacet(d , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , R(reflectance), fresnel(f) {}
+    MicroFacetReflection(RenderContext& rc, const Spectrum &reflectance, const Fresnel* f, const MicroFacetDistribution* d, const Spectrum& weight , const Vector& n , bool doubleSided = false ) :
+        Microfacet(rc, d , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , R(reflectance), fresnel(f) {}
 
     //! @brief Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.
@@ -313,7 +313,7 @@ public:
     //! @param  f               Fresnel term.
     //! @param  weight          Weight of this BRDF.
     //! @param  doubleSided     Whether the BRDF is double sided.
-    MicroFacetRefraction(const ClosureTypeMicrofacetRefractionGGX&params,  const Spectrum& weight);
+    MicroFacetRefraction(RenderContext& rc, const ClosureTypeMicrofacetRefractionGGX&params,  const Spectrum& weight);
 
     //! @brief Constructor from parameter set
     //!
@@ -321,7 +321,7 @@ public:
     //! @param  f               Fresnel term.
     //! @param  weight          Weight of this BRDF.
     //! @param  doubleSided     Whether the BRDF is double sided.
-    MicroFacetRefraction(const ClosureTypeMicrofacetRefractionBlinn& params, const Spectrum& weight);
+    MicroFacetRefraction(RenderContext& rc, const ClosureTypeMicrofacetRefractionBlinn& params, const Spectrum& weight);
 
     //! @brief Constructor from parameter set
     //!
@@ -329,7 +329,7 @@ public:
     //! @param  f               Fresnel term.
     //! @param  weight          Weight of this BRDF.
     //! @param  doubleSided     Whether the BRDF is double sided.
-    MicroFacetRefraction(const ClosureTypeMicrofacetRefractionBeckmann& params, const Spectrum& weight);
+    MicroFacetRefraction(RenderContext& rc, const ClosureTypeMicrofacetRefractionBeckmann& params, const Spectrum& weight);
 
     //! @brief Constructor
     //! @param transmittance    Direction hemisphere transmittance.
@@ -338,8 +338,8 @@ public:
     //! @param v                Visibility term.
     //! @param etai             Index of refraction of the side that normal points
     //! @param etat             Index of refraction of the other side that normal points
-    MicroFacetRefraction(const Spectrum &transmittance, const MicroFacetDistribution* d, float etai, float etat, const Spectrum& weight , const Vector& n)
-        : Microfacet(d, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_TRANSMISSION), n, true) , T(transmittance), etaI(etai) , etaT(etat) , fresnel( etai , etat )
+    MicroFacetRefraction(RenderContext& rc, const Spectrum &transmittance, const MicroFacetDistribution* d, float etai, float etat, const Spectrum& weight , const Vector& n)
+        : Microfacet(rc, d, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_TRANSMISSION), n, true) , T(transmittance), etaI(etai) , etaT(etat) , fresnel( etai , etat )
     {
         // make sure IORs are not the same inside and outside
         if (etaT == etaI)

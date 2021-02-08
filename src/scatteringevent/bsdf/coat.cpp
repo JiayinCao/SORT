@@ -30,9 +30,9 @@ IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeCoat)
 // when evaluating the attenuation upward. The exact number is not mentioned in the original paper, 0.2 is used as default here.
 #define TIR_COMPENSATION    0.2f
 
-Coat::Coat( const ClosureTypeCoat& params , const Spectrum& weight, const ScatteringEvent* bottom )
- : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, false), thickness(1.0f), ior(params.ior), sigma(params.sigma), ggx(params.roughness, params.roughness),
-   fresnel(1.0f,params.ior), coat_weight( 1.0f ), coat(coat_weight, &fresnel , &ggx , coat_weight , params.normal ), bottom( bottom ){}
+Coat::Coat(RenderContext& rc, const ClosureTypeCoat& params , const Spectrum& weight, const ScatteringEvent* bottom )
+ : Bxdf(rc, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, false), thickness(1.0f), ior(params.ior), sigma(params.sigma), ggx(params.roughness, params.roughness),
+   fresnel(1.0f,params.ior), coat_weight( 1.0f ), coat(rc, coat_weight, &fresnel , &ggx , coat_weight , params.normal ), bottom( bottom ){}
 
 Spectrum Coat::F( const Vector& wo , const Vector& wi ) const{
     if (!SameHemiSphere(wo, wi)) return 0.0f;

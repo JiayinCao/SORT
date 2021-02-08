@@ -110,10 +110,10 @@ SORT_STATIC_FORCEINLINE void ComputeApPdf(const float cosThetaO , const float co
         pdf[i] = ap[i].GetIntensity() / sumY;
 }
 
-Hair::Hair(const ClosureTypeHair& params, const Spectrum& weight): Hair(params.sigma, params.longtitudinalRoughness, params.azimuthalRoughness, params.ior, weight, true ){}
+Hair::Hair(RenderContext& rc, const ClosureTypeHair& params, const Spectrum& weight): Hair(rc, params.sigma, params.longtitudinalRoughness, params.azimuthalRoughness, params.ior, weight, true ){}
 
-Hair::Hair(const Spectrum& absorption, const float lRoughness, const float aRoughness, const float ior, const Spectrum& weight, bool doubleSided)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), Vector(0.0f,1.0f,0.0f), doubleSided) ,
+Hair::Hair(RenderContext& rc, const Spectrum& absorption, const float lRoughness, const float aRoughness, const float ior, const Spectrum& weight, bool doubleSided)
+        : Bxdf(rc, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), Vector(0.0f,1.0f,0.0f), doubleSided) ,
         m_sigma(absorption), m_lRoughness( std::max( 0.01f , lRoughness) ), m_aRoughness( std::max( 0.01f , aRoughness ) ), m_eta(ior){
     m_v[0] = SQR(0.726f * m_lRoughness + 0.812f * SQR(m_lRoughness) + 3.7f * Pow<20>(m_lRoughness));
     m_v[1] = 0.25f * m_v[0];

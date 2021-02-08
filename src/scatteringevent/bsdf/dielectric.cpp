@@ -19,6 +19,7 @@
 #include "sampler/sample.h"
 #include "microfacet.h"
 #include "core/memory.h"
+#include "core/render_context.h"
 
 IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeDielectric)
 IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDielectric, Tsl_float3, reflectance)
@@ -28,10 +29,10 @@ IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDielectric, Tsl_float, roughness_v)
 IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDielectric, Tsl_float3, normal)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeDielectric)
 
- Dielectric::Dielectric(const ClosureTypeDielectric& params, const Spectrum& weight):
- Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, true), R(params.reflectance), T(params.transmittance), fresnel(1.0f,1.5f),
-         mf_reflect(params.reflectance, &fresnel, SORT_MALLOC(GGX)(params.roughness_u, params.roughness_v), FULL_WEIGHT, params.normal, true),
-         mf_refract(params.transmittance, SORT_MALLOC(GGX)(params.roughness_u, params.roughness_v), 1.0f, 1.5f, FULL_WEIGHT, params.normal){
+ Dielectric::Dielectric(RenderContext& rc, const ClosureTypeDielectric& params, const Spectrum& weight):
+ Bxdf(rc, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, true), R(params.reflectance), T(params.transmittance), fresnel(1.0f,1.5f),
+         mf_reflect(rc, params.reflectance, &fresnel, SORT_MALLOC_PROXY(rc.m_memory_arena, GGX)(params.roughness_u, params.roughness_v), FULL_WEIGHT, params.normal, true),
+         mf_refract(rc, params.transmittance, SORT_MALLOC_PROXY(rc.m_memory_arena, GGX)(params.roughness_u, params.roughness_v), 1.0f, 1.5f, FULL_WEIGHT, params.normal){
  }
 
 Spectrum Dielectric::f(const Vector& wo, const Vector& wi) const{

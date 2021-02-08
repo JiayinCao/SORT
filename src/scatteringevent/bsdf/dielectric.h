@@ -44,7 +44,7 @@ public:
     //!
     //! @param param        All parameters.
     //! @param weight       Weight of this BRDF.
-    Dielectric(const ClosureTypeDielectric& params, const Spectrum& weight);
+    Dielectric(RenderContext& rc, const ClosureTypeDielectric& params, const Spectrum& weight);
 
     //! Constructor
     //! @param reflectance      Direction hemisphere reflection.
@@ -54,10 +54,10 @@ public:
     //! @param weight           Weight of the BXDF.
     //! @param n                Normal from normal map.
     //! @param doubleSided      Whether the surface is double sided.
-    Dielectric(const Spectrum& reflectance, const Spectrum& tranmisttance, const MicroFacetDistribution* d, float ior, float ior_in, const Spectrum& weight, const Vector& n)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, true), R(reflectance), T(tranmisttance), fresnel(ior, ior_in),
-        mf_reflect(reflectance, &fresnel, d, FULL_WEIGHT, n, true),
-        mf_refract(tranmisttance, d, ior, ior_in, FULL_WEIGHT, n)
+    Dielectric(RenderContext& rc, const Spectrum& reflectance, const Spectrum& tranmisttance, const MicroFacetDistribution* d, float ior, float ior_in, const Spectrum& weight, const Vector& n)
+        : Bxdf(rc, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, true), R(reflectance), T(tranmisttance), fresnel(ior, ior_in),
+        mf_reflect(rc, reflectance, &fresnel, d, FULL_WEIGHT, n, true),
+        mf_refract(rc, tranmisttance, d, ior, ior_in, FULL_WEIGHT, n)
         {}
 
     //! Evaluate the BRDF

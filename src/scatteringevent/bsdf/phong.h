@@ -52,8 +52,8 @@ public:
     //! @param  params          Parameter set.
     //! @param  weight          BRDF weight.
     //! @param  doubleSided     Whether the BRDF is double-sided.
-    Phong(const ClosureTypePhong& params, const Spectrum& weight, bool doubleSided = false)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, doubleSided) , D(params.diffuse), S(params.specular), power(params.specular_power),
+    Phong(RenderContext& rc, const ClosureTypePhong& params, const Spectrum& weight, bool doubleSided = false)
+        : Bxdf(rc, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, doubleSided) , D(params.diffuse), S(params.specular), power(params.specular_power),
           diffRatio(intensity_tsl_float3(params.diffuse)/(intensity_tsl_float3(params.diffuse)+ intensity_tsl_float3(params.specular))) {
         const auto combined = D + S;
         sAssert(combined.r <= 1.0f, MATERIAL);
@@ -67,8 +67,8 @@ public:
     //! @param roughnessU       Roughness along one axis.
     //! @param roughnessV       Roughness along the other axis
     //! @param weight           Weight of the BXDF
-    Phong(const Spectrum& diffuse, const Spectrum& specular, const float specularPower, const Spectrum& weight, const Vector& n , bool doubleSided = false)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , D(diffuse), S(specular), power(specularPower),
+    Phong(RenderContext& rc, const Spectrum& diffuse, const Spectrum& specular, const float specularPower, const Spectrum& weight, const Vector& n , bool doubleSided = false)
+        : Bxdf(rc, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , D(diffuse), S(specular), power(specularPower),
           diffRatio(diffuse.GetIntensity()/(diffuse.GetIntensity()+specular.GetIntensity())) {
         const auto combined = D + S;
         sAssert(combined.r <= 1.0f, MATERIAL);

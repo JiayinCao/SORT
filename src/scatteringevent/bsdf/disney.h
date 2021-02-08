@@ -67,22 +67,12 @@ public:
     //! @param params           All parameters.
     //! @param ew               Evaluation weight of the BXDF.
     //! @param sw               Sampling weight of the BXDF.
-    DisneyBRDF( const ClosureTypeDisney& param , const Spectrum& ew , const float sw)
-         : Bxdf(ew, sw, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), param.normal, true), basecolor(param.baseColor), metallic(param.metallic),
+    DisneyBRDF(RenderContext& rc, const ClosureTypeDisney& param , const Spectrum& ew , const float sw)
+         : Bxdf(rc, ew, sw, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), param.normal, true), basecolor(param.baseColor), metallic(param.metallic),
          specular(param.specular), specularTint(param.specularTint), roughness(param.roughness), anisotropic(param.anisotropic), sheen(param.sheen), sheenTint(param.sheenTint),
          clearcoat(param.clearcoat), clearcoatGloss(param.clearcoatGloss), specTrans(param.specTrans), scatterDistance(param.scatterDistance), flatness(param.flatness),
            diffTrans(param.diffTrans), thinSurface( false ) {}
     
-    //! Constructor
-    //!
-    //! @param params           All parameters.
-    //! @param ew               Evaluation weight of the BXDF.
-    // DisneyBRDF( const Params& param , const Spectrum& ew)
-    //     : Bxdf(ew, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), param.n, true), basecolor(param.baseColor), metallic(param.metallic),
-    //     specular(param.specular), specularTint(param.specularTint), roughness(param.roughness), anisotropic(param.anisotropic), sheen(param.sheen), sheenTint(param.sheenTint),
-    //     clearcoat(param.clearcoat), clearcoatGloss(param.clearcoatGloss), specTrans(param.specTrans), scatterDistance(param.scatterDistance), flatness(param.flatness),
-    //       diffTrans(param.diffTrans), thinSurface( param.thinSurface != 0 ) {}
-
     //! Constructor
     //! @param basecolor        The surface color, usually supplied by texture maps.
     //! @param metallic         This is a linear blend between two different models. The metallic model has no diffuse component and also has a tinted incident specular, equal to the base color.
@@ -102,10 +92,10 @@ public:
     //! @param ew               Evaluation weight of the BXDF.
     //! @param sw               Sampling weight of the BXDF.
     //! @param n                Normal in shading coordinate.
-    DisneyBRDF( const Spectrum& basecolor , float metallic , float specular , float specularTint , float roughness ,
+    DisneyBRDF( RenderContext& rc, const Spectrum& basecolor , float metallic , float specular , float specularTint , float roughness ,
                float anisotropic , float sheen , float sheenTint , float clearcoat , float clearcoatGloss , float specTrans , float scatterDistance ,
                float flatness , float diffTrans , int thinSurface , const Spectrum& ew, const float sw, const Vector& n )
-        : Bxdf(ew, sw, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, true) , basecolor(basecolor), metallic(metallic),
+        : Bxdf(rc, ew, sw, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, true) , basecolor(basecolor), metallic(metallic),
           specular(specular), specularTint(specularTint), roughness(roughness), anisotropic(anisotropic), sheen(sheen), sheenTint(sheenTint),
           clearcoat(clearcoat), clearcoatGloss(clearcoatGloss), specTrans(specTrans), scatterDistance(scatterDistance), flatness(flatness),
           diffTrans(diffTrans), thinSurface( thinSurface != 0 ) {}
@@ -128,10 +118,10 @@ public:
     //! @param thinSurface      Whether the surface is a thin surface.
     //! @param ew               Evaluation weight of the BXDF.
     //! @param n                Normal in shading coordinate.
-    DisneyBRDF( const Spectrum& basecolor , float metallic , float specular , float specularTint , float roughness ,
+    DisneyBRDF(RenderContext& rc, const Spectrum& basecolor , float metallic , float specular , float specularTint , float roughness ,
                float anisotropic , float sheen , float sheenTint , float clearcoat , float clearcoatGloss , float specTrans , float scatterDistance ,
                float flatness , float diffTrans , int thinSurface , const Spectrum& ew, const Vector& n )
-        : Bxdf(ew, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, true) , basecolor(basecolor), metallic(metallic),
+        : Bxdf(rc, ew, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, true) , basecolor(basecolor), metallic(metallic),
           specular(specular), specularTint(specularTint), roughness(roughness), anisotropic(anisotropic), sheen(sheen), sheenTint(sheenTint),
           clearcoat(clearcoat), clearcoatGloss(clearcoatGloss), specTrans(specTrans), scatterDistance(scatterDistance), flatness(flatness),
           diffTrans(diffTrans), thinSurface( thinSurface != 0 ) {}

@@ -37,14 +37,14 @@ DECLARE_CLOSURE_TYPE_END(ClosureTypeLambertTransmission)
  */
 class Lambert : public Bxdf{
 public:
-    Lambert( const ClosureTypeLambert& params, const Spectrum& weight, bool doubleSided = false) :Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, doubleSided), R(params.base_color) {}
+    Lambert(RenderContext& rc, const ClosureTypeLambert& params, const Spectrum& weight, bool doubleSided = false) :Bxdf(rc, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, doubleSided), R(params.base_color) {}
 
     //! Constructor taking spectrum information.
     //!
     //! @param s            Direction-Hemisphere reflection.
     //! @param weight       Weight of this BRDF
     //! @param t            Type of this BRDF
-    Lambert(const Spectrum& s, const Spectrum& weight, const Vector& n, bool doubleSided = false) :Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), R(s) {}
+    Lambert(RenderContext& rc, const Spectrum& s, const Spectrum& weight, const Vector& n, bool doubleSided = false) :Bxdf(rc, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), R(s) {}
 
     //! Constructor taking spectrum information.
     //!
@@ -52,14 +52,7 @@ public:
     //! @param ew           Evaluation weight of this BRDF.
     //! @param sw           Sampling weight of this BRDF.
     //! @param t            Type of this BRDF
-    Lambert(const Spectrum& s, const Spectrum& ew, const float sw, const Vector& n, bool doubleSided = false) :Bxdf(ew, sw, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), R(s) {}
-
-    //! Constructor from parameter set.
-    //!
-    //! @param param        All parameters.
-    //! @param weight       Weight of this BRDF.
-    //! @param doubleSided  Whether the material is double-sided.
-    // Lambert( const Params& param , const Spectrum& weight , bool doubleSided = false):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_REFLECTION), param.n, doubleSided),R(param.baseColor){}
+    Lambert(RenderContext& rc, const Spectrum& s, const Spectrum& ew, const float sw, const Vector& n, bool doubleSided = false) :Bxdf(rc, ew, sw, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), R(s) {}
 
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.
@@ -82,13 +75,13 @@ public:
     //! @param param        All parameters.
     //! @param weight       Weight of this BRDF.
     //! @param doubleSided  Whether the material is double-sided.
-    LambertTransmission( const ClosureTypeLambertTransmission& param , const Spectrum& weight):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_REFLECTION), param.normal, true),T(param.transmittance){}
+    LambertTransmission( RenderContext& rc, const ClosureTypeLambertTransmission& param , const Spectrum& weight):Bxdf(rc, weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_REFLECTION), param.normal, true),T(param.transmittance){}
 
     //! Constructor taking spectrum information.
     //! @param s            Direction-Hemisphere refraction.
     //! @param weight       Weight of this BRDF
     //! @param t            Type of this BRDF
-    LambertTransmission( const Spectrum& t , const Spectrum& weight , const Vector& n ):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_TRANSMISSION), n, true),T(t){}
+    LambertTransmission( RenderContext& rc, const Spectrum& t , const Spectrum& weight , const Vector& n ):Bxdf(rc, weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_TRANSMISSION), n, true),T(t){}
 
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.

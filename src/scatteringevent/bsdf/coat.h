@@ -53,7 +53,7 @@ public:
     //! @param params           Parameter set.
     //! @param weight           Weight of the BXDF.
     //! @param bottom           Bottom layer scattering event.
-    Coat( const ClosureTypeCoat& params , const Spectrum& weight , const ScatteringEvent* bottom );
+    Coat(RenderContext& rc, const ClosureTypeCoat& params , const Spectrum& weight , const ScatteringEvent* bottom );
 
     //! Evaluate the BRDF.
     //!
