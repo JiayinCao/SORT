@@ -21,10 +21,13 @@
 #include "core/define.h"
 #include "core/memory.h"
 
+struct Qbvh_Node;
+struct Obvh_Node;
+
 //! @brief  Render context is the context for rendering for each fiber/thread
 /**
- * With the introduction of fiber based job system, it is not possible to use thread_local anymore
- * since fiber can be ran on different thread, thread_local storage will not be the solution to 
+ * With the introduction of fiber based job system, it is not possible to use TLS anymore
+ * since fiber can be ran on different thread, thread local storage will not be the solution to 
  * lots of problems in SORT. As a matter of fact, there will be no easy way to use global memory
  * unless using fiber local storage. Instead of relying on a new feature, which I have no idea how
  * well it is supported on different platforms, I would prefer to introduce this concept named
@@ -35,6 +38,12 @@
 struct RenderContext{
     //! Memory allocator for small piece of memory
     std::unique_ptr<MemoryAllocator>                m_memory_arena;
+
+    std::unique_ptr<std::pair<Qbvh_Node*, float>[]> m_fast_qbvh_stack = nullptr;
+    std::unique_ptr<Qbvh_Node*[]>                   m_fast_qbvh_stack_simple = nullptr;
+
+    std::unique_ptr<std::pair<Obvh_Node*, float>[]> m_fast_obvh_stack;
+    std::unique_ptr<Obvh_Node*[]>                   m_fast_obvh_stack_simple;
 
     //! @brief  Initialize the render context, only needs to be done once.
     void Init(){

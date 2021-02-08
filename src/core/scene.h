@@ -51,7 +51,7 @@ public:
     //! @param  r           The ray to be tested.
     //! @param  intersect   The result where the intersected information is to be returned.
     //! @return             Whether there is an intersection between the ray and the scene.
-    bool    GetIntersect( const Ray& r , SurfaceInteraction& intersect ) const;
+    bool    GetIntersect( RenderContext& rc, const Ray& r , SurfaceInteraction& intersect ) const;
 
 #ifndef ENABLE_TRANSPARENT_SHADOW
     //! @brief  This is a dedicated interface for detecting shadow rays.

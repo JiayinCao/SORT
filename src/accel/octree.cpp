@@ -138,7 +138,7 @@ void OcTree::makeLeaf( OcTreeNode* node , NodePrimitiveContainer* container ){
         node->primitives.push_back( primitive );
 }
 
-bool OcTree::GetIntersect( const Ray& r , SurfaceInteraction& intersect ) const{
+bool OcTree::GetIntersect( RenderContext& rc, const Ray& r , SurfaceInteraction& intersect ) const{
     SORT_PROFILE("Traverse OcTree");
     SORT_STATS(++sRayCount);
 

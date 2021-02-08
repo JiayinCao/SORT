@@ -299,10 +299,9 @@ Simd_BBox Fbvh::calcBoundingBoxSIMD(const Fast_Bvh_Node_Ptr* children) const {
 }
 #endif
 
-bool Fbvh::GetIntersect( const Ray& ray , SurfaceInteraction& intersect ) const{
-    // std::stack is by no means an option here due to its overhead under the hood.
-    static thread_local std::unique_ptr<std::pair<Fbvh_Node*, float>[]> bvh_stack = nullptr;
-    if (UNLIKELY(IS_PTR_INVALID(bvh_stack)))
+bool Fbvh::GetIntersect( RenderContext& rc, const Ray& ray , SurfaceInteraction& intersect ) const{
+    auto& bvh_stack = rc.m_fast_bvh_stack;
+    if(UNLIKELY(IS_PTR_INVALID(bvh_stack)))
         bvh_stack = std::make_unique<std::pair<Fbvh_Node*, float>[]>(m_depth * FBVH_CHILD_CNT);
 
 #ifdef QBVH_IMPLEMENTATION
@@ -503,10 +502,8 @@ bool Fbvh::GetIntersect( const Ray& ray , SurfaceInteraction& intersect ) const{
 
 #ifndef ENABLE_TRANSPARENT_SHADOW
 bool  Fbvh::IsOccluded(const Ray& ray) const{
-    // std::stack is by no means an option here due to its overhead under the hood.
-    using Fbvh_Node_Ptr = Fbvh_Node*;
-    static thread_local std::unique_ptr<Fbvh_Node_Ptr[]> bvh_stack = nullptr;
-    if (UNLIKELY(IS_PTR_INVALID(bvh_stack)))
+    auto& bvh_stack = rc.m_fast_bvh_stack_simple;
+    if(UNLIKELY(IS_PTR_INVALID(bvh_stack)))
         bvh_stack = std::make_unique<Fbvh_Node_Ptr[]>(m_depth * FBVH_CHILD_CNT);
 
 #ifdef QBVH_IMPLEMENTATION
@@ -654,9 +651,8 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 #endif
 
 void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , RenderContext& rc, const StringID matID ) const{
-    // std::stack is by no means an option here due to its overhead under the hood.
-    static thread_local std::unique_ptr<std::pair<Fbvh_Node*, float>[]> bvh_stack = nullptr;
-    if ( UNLIKELY(IS_PTR_INVALID(bvh_stack) ) )
+    auto& bvh_stack = rc.m_fast_bvh_stack;
+    if(UNLIKELY(IS_PTR_INVALID(bvh_stack)))
         bvh_stack = std::make_unique<std::pair<Fbvh_Node*, float>[]>(m_depth * FBVH_CHILD_CNT);
 
 #ifdef QBVH_IMPLEMENTATION

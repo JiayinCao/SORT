@@ -70,9 +70,9 @@ bool Scene::LoadScene( IStreamBase& stream ){
     return true;
 }
 
-bool Scene::GetIntersect( const Ray& r , SurfaceInteraction& intersect ) const{
+bool Scene::GetIntersect( RenderContext& rc, const Ray& r , SurfaceInteraction& intersect ) const{
     intersect.t = FLT_MAX;
-    return g_accelerator->GetIntersect( r , intersect );
+    return g_accelerator->GetIntersect( rc, r , intersect );
 }
 
 #ifndef ENABLE_TRANSPARENT_SHADOW

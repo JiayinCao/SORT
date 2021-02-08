@@ -26,7 +26,7 @@ SORT_STATS_DEFINE_COUNTER(sIntersectionTest)
 bool Accelerator::GetAttenuation( Ray& ray , Spectrum& attenuation , RenderContext& rc , MediumStack* ms ) const {
     SurfaceInteraction intersection;
     intersection.query_shadow = true;
-    if (!GetIntersect(ray, intersection)) {
+    if (!GetIntersect(rc, ray, intersection)) {
         if (ms)
             attenuation *= ms->Tr(ray, ray.m_fMax);
         return false;
@@ -75,7 +75,7 @@ bool Accelerator::UpdateMediumStack( Ray& ray , MediumStack& ms , RenderContext&
 	intersection.query_shadow = false;
 #endif
 
-	if (!GetIntersect(ray, intersection))
+	if (!GetIntersect(rc, ray, intersection))
 		return false;
 
     // make sure there is primitive intersected

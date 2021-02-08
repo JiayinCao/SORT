@@ -81,7 +81,7 @@ unsigned sort_rand()
 #ifndef HIDE_OLD_RANDDOM_GENERATOR
     unsigned long y;
     {
-        static thread_local unsigned long mag01[2]={0x0UL, MATRIX_A};
+        static const unsigned long mag01[2]={0x0UL, MATRIX_A};
         /* mag01[x] = x * MATRIX_A  for x=0,1 */
 
         if( seed_setup == false )

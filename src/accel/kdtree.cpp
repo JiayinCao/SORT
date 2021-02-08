@@ -222,7 +222,7 @@ void KDTree::makeLeaf( Kd_Node* node , Splits& splits , unsigned prinum ){
     SORT_STATS(sKDTreeMaxPriCountInLeaf = std::max(sKDTreeMaxPriCountInLeaf, (StatsInt)prinum));
 }
 
-bool KDTree::GetIntersect( const Ray& r , SurfaceInteraction& intersect ) const{
+bool KDTree::GetIntersect( RenderContext& rc, const Ray& r , SurfaceInteraction& intersect ) const{
     SORT_PROFILE("Traverse KD-Tree");
     SORT_STATS(++sRayCount);
 

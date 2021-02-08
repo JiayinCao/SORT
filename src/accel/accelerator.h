@@ -69,7 +69,7 @@ public:
     //!                     shadow ray calculation.
     //! @return             It will return true if there is an intersection, otherwise
     //!                     it returns false.
-    virtual bool GetIntersect( const Ray& r , SurfaceInteraction& intersect) const = 0;
+    virtual bool GetIntersect( RenderContext& rc, const Ray& r , SurfaceInteraction& intersect) const = 0;
 
 #ifndef ENABLE_TRANSPARENT_SHADOW
     //! @brief This is a dedicated interface for detecting shadow rays.

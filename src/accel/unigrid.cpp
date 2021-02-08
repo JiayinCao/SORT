@@ -109,7 +109,7 @@ unsigned UniGrid::offset( unsigned x , unsigned y , unsigned z ) const{
     return z * m_voxelNum[1] * m_voxelNum[0] + y * m_voxelNum[0] + x;
 }
 
-bool UniGrid::GetIntersect( const Ray& r , SurfaceInteraction& intersect ) const{
+bool UniGrid::GetIntersect( RenderContext& rc, const Ray& r , SurfaceInteraction& intersect ) const{
     SORT_PROFILE("Traverse Uniform Grid");
     SORT_STATS(++sRayCount);
 

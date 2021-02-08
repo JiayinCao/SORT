@@ -35,7 +35,7 @@ Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps , const Scene& scen
 
     // get the intersection between the ray and the scene
     SurfaceInteraction ip;
-    if( false == scene.GetIntersect( r , ip ) )
+    if( false == scene.GetIntersect( rc, r , ip ) )
         return scene.Le(r);
 
     Spectrum t;

@@ -117,7 +117,7 @@ void Bvh::makeLeaf( Bvh_Node* node , unsigned start , unsigned end ){
     SORT_STATS(sBvhMaxPriCountInLeaf = std::max( sBvhMaxPriCountInLeaf , (StatsInt)node->pri_num) );
 }
 
-bool Bvh::GetIntersect(const Ray& ray, SurfaceInteraction& intersect) const{
+bool Bvh::GetIntersect(RenderContext& rc, const Ray& ray, SurfaceInteraction& intersect) const{
     SORT_PROFILE("Traverse Bvh");
     SORT_STATS(++sRayCount);
     

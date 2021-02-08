@@ -20,6 +20,8 @@
 #define QBVH_IMPLEMENTATION
 #define Fbvh        Qbvh
 #define Fbvh_Node   Qbvh_Node
+#define m_fast_bvh_stack        m_fast_qbvh_stack
+#define m_fast_bvh_stack_simple m_fast_qbvh_stack_simple
 
 #ifdef SIMD_4WAY_ENABLED
 #define SIMD_4WAY_IMPLEMENTATION
@@ -35,3 +37,5 @@
 
 #undef  Fbvh
 #undef  Fbvh_Node
+#undef  m_fast_bvh_stack
+#undef  m_fast_bvh_stack_simple

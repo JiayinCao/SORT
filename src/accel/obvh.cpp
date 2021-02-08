@@ -18,8 +18,10 @@
 #include "obvh.h"
 
 #define OBVH_IMPEMENTATION
-#define Fbvh        Obvh
-#define Fbvh_Node   Obvh_Node
+#define Fbvh                    Obvh
+#define Fbvh_Node               Obvh_Node
+#define m_fast_bvh_stack        m_fast_obvh_stack
+#define m_fast_bvh_stack_simple m_fast_obvh_stack_simple
 
 #ifdef SIMD_8WAY_ENABLED
 #define SIMD_8WAY_IMPLEMENTATION
@@ -35,3 +37,5 @@
 
 #undef  Fbvh
 #undef  Fbvh_Node
+#undef  m_fast_bvh_stack
+#undef  m_fast_bvh_stack_simple
