@@ -42,8 +42,7 @@ def sync_dep_utility( name, url ):
 
 # sync marl
 if sys.platform == 'win32':
-    sync_dep_utility('marl', 'https://raw.githubusercontent.com/JiayinCao/SORT/dependencies/Master/linux/marl.zip')
-    #sync_dep_utility('marl', 'https://raw.githubusercontent.com/JiayinCao/SORT/dependencies/Master/win/marl.zip')
+    sync_dep_utility('marl', 'https://raw.githubusercontent.com/JiayinCao/SORT/dependencies/Master/win/marl.zip')
 elif sys.platform == "linux" or sys.platform == "linux2":
     sync_dep_utility('marl', 'https://raw.githubusercontent.com/JiayinCao/SORT/dependencies/Master/linux/marl.zip')
 elif sys.platform == 'darwin':
@@ -55,6 +54,6 @@ elif sys.platform == 'darwin':
         sync_dep_utility('llvm', 'https://raw.githubusercontent.com/JiayinCao/SORT/dependencies/Master/win/marl.zip')
     elif str == 'x86_64':
         print('Syncing x86_64 version marl...')
-        sync_dep_utility('llvm', 'https://raw.githubusercontent.com/JiayinCao/SORT/dependencies/Master/win/marl.zip')
+        sync_dep_utility('llvm', 'https://raw.githubusercontent.com/JiayinCao/SORT/dependencies/Master/mac/marl_intel.zip')
     else:
         print('Error, unknown archtecture!')

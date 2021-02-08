@@ -27,7 +27,7 @@ dep_dir = sort_dir + '/dependencies'
 tsl_dir = dep_dir + '/tsl_src'
 
 # sync tsl code from github
-os.system('git clone https://github.com/JiayinCao/Tiny-Shading-Language.git ' + tsl_dir)
+os.system('git clone --depth 1 https://github.com/JiayinCao/Tiny-Shading-Language.git ' + tsl_dir)
 
 # build tsl from source code
 os.chdir(tsl_dir)
