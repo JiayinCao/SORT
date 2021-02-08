@@ -65,15 +65,10 @@ public:
 };
 
 // Tsl shading system
-static std::vector<std::shared_ptr<ShadingContext>>    g_contexts;
+static std::shared_ptr<ShadingContext>    g_contexts;
 
 std::shared_ptr<Tsl_Namespace::ShadingContext> GetShadingContext() {
-#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION_CHEAP
-    // this is by no means a good approach, but I'll live with it before I have a proper job system.
-    return ShadingSystem::get_instance().make_shading_context();
-#else
-    return g_contexts[ThreadId()];
-#endif
+    return g_contexts;
 }
 
 void ExecuteSurfaceShader( Tsl_Namespace::ShaderInstance* shader , ScatteringEvent& se , RenderContext& rc){
@@ -143,9 +138,7 @@ void CreateTSLThreadContexts(){
     RegisterClosures();
 
     // allocate shading context for each thread
-    g_contexts.resize( g_threadCnt );
-    for (auto i = 0u; i < g_threadCnt; ++i)
-        g_contexts[i] = shading_system.make_shading_context();
+    g_contexts = shading_system.make_shading_context();
 }
 
  void DestroyTSLThreadContexts(){

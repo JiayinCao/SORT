@@ -15,6 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
+#include <thread>
 #include "rand.h"
 #include "core/define.h"
 #include "core/thread.h"
@@ -54,7 +55,7 @@ static thread_local std::uniform_real_distribution<float>      dist_float( 0.0f 
 // set the seed
 void sort_seed()
 {
-    unsigned _seed = ( ThreadId() + 1 ) * (unsigned)time(0);
+    unsigned _seed = (unsigned)time(0);
 
 #ifndef HIDE_OLD_RANDDOM_GENERATOR
     mt[0]= _seed & 0xffffffffUL;

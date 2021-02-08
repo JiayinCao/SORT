@@ -25,9 +25,6 @@
 #include <atomic>
 #include "core/define.h"
 
-// get the thread id
-int ThreadId();
-
 class WorkerThread{
 public:
     // Constructor
