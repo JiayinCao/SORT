@@ -17,6 +17,7 @@
 
 #include <thread>
 #include <mutex>
+#include <memory>
 #include "unittest_common.h"
 #include "thirdparty/gtest/gtest.h"
 #include "sampler/sample.h"
@@ -32,8 +33,20 @@
 #include "scatteringevent/bsdf/dielectric.h"
 #include "scatteringevent/bsdf/hair.h"
 #include "scatteringevent/bsdf/fabric.h"
+#include "core/render_context.h"
 
-#if 0
+namespace {
+struct RenderContextWrapper{
+    RenderContextWrapper(){
+        rc = std::make_unique<RenderContext>();
+        rc->Init();
+    }
+
+    std::unique_ptr<RenderContext> rc;
+};
+static RenderContextWrapper g_rc;
+}
+
 // A physically based BRDF should obey the rule of reciprocity
 void checkReciprocity(const Bxdf* bxdf) {
     spinlock_mutex mutex;
@@ -125,36 +138,36 @@ void checkAll( const Bxdf* bxdf , bool cPdf = true , bool cReciprocity = true , 
 }
 
 TEST (BXDF, Labmert) {
-    Lambert lambert( WHITE_SPECTRUM , WHITE_SPECTRUM , DIR_UP );
+    Lambert lambert( *g_rc.rc, WHITE_SPECTRUM , WHITE_SPECTRUM , DIR_UP );
     checkAll( &lambert );
 }
 
 TEST(BXDF, LabmertTransmittion) {
-    LambertTransmission lambert(WHITE_SPECTRUM, WHITE_SPECTRUM, DIR_UP);
+    LambertTransmission lambert(*g_rc.rc, WHITE_SPECTRUM, WHITE_SPECTRUM, DIR_UP);
     checkAll(&lambert);
 }
 
 TEST(BXDF, OrenNayar) {
-    OrenNayar orenNayar(WHITE_SPECTRUM, sort_canonical(), FULL_WEIGHT, DIR_UP);
+    OrenNayar orenNayar(*g_rc.rc, WHITE_SPECTRUM, sort_canonical(), FULL_WEIGHT, DIR_UP);
     checkAll(&orenNayar);
 }
 
 TEST(BXDF, Phong) {
     const float ratio = sort_canonical();
-    Phong phong( WHITE_SPECTRUM * ratio , WHITE_SPECTRUM * ( 1.0f - ratio ) , sort_canonical(), FULL_WEIGHT , DIR_UP);
+    Phong phong(*g_rc.rc, WHITE_SPECTRUM * ratio , WHITE_SPECTRUM * ( 1.0f - ratio ) , sort_canonical(), FULL_WEIGHT , DIR_UP);
     checkAll(&phong, false);
 }
 
 // Sometimes it doesn't always pass, need investigation.
 TEST(BXDF, DISABLED_AshikhmanShirley) {
-    AshikhmanShirley as( WHITE_SPECTRUM , sort_canonical() , sort_canonical() , sort_canonical() , FULL_WEIGHT , DIR_UP );
+    AshikhmanShirley as(*g_rc.rc, WHITE_SPECTRUM , sort_canonical() , sort_canonical() , sort_canonical() , FULL_WEIGHT , DIR_UP );
     checkAll(&as);
 }
 
 // https://blog.selfshadow.com/publications/s2015-shading-course/burley/s2015_pbs_disney_bsdf_notes.pdf
 // Disney BRDF is not strictly energy conserving, please refer the above link for further detail ( chapter 5.1 ).
 TEST(BXDF, DISABLED_Disney) {
-    DisneyBRDF disney( WHITE_SPECTRUM , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() ,
+    DisneyBRDF disney(*g_rc.rc, WHITE_SPECTRUM , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() ,
                        sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() ,
                        sort_canonical() , sort_canonical() , 0 , FULL_WEIGHT , DIR_UP );
     checkAll(&disney);
@@ -163,27 +176,27 @@ TEST(BXDF, DISABLED_Disney) {
 TEST(BXDF, DISABLED_MicroFacetReflection) {
     const FresnelConductor fresnel( 1.0f , 1.5f );
     const GGX ggx(0.5f, 0.5f);
-    MicroFacetReflection mf( WHITE_SPECTRUM , &fresnel , &ggx , FULL_WEIGHT , DIR_UP );
+    MicroFacetReflection mf(*g_rc.rc, WHITE_SPECTRUM , &fresnel , &ggx , FULL_WEIGHT , DIR_UP );
     checkAll(&mf);
 }
 
 TEST(BXDF, MicroFacetRefraction) {
     const FresnelConductor fresnel( 1.0f , 1.5f );
     const GGX ggx( sort_canonical() , sort_canonical() );
-    MicroFacetRefraction mr( WHITE_SPECTRUM , &ggx , sort_canonical() , sort_canonical() , FULL_WEIGHT , DIR_UP );
+    MicroFacetRefraction mr( *g_rc.rc, WHITE_SPECTRUM , &ggx , sort_canonical() , sort_canonical() , FULL_WEIGHT , DIR_UP );
     checkAll( &mr , false , false , true );
 }
 
 TEST(BXDF, Dielectric) {
     const FresnelConductor fresnel( 1.0f , 1.5f );
     const GGX ggx( sort_canonical() , sort_canonical() );
-    Dielectric dielectric( WHITE_SPECTRUM , WHITE_SPECTRUM , &ggx , sort_canonical() , sort_canonical() , FULL_WEIGHT , DIR_UP );
+    Dielectric dielectric( *g_rc.rc, WHITE_SPECTRUM , WHITE_SPECTRUM , &ggx , sort_canonical() , sort_canonical() , FULL_WEIGHT , DIR_UP );
     checkAll( &dielectric , false , false , true );
 }
 
 TEST(BXDF, DISABLED_DreamWork_Fabric) {
     auto test_fabric = []( const float roughness ){
-        Fabric fabric( WHITE_SPECTRUM , roughness , FULL_WEIGHT , DIR_UP );
+        Fabric fabric( *g_rc.rc, WHITE_SPECTRUM , roughness , FULL_WEIGHT , DIR_UP );
         checkAll( &fabric );
     };
 
@@ -201,7 +214,7 @@ TEST(BXDF, DISABLED_HairFurnace) {
             // Estimate reflected uniform incident radiance from hair
             auto sum = 0.f;
             constexpr int CNT = 1024 * 256;
-            Hair hair(sigma_a, beta_m, beta_n, 1.55f, FULL_WEIGHT);
+            Hair hair(*g_rc.rc, sigma_a, beta_m, beta_n, 1.55f, FULL_WEIGHT);
             sum += ParrallReduction<float, 8, CNT>([&]() {
                 Vector3f wi = UniformSampleSphere(sort_canonical(), sort_canonical());
                 EXPECT_GE(hair.f(wo, wi).GetIntensity(), 0.00f);
@@ -236,7 +249,7 @@ TEST(BXDF, HairPDFConsistant) {
 
     for (float beta_m = 0.1f; beta_m < 1.0f; beta_m += 0.5f) {
         for (float beta_n = 0.1f; beta_n < 1.0f; beta_n += 0.5f) {
-            Hair hair( sigma_a, beta_m, beta_n, 1.55f, FULL_WEIGHT);
+            Hair hair( *g_rc.rc, sigma_a, beta_m, beta_n, 1.55f, FULL_WEIGHT);
             checkPDF( &hair );
         }
     }
@@ -246,7 +259,7 @@ TEST(BXDF, DISABLED_HairStandardChecking) {
     static Spectrum sigma_a = 0.f;
     for (float beta_m = 0.1f; beta_m < 1.0f; beta_m += 0.5f) {
         for (float beta_n = 0.1f; beta_n < 1.0f; beta_n += 0.5f) {
-            Hair hair(sigma_a, beta_m, beta_n, 1.55f, FULL_WEIGHT);
+            Hair hair(*g_rc.rc, sigma_a, beta_m, beta_n, 1.55f, FULL_WEIGHT);
             checkAll(&hair , true , false , true );
         }
     }
@@ -286,11 +299,8 @@ TEST(BXDF, DISABLED_HairSamplingConsistance) {
 
     for (float beta_m = 0.1f; beta_m < 1.0f; beta_m += 0.5f) {
         for (float beta_n = 0.1f; beta_n < 1.0f; beta_n += 0.5f) {
-            Hair hair( sigma_a, beta_m, beta_n, 1.55f, FULL_WEIGHT);
+            Hair hair( *g_rc.rc, sigma_a, beta_m, beta_n, 1.55f, FULL_WEIGHT);
             checkPDF( &hair );
         }
     }
 }
-
-
-#endif
