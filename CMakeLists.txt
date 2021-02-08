@@ -87,17 +87,15 @@ endif()
 
 project (SORT)
 
-# loading llvm library, this is mandatory for compiling tsl, make sure it looks for a local llvm library
+# loading tsl lirary, this is mandatory
 set(TSL_DIR ${SORT_SOURCE_DIR}/dependencies/tsl/)
-
-# find llvm librar${TSL_SOURCE_DIR}/thirdparty/gtesty
 find_package(TSL REQUIRED CONFIG)
-
-# output tsl library version
 message(STATUS "Tiny Shading Langauge version: ${TSL_VERSION}")
 
-# include other modules
-# include("${CMAKE_CURRENT_LIST_DIR}/build-files/cmake/externalPackages.cmake")
+# loading marl library
+set(MARL_INCLUDE_DIR ${SORT_SOURCE_DIR}/dependencies/marl/include)
+set(MARL_LIBRARY_DIR ${SORT_SOURCE_DIR}/dependencies/marl/lib)
+set(MARL_LIBS        marl)
 
 if(ENABLE_PROFILER)
 	find_package(easy_profiler REQUIRED)
@@ -106,7 +104,7 @@ endif(ENABLE_PROFILER)
 include_directories( "${SORT_SOURCE_DIR}/src" )
 include_directories( "${TSL_INCLUDE_DIR}" )
 
-link_directories( "${TSL_LIBRARY_DIR}" )
+link_directories( ${TSL_LIBRARY_DIR} ${MARL_LIBRARY_DIR} )
 
 file(GLOB_RECURSE project_headers src/*.h src/*.hpp)
 file(GLOB_RECURSE project_cpps src/*.cpp)
@@ -126,6 +124,10 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src FILES ${all_files})
 # tsl include folder
 file(GLOB_RECURSE tsl_headers ${TSL_INCLUDE_DIR}/*.h)
 source_group("thirdparty\\tsl" FILES ${tsl_headers})
+
+# marl include folder
+file(GLOB_RECURSE marl_headers ${MARL_INCLUDE_DIR}/*.h)
+source_group("thirdparty\\marl" FILES ${marl_headers})
 
 file(GLOB_RECURSE thirdparty_headers src/thirdparty/*.h)
 file(GLOB_RECURSE thirdparty_cpps src/thirdparty/*.cpp)
@@ -155,7 +157,7 @@ add_custom_command( OUTPUT ${generated_src}
                     WORKING_DIRECTORY ${SORT_SOURCE_DIR})
 source_group( "generated src" FILES ${generated_src} )
 
-target_link_libraries(SORT ${TSL_LIBS})
+target_link_libraries(SORT ${TSL_LIBS} ${MARL_LIBS})
 if(ENABLE_PROFILER)
     target_link_libraries(SORT easy_profiler)
 endif(ENABLE_PROFILER)

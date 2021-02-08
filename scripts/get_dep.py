@@ -45,9 +45,6 @@ if forcing_sync:
         # remove the folder
         shutil.rmtree(dep_dir)
 
-    # re-create the folder again
-    os.makedirs(dep_dir)
-
     sync_dep = True
 else:
     # this might not be very robust since it just check the folder
@@ -59,5 +56,11 @@ else:
     
 # sync dependencies if needed
 if sync_dep:
-    # TSL is the only dependency for now
+    # create the directory first
+    os.makedirs(dep_dir)
+
+    # TSL
     exec(open("./scripts/build_tsl.py").read())
+
+    # marl
+    exec(open("./scripts/get_marl.py").read())
