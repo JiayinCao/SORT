@@ -102,7 +102,7 @@ if(ENABLE_PROFILER)
 endif(ENABLE_PROFILER)
 
 include_directories( "${SORT_SOURCE_DIR}/src" )
-include_directories( "${TSL_INCLUDE_DIR}" )
+include_directories( ${TSL_INCLUDE_DIR} ${MARL_INCLUDE_DIR})
 
 link_directories( ${TSL_LIBRARY_DIR} ${MARL_LIBRARY_DIR} )
 
