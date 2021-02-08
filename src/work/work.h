@@ -35,7 +35,7 @@
 class Work {
 public:
     //! @brief  Make sure the destructor is virtual
-    ~Work() = default;
+    virtual ~Work() = default;
 
     //! @brief  Start work evaluation.
     //!

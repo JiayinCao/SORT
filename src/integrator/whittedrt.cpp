@@ -27,7 +27,7 @@ SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
 
 SORT_STATS_COUNTER("Whitted Ray Tracing", "Primary Ray Count" , sPrimaryRayCount);
 
-Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps , const Scene& scene) const{
+Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps , const Scene& scene, RenderContext& rc) const{
     SORT_STATS(++sPrimaryRayCount);
 
     if( r.m_Depth > max_recursive_depth )
@@ -42,7 +42,7 @@ Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps , const Scene& scen
 
     // no support for SSS in this integrator.
     ScatteringEvent se( ip , SE_EVALUATE_ALL_NO_SSS );
-    ip.primitive->GetMaterial()->UpdateScatteringEvent(se);
+    ip.primitive->GetMaterial()->UpdateScatteringEvent(se, rc);
 
     // lights
     Visibility visibility(scene);
@@ -69,7 +69,7 @@ Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps , const Scene& scen
             if( visible )
                 t += (ld * f / pdf);
 #else
-            const auto attenuation = visibility.GetAttenuation();
+            const auto attenuation = visibility.GetAttenuation(rc);
             if( !attenuation.IsBlack() )
                 t += (ld * f * attenuation / pdf );
 #endif

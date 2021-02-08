@@ -33,6 +33,7 @@ struct SurfaceInteraction;
 class MediumStack;
 struct MediumInteraction;
 class Mesh;
+struct RenderContext;
 
 // In an ideal world, I should have used different memory layout for different type of shaders.
 // The following fields are obviously not valid in certain cases, like there is no normal in 
@@ -55,7 +56,7 @@ DECLARE_TSLGLOBAL_END()
 std::shared_ptr<Tsl_Namespace::ShadingContext> GetShadingContext();
 
 //! @brief  Execute Jited shader code.
-void ExecuteSurfaceShader(Tsl_Namespace::ShaderInstance* shader, ScatteringEvent& se);
+void ExecuteSurfaceShader(Tsl_Namespace::ShaderInstance* shader, ScatteringEvent& se, RenderContext& rc);
 
 //! @brief  Execute a shader and populate the medium stack
 //!
@@ -64,7 +65,7 @@ void ExecuteSurfaceShader(Tsl_Namespace::ShaderInstance* shader, ScatteringEvent
 //! @param  ms          The medium stack to hold the results.
 //! @param  flag        A flag indicates whether to add or remove the medium.
 //! @param  material    The material that spawns the medium.
-void ExecuteVolumeShader(Tsl_Namespace::ShaderInstance* shader, const MediumInteraction& mi , MediumStack& ms, const SE_Interaction flag, const MaterialBase* material);
+void ExecuteVolumeShader(Tsl_Namespace::ShaderInstance* shader, const MediumInteraction& mi , MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, RenderContext& rc);
 
 //! @brief  Evaluate the properties at a specific position in the volume.
 //!

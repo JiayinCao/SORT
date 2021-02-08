@@ -80,13 +80,13 @@ bool Scene::IsOccluded(const Ray& r) const{
     return g_accelerator->IsOccluded(r);
 }
 #else
-Spectrum Scene::GetAttenuation( const Ray& const_ray , MediumStack* ms ) const{
+Spectrum Scene::GetAttenuation( const Ray& const_ray , RenderContext& rc , MediumStack* ms ) const{
     auto ray = const_ray;
 
     Spectrum attenuation( 1.0f );
     while( !attenuation.IsBlack() ){
         Spectrum att;
-        if( !g_accelerator->GetAttenuation(ray, att, ms) )
+        if( !g_accelerator->GetAttenuation(ray, att, rc, ms) )
             break;
 
         if( att.IsBlack() )
@@ -99,7 +99,7 @@ Spectrum Scene::GetAttenuation( const Ray& const_ray , MediumStack* ms ) const{
 }
 #endif
 
-void Scene::RestoreMediumStack( const Point& p , MediumStack& ms ) const{
+void Scene::RestoreMediumStack( const Point& p , RenderContext& rc, MediumStack& ms ) const{
 	// check if there is volume in the scene, early return if there isn't.
 	if (!g_acceleratorVol->GetIsValid())
 		return;
@@ -107,13 +107,13 @@ void Scene::RestoreMediumStack( const Point& p , MediumStack& ms ) const{
 	Ray ray;
 	ray.m_Ori = p;
 	ray.m_Dir = Vector( 0.0f , 1.0f , 0.0f );		// shoot the ray through a random direction.
-	while (g_accelerator->UpdateMediumStack(ray, ms, true)) {}
+	while (g_accelerator->UpdateMediumStack(ray, ms, rc, true)) {}
 }
 
-void Scene::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID ) const{
+void Scene::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , RenderContext& rc, const StringID matID ) const{
     // no brute force support in BSSRDF
     if(IS_PTR_VALID(g_accelerator))
-        g_accelerator->GetIntersect( r , intersect , matID );
+        g_accelerator->GetIntersect( r , intersect , rc , matID );
 }
 
 void Scene::generatePriBuf(){

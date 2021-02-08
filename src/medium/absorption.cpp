@@ -30,6 +30,6 @@ Spectrum AbsorptionMedium::Tr( const Ray& ray , const float max_t ) const{
 }
 
 // Since there is no scattering, medium interaction is never sampled in this type of medium.
-Spectrum AbsorptionMedium::Sample( const Ray& ray, const float max_t, MediumInteraction*& mi , Spectrum& emission ) const{
+Spectrum AbsorptionMedium::Sample( const Ray& ray, const float max_t, MediumInteraction*& mi , Spectrum& emission , RenderContext& rc) const{
     return Tr( ray , max_t );
 }

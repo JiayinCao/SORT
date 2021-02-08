@@ -77,7 +77,7 @@ public:
     //! @param  r           The input ray to be tested.
     //! @param  intersect   The intersection result that holds all intersectionn.
     //! @param  matID       We are only interested in intersection with the same material, whose material id should be set to matID.
-    void GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID = INVALID_SID ) const override;
+    void GetIntersect( const Ray& r , BSSRDFIntersections& intersect , RenderContext& rc, const StringID matID = INVALID_SID ) const override;
     
     //! Build the OcTree in O(Nlg(N)) time.
     //!
@@ -155,7 +155,7 @@ private:
     //! @param fmax         Current maximum value along the ray.
     //! @param matID        Material ID to avoid if it is not invalid.
     void traverseOcTree( const OcTreeNode* node , const Ray& ray , BSSRDFIntersections& intersect ,
-                         float fmin , float fmax , const StringID matID ) const;
+                         float fmin , float fmax , RenderContext& rc , const StringID matID ) const;
 
     //! @brief  Release OcTree memory.
     //!

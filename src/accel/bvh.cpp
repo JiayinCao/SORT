@@ -212,7 +212,7 @@ bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , SurfaceInteracti
     return inter;
 }
 
-void Bvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const StringID matID ) const{
+void Bvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , RenderContext& rc , const StringID matID ) const{
     SORT_PROFILE("Traverse Bvh");
     SORT_STATS(++sRayCount);
 
@@ -224,10 +224,10 @@ void Bvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const 
     const auto fmin = Intersect(ray, m_bbox);
     if( fmin < 0.0f )
         return;
-    traverseNode(m_root.get(), ray, intersect, fmin, matID);
+    traverseNode(m_root.get(), ray, intersect, fmin, rc, matID);
 }
 
-void Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , BSSRDFIntersections& intersect , float fmin , const StringID matID ) const{
+void Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , BSSRDFIntersections& intersect , float fmin , RenderContext& rc, const StringID matID ) const{
     sAssert( fmin >= 0.0f , SPATIAL_ACCELERATOR );
 
     if( intersect.maxt < fmin )
@@ -248,7 +248,7 @@ void Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , BSSRDFIntersecti
             const auto intersected = m_bvhpri[i].primitive->GetIntersect( ray , &intersection );
             if( intersected ){
                 if( intersect.cnt < TOTAL_SSS_INTERSECTION_CNT ){
-                    intersect.intersections[intersect.cnt] = SORT_MALLOC(BSSRDFIntersection)();
+                    intersect.intersections[intersect.cnt] = SORT_MALLOC_PROXY(rc.m_memory_arena,BSSRDFIntersection)();
                     intersect.intersections[intersect.cnt++]->intersection = intersection;
                 }else{
                     auto picked_i = -1;
@@ -280,14 +280,14 @@ void Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , BSSRDFIntersecti
 
     if( fmin1 > fmin0 ){
         if( fmin0 >= 0.0f )
-            traverseNode( left , ray , intersect , fmin0 , matID );
+            traverseNode( left , ray , intersect , fmin0 , rc , matID );
         if( fmin1 >= 0.0f )
-            traverseNode( right , ray , intersect , fmin1 , matID );
+            traverseNode( right , ray , intersect , fmin1 , rc , matID );
     }else{
         if( fmin1 >= 0.0f )
-            traverseNode( right , ray , intersect , fmin1 , matID );
+            traverseNode( right , ray , intersect , fmin1 , rc , matID );
         if( fmin0 >= 0.0f )
-            traverseNode( left , ray , intersect , fmin0 , matID );
+            traverseNode( left , ray , intersect , fmin0 , rc , matID );
     }
 }
 

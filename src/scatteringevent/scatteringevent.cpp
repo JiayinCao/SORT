@@ -138,11 +138,11 @@ float ScatteringEvent::Pdf_BSDF( const Vector& wo , const Vector& wi ) const{
     return pdf;
 }
 
-void ScatteringEvent::Sample_BSSRDF( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter , float& pdf ) const{
+void ScatteringEvent::Sample_BSSRDF( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter , float& pdf , RenderContext& rc) const{
     // Randomly pick a bssrdf
     sAssert( m_bssrdfTotalSampleWeight > 0.0f , MATERIAL );
     const Bssrdf* bssrdf = pickScattering<Bssrdf>( m_bssrdfs , m_bssrdfCnt , m_bssrdfTotalSampleWeight , pdf );
 
     // importance sampling the bssrdf
-    bssrdf->Sample_S( scene , wo , po , inter );
+    bssrdf->Sample_S( scene , wo , po , inter , rc );
 }

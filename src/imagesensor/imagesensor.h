@@ -30,10 +30,7 @@ public:
         m_mutex = std::make_unique<spinlock_mutex[]>( m_width * m_height );
     }
     virtual ~ImageSensor(){}
-
-    // pre process
-    virtual void PreProcess() {}
-
+    
     // store pixel information
     virtual void StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt ) = 0;
 

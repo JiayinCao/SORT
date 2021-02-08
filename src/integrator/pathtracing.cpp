@@ -34,14 +34,14 @@ SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
 SORT_STATS_COUNTER("Path Tracing", "Primary Ray Count" , sPrimaryRayCount);
 SORT_STATS_AVG_COUNT("Path Tracing", "Average Length of Path", sTotalPathLength , sPrimaryRayCount);    // This also counts the case where ray hits sky
 
-Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& scene) const{
+Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& scene, RenderContext& rc) const{
 	MediumStack ms;
-	scene.RestoreMediumStack(ray.m_Ori, ms);
+	scene.RestoreMediumStack(ray.m_Ori, rc, ms);
 
-    return li( ray , ps , scene , 0 , false , 0 , false , ms );
+    return li( ray , ps , scene , 0 , false , 0 , false , ms , rc);
 }
 
-Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& scene , int bounces , bool indirectOnly , int bssrdfBounces , bool replaceSSS , MediumStack& ms ) const{
+Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& scene , int bounces , bool indirectOnly , int bssrdfBounces , bool replaceSSS , MediumStack& ms, RenderContext& rc ) const{
     SORT_PROFILE("Path tracing");
     SORT_STATS(++sPrimaryRayCount);
 
@@ -67,7 +67,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
 
         Spectrum emission;
         MediumInteraction* pMi = nullptr;
-        const auto medium_attenuation = ms.Sample(r, inter.t, pMi, emission);
+        const auto medium_attenuation = ms.Sample(r, inter.t, pMi, emission, rc);
 
         L += emission * throughput;
 
@@ -85,7 +85,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             // evaluate direct light illumination
             float light_pdf = 0.0f;
             const auto  light = scene.SampleLight(sort_canonical(), &light_pdf);
-            L += throughput * EvaluateDirect(pMi->intersect, pMi->phaseFunction, -r.m_Dir, scene, light, ms) / light_pdf;
+            L += throughput * EvaluateDirect(pMi->intersect, pMi->phaseFunction, -r.m_Dir, scene, light, ms, rc) / light_pdf;
 
             // update path weight
             throughput *= pf / pdf;
@@ -126,7 +126,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
         // Parse the material and populate the results into a scatteringEvent.
         SE_Flag seFlag = replaceSSS ? SE_Flag( SE_EVALUATE_ALL | SE_REPLACE_BSSRDF ) : SE_EVALUATE_ALL;
         ScatteringEvent se(inter, seFlag);
-        material->UpdateScatteringEvent(se);
+        material->UpdateScatteringEvent(se, rc);
 
         SE_Flag scattering_type_flag;
         auto pdf_scattering_type = se.SampleScatteringType(scattering_type_flag);
@@ -138,11 +138,11 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             const auto  bsdf_sample = BsdfSample(true);
             const auto  light = scene.SampleLight( light_sample.t , &light_pdf );
             if( light_pdf > 0.0f )
-                L += throughput * EvaluateDirect( se , r , scene, light , light_sample , bsdf_sample , material , ms ) / light_pdf / pdf_scattering_type;
+                L += throughput * EvaluateDirect( se , r , scene, light , light_sample , bsdf_sample , material , ms , rc) / light_pdf / pdf_scattering_type;
         }else if(scattering_type_flag & SE_EVALUATE_BSSRDF) {
             BSSRDFIntersections bssrdf_inter;
             float               bssrdf_pdf = 0.0f;
-            se.Sample_BSSRDF( scene, -r.m_Dir, se.GetInteraction().intersect, bssrdf_inter , bssrdf_pdf);
+            se.Sample_BSSRDF( scene, -r.m_Dir, se.GetInteraction().intersect, bssrdf_inter , bssrdf_pdf, rc);
 
             // Accumulate the contribution from direct illumination
             if( bssrdf_inter.cnt > 0 ){
@@ -156,10 +156,10 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                     // Fresnel is totally ignored here due to two reasons, the lack of visual differences and most importantly,
                     // there will be a discontinuity introduced when mean free path approaches zero.
                     ScatteringEvent se(pInter->intersection);
-                    se.AddBxdf( SORT_MALLOC(Lambert)( WHITE_SPECTRUM , FULL_WEIGHT , DIR_UP ) );
+                    se.AddBxdf( SORT_MALLOC_PROXY(rc.m_memory_arena, Lambert)( WHITE_SPECTRUM , FULL_WEIGHT , DIR_UP ) );
 
                     // Accumulate the contribution from direct illumination
-                    total_bssrdf += SampleOneLight( se , r , intersection , scene , material , ms ) * pInter->weight;
+                    total_bssrdf += SampleOneLight( se , r , intersection , scene , material , ms , rc ) * pInter->weight;
                 }
                 
                 L += total_bssrdf * throughput / pdf_scattering_type / bssrdf_pdf;
@@ -189,7 +189,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                 MediumInteraction mi;
                 mi.intersect = inter.intersect;
                 mi.mesh = inter.primitive->GetMesh();
-                material->UpdateMediumStack(mi, interaction_flag, ms);
+                material->UpdateMediumStack(mi, interaction_flag, ms, rc);
             }
 
             // update path weight
@@ -209,7 +209,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
 
             BSSRDFIntersections bssrdf_inter;
             float               bssrdf_pdf = 0.0f;
-            se.Sample_BSSRDF( scene, -r.m_Dir, se.GetInteraction().intersect, bssrdf_inter , bssrdf_pdf);
+            se.Sample_BSSRDF( scene, -r.m_Dir, se.GetInteraction().intersect, bssrdf_inter , bssrdf_pdf, rc);
 
             // Accumulate the contribution from direct illumination
             if( bssrdf_inter.cnt > 0 ){
@@ -224,7 +224,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                     //  - the lack of visual differences 
                     //  - more importantly, there will be a discontinuity introduced when mean free path approaches zero.
                     ScatteringEvent se(pInter->intersection, SE_Flag( SE_EVALUATE_ALL | SE_REPLACE_BSSRDF ));
-                    se.AddBxdf( SORT_MALLOC(Lambert)( WHITE_SPECTRUM , FULL_WEIGHT , DIR_UP ) );
+                    se.AddBxdf( SORT_MALLOC_PROXY(rc.m_memory_arena, Lambert)( WHITE_SPECTRUM , FULL_WEIGHT , DIR_UP ) );
 
                     // Counts the light from indirect illumination recursively
                     float pdf = 0.0f;
@@ -232,7 +232,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                     Spectrum f = se.Sample_BSDF( -r.m_Dir, wi, BsdfSample(true), pdf);
                     if (!f.IsBlack() && pdf > 0.0f && !pInter->weight.IsBlack()) {
                         MediumStack ms_copy = ms;
-                        total_bssrdf += li(Ray(intersection.intersect, wi, 0, 0.0001f), PixelSample(), scene, bounces + 1, true, bssrdfBounces + 1, true, ms_copy) * f * pInter->weight / pdf;
+                        total_bssrdf += li(Ray(intersection.intersect, wi, 0, 0.0001f), PixelSample(), scene, bounces + 1, true, bssrdfBounces + 1, true, ms_copy, rc) * f * pInter->weight / pdf;
                     }
                 }
                 

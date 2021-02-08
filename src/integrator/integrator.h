@@ -27,6 +27,7 @@
 #include "core/primitive.h"
 #include "stream/stream.h"
 #include "core/scene.h"
+#include "core/render_context.h"
 
 class   Ray;
 
@@ -51,13 +52,13 @@ public:
     //! @param  ps      The pixel samples. Currently not used.
     //! @param  scene   The rendering scene.
     //! @return         The spectrum of the radiance along the opposite direction of the ray.
-    virtual Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene) const = 0;
+    virtual Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene, RenderContext& rc) const = 0;
 
     //! @brief Pre-process before rendering.
     //!
     //! By default , nothing is done in pre-process some integrator, such as Photon Mapping use pre-process step to
     //! generate some neccessary infomation by latter stage.
-    virtual void PreProcess(const Scene& scene) {}
+    virtual void PreProcess(const Scene& scene, RenderContext& rc ) {}
 
     //! @brief  Some integrator have a post process step.
     virtual void PostProcess() {}

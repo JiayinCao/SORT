@@ -76,7 +76,7 @@ std::shared_ptr<Tsl_Namespace::ShadingContext> GetShadingContext() {
 #endif
 }
 
-void ExecuteSurfaceShader( Tsl_Namespace::ShaderInstance* shader , ScatteringEvent& se ){
+void ExecuteSurfaceShader( Tsl_Namespace::ShaderInstance* shader , ScatteringEvent& se , RenderContext& rc){
     const SurfaceInteraction& intersection = se.GetInteraction();
     TslGlobal global;
     global.uvw = make_float3(intersection.u, intersection.v, 0.0f);
@@ -90,10 +90,10 @@ void ExecuteSurfaceShader( Tsl_Namespace::ShaderInstance* shader , ScatteringEve
     raw_function(&closure, &global);
 
     // parse the surface shader
-    ProcessSurfaceClosure(closure, Tsl_Namespace::make_float3(1.0f, 1.0f, 1.0f) , se );
+    ProcessSurfaceClosure(closure, Tsl_Namespace::make_float3(1.0f, 1.0f, 1.0f) , se , rc);
 }
 
-void ExecuteVolumeShader(Tsl_Namespace::ShaderInstance* shader, const MediumInteraction& mi, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material ) {
+void ExecuteVolumeShader(Tsl_Namespace::ShaderInstance* shader, const MediumInteraction& mi, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material , RenderContext& rc) {
     //const SurfaceInteraction& intersection = se.GetInteraction();
     TslGlobal global;
     //global.normal = make_float3(intersection.normal.x, intersection.normal.y, intersection.normal.z);
@@ -103,7 +103,7 @@ void ExecuteVolumeShader(Tsl_Namespace::ShaderInstance* shader, const MediumInte
     auto raw_function = (void(*)(ClosureTreeNodeBase**, TslGlobal*))shader->get_function();
     raw_function(&closure, &global);
 
-    ProcessVolumeClosure(closure, Tsl_Namespace::make_float3(1.0f, 1.0f, 1.0f), ms, flag, material, mi.mesh);
+    ProcessVolumeClosure(closure, Tsl_Namespace::make_float3(1.0f, 1.0f, 1.0f), ms, flag, material, mi.mesh, rc);
 }
 
 void EvaluateVolumeSample(Tsl_Namespace::ShaderInstance* shader, const MediumInteraction& mi, MediumSample& ms) {

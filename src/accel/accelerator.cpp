@@ -23,7 +23,7 @@ SORT_STATS_DEFINE_COUNTER(sShadowRayCount)
 SORT_STATS_DEFINE_COUNTER(sIntersectionTest)
 
 #ifdef ENABLE_TRANSPARENT_SHADOW
-bool Accelerator::GetAttenuation( Ray& ray , Spectrum& attenuation , MediumStack* ms ) const {
+bool Accelerator::GetAttenuation( Ray& ray , Spectrum& attenuation , RenderContext& rc , MediumStack* ms ) const {
     SurfaceInteraction intersection;
     intersection.query_shadow = true;
     if (!GetIntersect(ray, intersection)) {
@@ -57,7 +57,7 @@ bool Accelerator::GetAttenuation( Ray& ray , Spectrum& attenuation , MediumStack
         MediumInteraction mi;
         mi.intersect = intersection.intersect;
         mi.mesh = intersection.primitive->GetMesh();
-        material->UpdateMediumStack(mi, interaction_flag, *ms);
+        material->UpdateMediumStack(mi, interaction_flag, *ms, rc);
     }
 
     ray.m_Ori = intersection.intersect;
@@ -68,7 +68,7 @@ bool Accelerator::GetAttenuation( Ray& ray , Spectrum& attenuation , MediumStack
 }
 #endif
 
-bool Accelerator::UpdateMediumStack( Ray& ray , MediumStack& ms , const bool reversed ) const{
+bool Accelerator::UpdateMediumStack( Ray& ray , MediumStack& ms , RenderContext& rc, const bool reversed ) const{
 	SurfaceInteraction intersection;
 
 #ifdef ENABLE_TRANSPARENT_SHADOW
@@ -106,7 +106,7 @@ bool Accelerator::UpdateMediumStack( Ray& ray , MediumStack& ms , const bool rev
 	MediumInteraction mi;
 	mi.intersect = intersection.intersect;
     mi.mesh = intersection.primitive->GetMesh();
-	material->UpdateMediumStack(mi, interaction_flag, ms);
+	material->UpdateMediumStack(mi, interaction_flag, ms, rc);
 
 	ray.m_Ori = intersection.intersect;
 	ray.m_fMin = 0.001f;              // avoid self collision again.

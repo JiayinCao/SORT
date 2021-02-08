@@ -70,7 +70,7 @@ public:
     //! @param  ps              Pixel sample used to evaluate Monte Carlo method.
     //! @param  scene           The scene to be evaluated.
     //! @return                 The radiance along the opposite direction that the ray points to.
-    Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene) const override;
+    Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene, RenderContext& rc) const override;
 
 
     //! @brief  The samples generated in this interface is not well used in this integrator for now.
@@ -97,13 +97,13 @@ protected:
     Spectrum    _Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) const;
 
     // connect light sample
-    Spectrum    _ConnectLight(const BDPT_Vertex& eye_vertex, const Light* light , const Scene& scene ) const;
+    Spectrum    _ConnectLight(const BDPT_Vertex& eye_vertex, const Light* light , const Scene& scene , RenderContext& rc) const;
 
     // connect camera point
-    void        _ConnectCamera(const BDPT_Vertex& light_vertex , int len , const Light* light , const Scene& scene ) const;
+    void        _ConnectCamera(const BDPT_Vertex& light_vertex , int len , const Light* light , const Scene& scene , RenderContext& rc ) const;
 
     // connect vertices
-    Spectrum    _ConnectVertices( const BDPT_Vertex& light_vertex , const BDPT_Vertex& eye_vertex , const Light* light , const Scene& scene ) const;
+    Spectrum    _ConnectVertices( const BDPT_Vertex& light_vertex , const BDPT_Vertex& eye_vertex , const Light* light , const Scene& scene, RenderContext& rc ) const;
 
 private:
     // use multiple importance sampling to sample direct illumination

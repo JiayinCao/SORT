@@ -36,7 +36,7 @@ public:
     //! @param  ps              There is no Monte-Carlo evaluation in this integrator, this will be ignored.
     //! @param  scene           The scene to be evaluated.
     //! @return                 The radiance along the opposite direction that the ray points to.
-    virtual Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene) const;
+    virtual Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene, RenderContext& rc) const;
 
 private:
     SORT_STATS_ENABLE( "Whitted Ray Tracing" )

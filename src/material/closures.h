@@ -22,6 +22,7 @@
 #include "spectrum/spectrum.h"
 #include "medium/medium.h"
 
+struct RenderContext;
 class ScatteringEvent;
 class MediumStack;
 class MaterialBase;
@@ -35,7 +36,7 @@ void RegisterClosures();
 //! @param  closure         The closure tree in the tsl shader.
 //! @param  w               The weight of this closure tree, this also counts the weight inherits from the higher level tree nodes.
 //! @param  se              The result scattering event.
-void ProcessSurfaceClosure(const Tsl_Namespace::ClosureTreeNodeBase* closure, const Tsl_Namespace::float3& w, ScatteringEvent& se);
+void ProcessSurfaceClosure(const Tsl_Namespace::ClosureTreeNodeBase* closure, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc);
 
 //! @brief  Process the closure tree result and populate the MediumStack.
 //!
@@ -45,7 +46,7 @@ void ProcessSurfaceClosure(const Tsl_Namespace::ClosureTreeNodeBase* closure, co
 //! @param  flag            A flag indicates whether to add or remove the medium.
 //! @param	material		The material that spawns the medium.
 //! @param  mesh            The mesh that wraps the volume.
-void ProcessVolumeClosure(const Tsl_Namespace::ClosureTreeNodeBase* closure, const Tsl_Namespace::float3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh);
+void ProcessVolumeClosure(const Tsl_Namespace::ClosureTreeNodeBase* closure, const Tsl_Namespace::float3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh, RenderContext& rc);
 
 //! @brief  Evaluate the properties of the volume at specific position in a volume.
 //!

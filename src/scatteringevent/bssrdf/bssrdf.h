@@ -24,6 +24,7 @@
 #include "scatteringevent/bsdf/bxdf.h"
 #include "math/interaction.h"
 #include "scatteringevent/scatteringunit.h"
+#include "core/render_context.h"
 
 class Scene;
 
@@ -89,7 +90,7 @@ public:
     //! @param  wo      Extant direction.
     //! @param  po      Extant position.
     //! @param  inter   Incident intersection sampled.
-    virtual void        Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const = 0;
+    virtual void        Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter, RenderContext& rc ) const = 0;
 };
 
 //! @brief  Separable BSSRDF implementation.
@@ -121,7 +122,7 @@ public:
     //! @param  wo      Extant direction.
     //! @param  po      Extant position.
     //! @param  inter   Intersection between the rays and the objects with same material.
-    void        Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const override;
+    void        Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter, RenderContext& rc) const override;
 
     //! @brief  PDF of sampling the reflectance profile.
     //!

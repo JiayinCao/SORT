@@ -34,7 +34,7 @@ public:
     //! @param  ps              Pixel sample used to evaluate Monte Carlo method.
     //! @param  scene           The scene to be evaluated.
     //! @return                 The radiance along the opposite direction that the ray points to.
-    Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene) const override;
+    Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene, RenderContext& rc) const override;
 
     //! @brief      Serializing data from stream
     //!
@@ -63,5 +63,6 @@ private:
     //! @param  replaceSSS      Whether to replace SSS with lambert.
     //! @param  ms              Medium stack during radiance evaluation.
     //! @return                 The radiance along the opposite direction that the ray points to.
-    Spectrum    li( const Ray& ray , const PixelSample& ps , const Scene& scene , int bounces , bool indirectOnly , int bssrdfBounces , bool replaceSSS , MediumStack& ms ) const;
+    Spectrum    li( const Ray& ray , const PixelSample& ps , const Scene& scene , int bounces , bool indirectOnly , 
+                    int bssrdfBounces , bool replaceSSS , MediumStack& ms , RenderContext& rc) const;
 };

@@ -45,14 +45,14 @@ public:
     //! @param  ps              Pixel sample used to evaluate Monte Carlo method.
     //! @param  scene           The scene to be evaluated.
     //! @return                 The radiance along the opposite direction that the ray points to.
-    Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene) const override;
+    Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene, RenderContext& rc) const override;
 
     //! @brief  Preprocess before second phase happens.
     //!
     //! In preprocessing stage, numbers of virtual light sources are generated along the path tracing from light sources.
     //!
     //! @param  scene           The scene to be evaluated.
-    void PreProcess( const Scene& scene ) override;
+    void PreProcess( const Scene& scene, RenderContext& rc ) override;
 
     //! @brief      Serializing data from stream
     //!
@@ -78,7 +78,7 @@ private:
     /**< container for light sources. */
     std::unique_ptr<std::list<VirtualLightSource>[]>    m_pVirtualLightSources;
 
-    Spectrum _li( const Ray& ray , const Scene& scene , bool ignoreLe = false , float* first_intersect_dist = 0 ) const;
+    Spectrum _li( const Ray& ray , const Scene& scene , RenderContext& rc, bool ignoreLe = false , float* first_intersect_dist = 0 ) const;
 
     SORT_STATS_ENABLE( "Instant Radiosity" )
 };

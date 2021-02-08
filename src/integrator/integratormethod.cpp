@@ -29,7 +29,7 @@ SORT_FORCEINLINE float MisFactor( float f, float g ){
     return (f*f) / (f*f + g*g);
 }
 
-Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Scene& scene , const Light* light , const LightSample& ls ,const BsdfSample& bs ){
+Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Scene& scene , const Light* light , const LightSample& ls ,const BsdfSample& bs, RenderContext& rc ){
     const auto& ip = se.GetInteraction();
     Spectrum radiance;
     Visibility visibility(scene);
@@ -53,7 +53,7 @@ Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Sce
         }
 #else
 		if( !f.IsBlack() ){
-			const auto attenuation = visibility.GetAttenuation();
+			const auto attenuation = visibility.GetAttenuation(rc);
 			if (!attenuation.IsBlack()) {
 				if (light->IsDelta()) {
 					radiance += attenuation * li * f / light_pdf;
@@ -86,7 +86,7 @@ Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Sce
                 radiance += li * f * weight / bsdf_pdf;
 #else
 			if( !li.IsBlack() ){
-				const auto attenuation = visibility.GetAttenuation();
+				const auto attenuation = visibility.GetAttenuation(rc);
 				if (!attenuation.IsBlack())
 					radiance += attenuation * li * f * weight / bsdf_pdf;
 			}
@@ -97,7 +97,7 @@ Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Sce
     return radiance;
 }
 
-Spectrum    EvaluateDirect(const ScatteringEvent& se, const Ray& r, const Scene& scene, const Light* light, const LightSample& ls, const BsdfSample& bs, const MaterialBase* material , const MediumStack& ms ) {
+Spectrum    EvaluateDirect(const ScatteringEvent& se, const Ray& r, const Scene& scene, const Light* light, const LightSample& ls, const BsdfSample& bs, const MaterialBase* material , const MediumStack& ms, RenderContext& rc ) {
     const auto& ip = se.GetInteraction();
     Spectrum radiance;
     Visibility visibility(scene);
@@ -128,11 +128,11 @@ Spectrum    EvaluateDirect(const ScatteringEvent& se, const Ray& r, const Scene&
             MediumInteraction mi;
             mi.intersect = se.GetInteraction().intersect;
             mi.mesh = se.GetInteraction().primitive->GetMesh();
-            material->UpdateMediumStack(mi, interaction_flag, ms_copy);
+            material->UpdateMediumStack(mi, interaction_flag, ms_copy, rc);
         }
 
         if (!f.IsBlack()) {
-            const auto attenuation = visibility.GetAttenuation( &ms_copy );
+            const auto attenuation = visibility.GetAttenuation( rc, &ms_copy );
             if (!attenuation.IsBlack()) {
                 if (light->IsDelta()) {
                     radiance += attenuation * li * f / light_pdf;
@@ -176,11 +176,11 @@ Spectrum    EvaluateDirect(const ScatteringEvent& se, const Ray& r, const Scene&
                 MediumInteraction mi;
                 mi.intersect = se.GetInteraction().intersect;
                 mi.mesh = se.GetInteraction().primitive->GetMesh();
-                material->UpdateMediumStack(mi, interaction_flag, ms_copy);
+                material->UpdateMediumStack(mi, interaction_flag, ms_copy, rc);
             }
 
             if (!li.IsBlack()) {
-                const auto attenuation = visibility.GetAttenuation(&ms_copy);
+                const auto attenuation = visibility.GetAttenuation(rc, &ms_copy);
                 if (!attenuation.IsBlack())
                     radiance += attenuation * li * f * weight / bsdf_pdf;
             }
@@ -191,7 +191,7 @@ Spectrum    EvaluateDirect(const ScatteringEvent& se, const Ray& r, const Scene&
     return radiance;
 }
 
-Spectrum    EvaluateDirect(const Point& ip, const PhaseFunction* ph, const Vector& wo, const Scene& scene, const Light* light, MediumStack ms) {
+Spectrum    EvaluateDirect(const Point& ip, const PhaseFunction* ph, const Vector& wo, const Scene& scene, const Light* light, MediumStack ms, RenderContext& rc) {
     Spectrum radiance;
     Visibility visibility(scene);
     float light_pdf;
@@ -202,7 +202,7 @@ Spectrum    EvaluateDirect(const Point& ip, const PhaseFunction* ph, const Vecto
         const auto f = ph->P(wo, wi);
         if (f > 0.0f) {
 #ifdef ENABLE_TRANSPARENT_SHADOW
-            const auto attenuation = visibility.GetAttenuation(&ms);
+            const auto attenuation = visibility.GetAttenuation(rc, &ms);
             if (!attenuation.IsBlack())
                 radiance = attenuation * li * f / light_pdf;
 #else
@@ -217,7 +217,7 @@ Spectrum    EvaluateDirect(const Point& ip, const PhaseFunction* ph, const Vecto
 }
 
 // This is only used by SSS for now, since it is a smooth BRDF, there is no need to do MIS.
-Spectrum SampleOneLight( const ScatteringEvent& se , const Ray& r, const SurfaceInteraction& inter, const Scene& scene, const MaterialBase* material, const MediumStack& ms) {
+Spectrum SampleOneLight( const ScatteringEvent& se , const Ray& r, const SurfaceInteraction& inter, const Scene& scene, const MaterialBase* material, const MediumStack& ms, RenderContext& rc) {
     // Uniformly choose a light, this may not be the optimal solution in case of more lights, need more research in this topic later.
     float light_pick_pdf = 0.0f;
     const auto light = scene.SampleLight( sort_canonical() , &light_pick_pdf );
@@ -246,11 +246,11 @@ Spectrum SampleOneLight( const ScatteringEvent& se , const Ray& r, const Surface
             MediumInteraction mi;
             mi.intersect = se.GetInteraction().intersect;
             mi.mesh = se.GetInteraction().primitive->GetMesh();
-            material->UpdateMediumStack(mi, interaction_flag, ms_copy);
+            material->UpdateMediumStack(mi, interaction_flag, ms_copy, rc);
         }
 
 		if( !f.IsBlack() ){
-			const auto attenuation = visibility.GetAttenuation( &ms_copy );
+			const auto attenuation = visibility.GetAttenuation(rc, &ms_copy );
 			if( !attenuation.IsBlack() )
 				radiance += attenuation * li * f / light_pdf / light_pick_pdf;
         }
@@ -260,8 +260,8 @@ Spectrum SampleOneLight( const ScatteringEvent& se , const Ray& r, const Surface
 }
 
 Spectrum    EvaluateDirect( const Ray& r , const Scene& scene , const Light* light , const SurfaceInteraction& ip ,
-                            const LightSample& ls ,const BsdfSample& bs , bool replaceSSS ){
+                            const LightSample& ls ,const BsdfSample& bs , RenderContext& rc, bool replaceSSS ){
     ScatteringEvent se( ip , replaceSSS ? SE_EVALUATE_ALL_NO_SSS : SE_EVALUATE_ALL );
-    ip.primitive->GetMaterial()->UpdateScatteringEvent( se );
-    return EvaluateDirect( se , r , scene , light , ls , bs );
+    ip.primitive->GetMaterial()->UpdateScatteringEvent( se , rc);
+    return EvaluateDirect( se , r , scene , light , ls , bs , rc);
 }

@@ -250,7 +250,7 @@ bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , SurfaceIn
     return found;
 }
 
-void OcTree::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID ) const{
+void OcTree::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , RenderContext& rc, const StringID matID ) const{
     SORT_PROFILE("Traverse OcTree");
     SORT_STATS(++sRayCount);
 
@@ -264,10 +264,10 @@ void OcTree::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const
     if( fmin < 0.0f )
         return;
 
-    traverseOcTree( m_root.get() , r , intersect , fmin , fmax , matID );
+    traverseOcTree( m_root.get() , r , intersect , fmin , fmax , rc , matID );
 }
 
-void OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , BSSRDFIntersections& intersect , float fmin , float fmax , const StringID matID ) const{
+void OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , BSSRDFIntersections& intersect , float fmin , float fmax , RenderContext& rc , const StringID matID ) const{
     constexpr auto   delta = 0.001f;
 
     // early rejections
@@ -300,7 +300,7 @@ void OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , BSSRDFInt
             const auto intersected = primitive->GetIntersect( ray , &intersection );
             if( intersected ){
                 if( intersect.cnt < TOTAL_SSS_INTERSECTION_CNT ){
-                    intersect.intersections[intersect.cnt] = SORT_MALLOC(BSSRDFIntersection)();
+                    intersect.intersections[intersect.cnt] = SORT_MALLOC_PROXY(rc.m_memory_arena,BSSRDFIntersection)();
                     intersect.intersections[intersect.cnt++]->intersection = intersection;
                 }else{
                     auto picked_i = -1;
@@ -346,7 +346,7 @@ void OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , BSSRDFInt
         nextAxis = (_next[nextAxis] <= _next[2]) ? nextAxis : 2;
 
         // check if there is intersection in the current grid
-        traverseOcTree( node->child[node_index].get() , ray , intersect , _curt , _next[nextAxis] , matID );
+        traverseOcTree( node->child[node_index].get() , ray , intersect , _curt , _next[nextAxis] , rc , matID );
 
         // get to the next node based on distance
         node_index += ( 1 << nextAxis ) * _dir[nextAxis];

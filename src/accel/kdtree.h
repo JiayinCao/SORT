@@ -136,7 +136,7 @@ public:
     //! @param  r           The input ray to be tested.
     //! @param  intersect   The intersection result that holds all intersection.
     //! @param  matID       We are only interested in intersection with the same material, whose material id should be set to matID.
-    void GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID = INVALID_SID ) const override;
+    void GetIntersect( const Ray& r , BSSRDFIntersections& intersect , RenderContext& rc, const StringID matID = INVALID_SID ) const override;
 
     //! @brief Build KD-Tree structure in O(N*lg(N)).
     //!
@@ -233,7 +233,7 @@ private:
     //! @param fmin         The minimum range along the ray.
     //! @param fmax         The maximum range along the ray.
     //! @param matID        Material ID to avoid if it is not invalid.
-    void traverse( const Kd_Node* node , const Ray& ray , BSSRDFIntersections& intersect , float fmin , float fmax , const StringID matID ) const;
+    void traverse( const Kd_Node* node , const Ray& ray , BSSRDFIntersections& intersect , float fmin , float fmax , RenderContext& rc, const StringID matID ) const;
 
     //! @brief  Delete all sub tree originating from node.
     //!

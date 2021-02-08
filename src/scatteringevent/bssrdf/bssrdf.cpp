@@ -30,7 +30,7 @@ SeparableBssrdf::SeparableBssrdf( const Spectrum& R , const SurfaceInteraction* 
     tn = normalize(cross( btn , nn ));
 }
 
-void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const {
+void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter, RenderContext& rc ) const {
     Vector vx , vy , vz;
     const auto r0 = sort_canonical();
 
@@ -64,7 +64,7 @@ void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Po
     const auto source = po + r * ( vx * cos(phi) + vz * sin(phi) ) + l * vy * 0.5f;
     
     const Ray ray( source , -vy , 0 , 0.0001f , l );
-    scene.GetIntersect( ray , inter , intersection->primitive->GetMaterial()->GetUniqueID() );
+    scene.GetIntersect( ray , inter , rc, intersection->primitive->GetMaterial()->GetUniqueID() );
 
     for( auto i = 0u ; i < inter.cnt ; ++i ){
         sAssert(IS_PTR_VALID(inter.intersections[i]), MATERIAL );

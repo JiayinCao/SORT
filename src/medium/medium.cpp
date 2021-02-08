@@ -66,11 +66,11 @@ Spectrum MediumStack::Tr(const Ray& r, const float max_t) const {
     return medium->Tr(r, max_t) * m_mediumCnt;
 }
 
-Spectrum MediumStack::Sample(const Ray& r, const float max_t , MediumInteraction*& mi, Spectrum& emission) const {
+Spectrum MediumStack::Sample(const Ray& r, const float max_t , MediumInteraction*& mi, Spectrum& emission, RenderContext& rc) const {
     if (0 == m_mediumCnt)
         return 1.0f;
 
     const auto k = clamp((int)(sort_canonical() * m_mediumCnt), 0, m_mediumCnt - 1);
     const Medium* medium = m_mediums[k];
-    return medium->Sample(r, max_t, mi, emission) * m_mediumCnt;
+    return medium->Sample(r, max_t, mi, emission, rc) * m_mediumCnt;
 }

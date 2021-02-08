@@ -93,7 +93,7 @@ public:
     //! @param  r           The input ray to be tested.
     //! @param  intersect   The intersection result that holds all intersection.
     //! @param  matID       We are only interested in intersection with the same material, whose material id should be set to matID.
-    void    GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID = INVALID_SID ) const override;
+    void    GetIntersect( const Ray& r , BSSRDFIntersections& intersect, RenderContext& rc, const StringID matID = INVALID_SID ) const override;
 
     //! @brief Build BVH structure in O(N*lg(N)).
     //!
@@ -164,7 +164,7 @@ private:
     //! @param intersect    The result intersections.
     //! @param fmin         The minimum range along the ray, any intersection before it will be ignored.
     //! @param              Material ID to avoid if it is not invalid.
-    void    traverseNode( const Bvh_Node* node , const Ray& ray , BSSRDFIntersections& intersect , float fmin , const StringID matID ) const;
+    void    traverseNode( const Bvh_Node* node , const Ray& ray , BSSRDFIntersections& intersect , float fmin , RenderContext& rc , const StringID matID ) const;
 
     SORT_STATS_ENABLE( "Spatial-Structure(BVH)" )
 };

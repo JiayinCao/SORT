@@ -65,14 +65,14 @@ public:
     //! @brief      Parse scattering event from the material shader.
     //!
     //! @param      se              Scattering event to be returned.
-    virtual void       UpdateScatteringEvent(ScatteringEvent& se) const = 0;
+    virtual void       UpdateScatteringEvent(ScatteringEvent& se, RenderContext& rc) const = 0;
 
     //! @brief      Parse volume from the material shader.
     //!
     //! @param      mi              Interaction with the medium.
     //! @param      flag            A flag indicates whether to add or remove the medium.
     //! @param      ms              Medium stack to be populated.
-    virtual void       UpdateMediumStack(const MediumInteraction& mi, const SE_Interaction flag, MediumStack& ms) const = 0;
+    virtual void       UpdateMediumStack(const MediumInteraction& mi, const SE_Interaction flag, MediumStack& ms, RenderContext& rc) const = 0;
 
     //! @brief      Take sample in a medium at a specific position.
     //!
@@ -150,14 +150,14 @@ public:
     //! @brief      Parse scattering event from the material shader.
     //!
     //! @param      se              Scattering event to be returned.
-    void        UpdateScatteringEvent( ScatteringEvent& se ) const override;
+    void        UpdateScatteringEvent( ScatteringEvent& se, RenderContext& rc ) const override;
 
     //! @brief      Parse volume from the material shader.
     //!
     //! @param      mi              Interaction with the medium.
     //! @param      flag            A flag indicates whether to add or remove the medium.
     //! @param      ms              Medium stack to be populated.
-    void        UpdateMediumStack(const MediumInteraction& mi, const SE_Interaction flag, MediumStack& ms) const override;
+    void        UpdateMediumStack(const MediumInteraction& mi, const SE_Interaction flag, MediumStack& ms, RenderContext& rc) const override;
 
     //! @brief      Take sample in a medium at a specific position.
     //!
@@ -285,13 +285,13 @@ public:
     //! @brief      Parse scattering event from the material shader.
     //!
     //! @param      se              Scattering event to be returned.
-    void       UpdateScatteringEvent(ScatteringEvent& se) const override;
+    void       UpdateScatteringEvent(ScatteringEvent& se, RenderContext& rc) const override;
 
     //! @brief      Parse volume from the material shader.
     //! @param      mi              Interaction with the medium.
     //! @param      flag            A flag indicates whether to add or remove the medium.
     //! @param      ms              Medium stack to be populated.
-    void       UpdateMediumStack(const MediumInteraction& mi, const SE_Interaction flag, MediumStack& ms) const override;
+    void       UpdateMediumStack(const MediumInteraction& mi, const SE_Interaction flag, MediumStack& ms, RenderContext& rc) const override;
 
     //! @brief      Take sample in a medium at a specific position.
     //!

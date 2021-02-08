@@ -278,7 +278,7 @@ bool UniGrid::traverse( const Ray& r , SurfaceInteraction* intersect , unsigned 
     return inter && ( intersect->t < nextT + 0.00001f );
 }
 
-void UniGrid::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID ) const{
+void UniGrid::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , RenderContext& rc, const StringID matID ) const{
     SORT_PROFILE("Traverse Uniform Grid");
     SORT_STATS(++sRayCount);
 
@@ -331,7 +331,7 @@ void UniGrid::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , cons
         nextAxis = idArray[nextAxis];
 
         // check if there is intersection in the current grid
-        traverse( r , intersect , voxelId , next[nextAxis] , matID );
+        traverse( r , intersect , voxelId , next[nextAxis] , rc, matID );
 
         // get to the next voxel
         curGrid[nextAxis] += dir[nextAxis];
@@ -345,7 +345,7 @@ void UniGrid::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , cons
     }
 }
 
-void UniGrid::traverse( const Ray& ray , BSSRDFIntersections& intersect , unsigned voxelId , float nextT , const StringID matID ) const{
+void UniGrid::traverse( const Ray& ray , BSSRDFIntersections& intersect , unsigned voxelId , float nextT , RenderContext& rc , const StringID matID ) const{
     sAssertMsg( voxelId < m_voxelCount , SPATIAL_ACCELERATOR , "Invalid voxel id." );
 
     SurfaceInteraction intersection;
@@ -370,7 +370,7 @@ void UniGrid::traverse( const Ray& ray , BSSRDFIntersections& intersect , unsign
         const auto intersected = primitive->GetIntersect( ray , &intersection );
         if( intersected ){
             if( intersect.cnt < TOTAL_SSS_INTERSECTION_CNT ){
-                intersect.intersections[intersect.cnt] = SORT_MALLOC(BSSRDFIntersection)();
+                intersect.intersections[intersect.cnt] = SORT_MALLOC_PROXY(rc.m_memory_arena,BSSRDFIntersection)();
                 intersect.intersections[intersect.cnt++]->intersection = intersection;
             }else{
                 auto picked_i = -1;

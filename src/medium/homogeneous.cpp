@@ -19,6 +19,7 @@
 #include "core/rand.h"
 #include "core/memory.h"
 #include "phasefunction.h"
+#include "core/render_context.h"
 
 IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeHomogeneous)
 IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHomogeneous, Tsl_float3, base_color)
@@ -33,7 +34,7 @@ Spectrum HomogeneousMedium::Tr( const Ray& ray , const float max_t ) const{
     return e.Exp();
 }
 
-Spectrum HomogeneousMedium::Sample( const Ray& ray , const float max_t , MediumInteraction*& mi , Spectrum& emission ) const{
+Spectrum HomogeneousMedium::Sample( const Ray& ray , const float max_t , MediumInteraction*& mi , Spectrum& emission , RenderContext& rc) const{
     const auto extinction = m_globalMediumSample.basecolor * m_globalMediumSample.extinction;
     const auto scattering = m_globalMediumSample.basecolor * m_globalMediumSample.scattering;
     const auto absorption = m_globalMediumSample.basecolor * m_globalMediumSample.absorption;
@@ -43,9 +44,9 @@ Spectrum HomogeneousMedium::Sample( const Ray& ray , const float max_t , MediumI
 
     const auto sample_medium = d < max_t;
     if (sample_medium) {
-        mi = SORT_MALLOC(MediumInteraction)();
+        mi = SORT_MALLOC_PROXY(rc.m_memory_arena, MediumInteraction)();
         mi->intersect = ray(d);
-        mi->phaseFunction = SORT_MALLOC(HenyeyGreenstein)(m_globalMediumSample.anisotropy);
+        mi->phaseFunction = SORT_MALLOC_PROXY(rc.m_memory_arena, HenyeyGreenstein)(m_globalMediumSample.anisotropy);
     }
 
     const auto e = extinction * (-fmin( d , FLT_MAX ));

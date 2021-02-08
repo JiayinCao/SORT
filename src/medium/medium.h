@@ -26,6 +26,7 @@
 #include "core/strid.h"
 
 class MaterialBase;
+struct RenderContext;
 
 enum SE_Interaction : char {
     SE_REFLECTION = 0,
@@ -93,7 +94,7 @@ public:
     //! @param mi           The interaction sampled.
     //! @param emission     The emission contribution in RTE.
     //! @return             The beam transmittance between the ray origin and the interaction.
-    virtual Spectrum Sample( const Ray& ray , const float max_t , MediumInteraction*& interaction, Spectrum& emission) const = 0;
+    virtual Spectrum Sample( const Ray& ray , const float max_t , MediumInteraction*& interaction, Spectrum& emission, RenderContext& rc) const = 0;
 
 	//! @brief	Get the material that spawns the medium.
 	//!
@@ -156,7 +157,7 @@ public:
     //! @param  mi          The medium interaction taken as a sample, null if no sample is taken in the medium.
     //! @param  emission    The emission contribution in RTE.
     //! @return             Attenuation along the ray all the way to the sampled point.
-    Spectrum    Sample(const Ray& r, const float max_t, MediumInteraction*& mi, Spectrum& emission) const;
+    Spectrum    Sample(const Ray& r, const float max_t, MediumInteraction*& mi, Spectrum& emission, RenderContext& rc) const;
 
 public:
     /**< Mediums it holds. */

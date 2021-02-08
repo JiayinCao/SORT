@@ -27,7 +27,7 @@ SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
 
 SORT_STATS_COUNTER("Direct Illumination", "Primary Ray Count" , sPrimaryRayCount);
 
-Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps , const Scene& scene) const{
+Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps , const Scene& scene, RenderContext& rc) const{
     SORT_STATS(++sPrimaryRayCount);
 
     if( r.m_Depth > max_recursive_depth )
@@ -45,7 +45,7 @@ Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps , const Scene& sc
     auto light_num = scene.LightNum();
     for( auto i = 0u ; i < light_num ; ++i ){
         const auto light = scene.GetLight(i);
-        li += EvaluateDirect( r , scene , light , ip , LightSample(true) , BsdfSample(true) , true );
+        li += EvaluateDirect( r , scene , light , ip , LightSample(true) , BsdfSample(true) , rc, true );
     }
 
     return li;

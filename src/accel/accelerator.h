@@ -25,6 +25,7 @@
 #include "core/profile.h"
 #include "stream/stream.h"
 #include "core/scene.h"
+#include "core/render_context.h"
 
 class Ray;
 struct SurfaceInteraction;
@@ -68,7 +69,7 @@ public:
     //!                     shadow ray calculation.
     //! @return             It will return true if there is an intersection, otherwise
     //!                     it returns false.
-    virtual bool GetIntersect( const Ray& r , SurfaceInteraction& intersect ) const = 0;
+    virtual bool GetIntersect( const Ray& r , SurfaceInteraction& intersect) const = 0;
 
 #ifndef ENABLE_TRANSPARENT_SHADOW
     //! @brief This is a dedicated interface for detecting shadow rays.
@@ -90,7 +91,7 @@ public:
     //! @param attenuation  The occlusion along the ray.
     //! @param ms           The medium stack used to evaluate shadow attenuation.
     //! @return             Whether there is an intersection along the ray.
-    bool         GetAttenuation( Ray& r , Spectrum& attenuation , MediumStack* ms = nullptr ) const;
+    bool         GetAttenuation( Ray& r , Spectrum& attenuation , RenderContext& rc ,MediumStack* ms = nullptr ) const;
 #endif
 
 	//! @brief	Update medium stack.
@@ -101,7 +102,7 @@ public:
 	//! @param	ms			The medium stack to be populated.
     //! @param  reversed    Reversing the order of updating medium stack.
 	//! @return				Whether there is an intersection found.
-	bool		UpdateMediumStack( Ray& r , MediumStack& ms , const bool reversed = false ) const;
+	bool		UpdateMediumStack( Ray& r , MediumStack& ms , RenderContext& rc , const bool reversed = false ) const;
 
     //! @brief Get multiple intersections between the ray and the primitive set using spatial data structure.
     //!
@@ -116,7 +117,7 @@ public:
     //! @param  r           The input ray to be tested.
     //! @param  intersect   The intersection result that holds all intersection.
     //! @param  matID       We are only interested in intersection with the same material, whose material id should be set to matID.
-    virtual void GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID = INVALID_SID ) const = 0;
+    virtual void GetIntersect( const Ray& r , BSSRDFIntersections& intersect , RenderContext& rc , const StringID matID = INVALID_SID ) const = 0;
 
     //! @brief Build the acceleration structure.
     //!

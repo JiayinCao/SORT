@@ -22,16 +22,17 @@
 struct	SurfaceInteraction;
 class	Light;
 class   MediumStack;
+struct  RenderContext;
 
 // evaluate direct lighting
-Spectrum    EvaluateDirect(const ScatteringEvent& se, const Ray& r, const Scene& scene, const Light* light, const LightSample& ls, const BsdfSample& bs, const MaterialBase* material, const MediumStack& ms);
-Spectrum    EvaluateDirect(const ScatteringEvent& se, const Ray& r, const Scene& scene, const Light* light, const LightSample& ls, const BsdfSample& bs);
+Spectrum    EvaluateDirect(const ScatteringEvent& se, const Ray& r, const Scene& scene, const Light* light, const LightSample& ls, const BsdfSample& bs, const MaterialBase* material, const MediumStack& ms, RenderContext& rc);
+Spectrum    EvaluateDirect(const ScatteringEvent& se, const Ray& r, const Scene& scene, const Light* light, const LightSample& ls, const BsdfSample& bs, RenderContext& rc);
 
-Spectrum    EvaluateDirect(const Point& ip, const PhaseFunction* ph, const Vector& wo, const Scene& scene, const Light* light, MediumStack ms);
+Spectrum    EvaluateDirect(const Point& ip, const PhaseFunction* ph, const Vector& wo, const Scene& scene, const Light* light, MediumStack ms, RenderContext& rc);
 
 // uniformly evaluate direct illumination from one light
-Spectrum    SampleOneLight( const ScatteringEvent& se , const Ray& r, const SurfaceInteraction& inter, const Scene& scene, const MaterialBase* material, const MediumStack& ms);
+Spectrum    SampleOneLight( const ScatteringEvent& se , const Ray& r, const SurfaceInteraction& inter, const Scene& scene, const MaterialBase* material, const MediumStack& ms, RenderContext& rc);
 
 // helper function to evaluate light contribution
 Spectrum    EvaluateDirect( const Ray& r , const Scene& scene , const Light* light , const SurfaceInteraction& ip ,
-                            const LightSample& ls , const BsdfSample& bs , bool replaceSSS = false );
+                            const LightSample& ls , const BsdfSample& bs , RenderContext& rc, bool replaceSSS = false );

@@ -26,6 +26,7 @@
 #include "core/primitive.h"
 #include "shape/triangle.h"
 #include "entity/visual.h"
+#include "core/render_context.h"
 
 // Reference implementation is disabled by default, it is only for debugging purposes.
 // #define SIMD_TRI_REFERENCE_IMPLEMENTATION
@@ -408,7 +409,7 @@ SORT_FORCEINLINE bool intersectTriangleFast_SIMD(const Ray& ray, const Simd_Ray_
 //! @param  ray         Ray to be tested against.
 //! @param  tri_simd    Data structure holds four/eight triangles.
 //! @param  ret         The result of intersection.
-SORT_FORCEINLINE void intersectTriangleMulti_SIMD(const Ray& ray, const Simd_Ray_Data& ray_simd, const Simd_Triangle& tri_simd, const StringID matID , BSSRDFIntersections& intersections) {
+SORT_FORCEINLINE void intersectTriangleMulti_SIMD(const Ray& ray, const Simd_Ray_Data& ray_simd, const Simd_Triangle& tri_simd, const StringID matID , RenderContext& rc, BSSRDFIntersections& intersections) {
 #ifndef SIMD_TRI_REFERENCE_IMPLEMENTATION
     simd_data   u_simd, v_simd, t_simd, mask;
     const auto intersected = intersectTriangleInner_SIMD<false>(ray, ray_simd, tri_simd, t_simd, u_simd, v_simd, mask);
@@ -433,7 +434,7 @@ SORT_FORCEINLINE void intersectTriangleMulti_SIMD(const Ray& ray, const Simd_Ray
             continue;
 
         if (intersections.cnt < TOTAL_SSS_INTERSECTION_CNT) {
-            intersections.intersections[intersections.cnt] = SORT_MALLOC(BSSRDFIntersection)();
+            intersections.intersections[intersections.cnt] = SORT_MALLOC_PROXY(rc.m_memory_arena, BSSRDFIntersection)();
             setupIntersection(tri_simd, ray, t_simd, u_simd, v_simd, res_i, &intersections.intersections[intersections.cnt++]->intersection);
         } else {
             auto picked_i = -1;
@@ -461,7 +462,7 @@ SORT_FORCEINLINE void intersectTriangleMulti_SIMD(const Ray& ray, const Simd_Ray
         const auto intersected = primitive->GetIntersect(ray, &intersection);
         if (intersected) {
             if (intersections.cnt < TOTAL_SSS_INTERSECTION_CNT) {
-                intersections.intersections[intersections.cnt] = SORT_MALLOC(BSSRDFIntersection)();
+                intersections.intersections[intersections.cnt] = SORT_MALLOC_PROXY(rc.m_memory_arena, BSSRDFIntersection)();
                 intersections.intersections[intersections.cnt++]->intersection = intersection;
             }
             else {

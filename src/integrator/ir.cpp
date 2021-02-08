@@ -29,7 +29,7 @@ SORT_STATS_COUNTER("Instant Radiosity", "Primary Ray Count" , sPrimaryRayCount);
 SORT_STATS_COUNTER("Instant Radiosity", "Virtual Point Lights Count" , sVPLCount);
 
 // Preprocess
-void InstantRadiosity::PreProcess( const Scene& scene )
+void InstantRadiosity::PreProcess( const Scene& scene , RenderContext& rc )
 {
     SORT_PROFILE("Instant Radiosity (LPV distribution stage)");
 
@@ -67,7 +67,7 @@ void InstantRadiosity::PreProcess( const Scene& scene )
                 Vector wo;
                 
                 ScatteringEvent se( intersect , SE_EVALUATE_ALL_NO_SSS );
-                intersect.primitive->GetMaterial()->UpdateScatteringEvent(se);
+                intersect.primitive->GetMaterial()->UpdateScatteringEvent(se, rc);
                 Spectrum bsdf_value = se.Sample_BSDF( ls.wi , wo, BsdfSample(true) , bsdf_pdf );
 
                 if( bsdf_pdf == 0.0f )
@@ -92,13 +92,13 @@ void InstantRadiosity::PreProcess( const Scene& scene )
 }
 
 // radiance along a specific ray direction
-Spectrum InstantRadiosity::Li( const Ray& r , const PixelSample& ps  , const Scene& scene ) const{
+Spectrum InstantRadiosity::Li( const Ray& r , const PixelSample& ps  , const Scene& scene , RenderContext& rc) const{
     SORT_STATS( ++sPrimaryRayCount );
-    return _li( r , scene );
+    return _li( r , scene, rc );
 }
 
 // private method of li
-Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene , bool ignoreLe , float* first_intersect_dist ) const{
+Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene, RenderContext& rc , bool ignoreLe , float* first_intersect_dist ) const{
     // return if it is larger than the maximum depth
     if( r.m_Depth > max_recursive_depth )
         return 0.0f;
@@ -113,7 +113,7 @@ Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene , bool ignoreL
     unsigned light_num = scene.LightNum();
     for( unsigned i = 0 ; i < light_num ; ++i ){
         const auto light = scene.GetLight(i);
-        radiance += EvaluateDirect( r , scene , light , ip , LightSample(true) , BsdfSample(true) , true );
+        radiance += EvaluateDirect( r , scene , light , ip , LightSample(true) , BsdfSample(true) , rc, true );
     }
 
     if( first_intersect_dist )
@@ -124,7 +124,7 @@ Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene , bool ignoreL
     std::list<VirtualLightSource> vps = m_pVirtualLightSources[lps_id];
 
     ScatteringEvent se( ip , SE_EVALUATE_ALL_NO_SSS );
-    ip.primitive->GetMaterial()->UpdateScatteringEvent(se);
+    ip.primitive->GetMaterial()->UpdateScatteringEvent(se, rc);
 
     // evaluate indirect illumination
     Spectrum indirectIllum;
@@ -141,7 +141,7 @@ Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene , bool ignoreL
         const auto  n_delta = delta / len;
 
         ScatteringEvent se1( it->intersect , SE_EVALUATE_ALL_NO_SSS );
-        it->intersect.primitive->GetMaterial()->UpdateScatteringEvent(se1);
+        it->intersect.primitive->GetMaterial()->UpdateScatteringEvent(se1, rc);
 
         const auto    gterm = 1.0f / std::max( m_fMinSqrDist , sqrLen );
         const auto    f0 = se.Evaluate_BSDF( -r.m_Dir , -n_delta );
@@ -156,7 +156,7 @@ Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene , bool ignoreL
             if( vis.IsVisible() )
                 indirectIllum += contr;
 #else
-            const auto attenuation = vis.GetAttenuation();
+            const auto attenuation = vis.GetAttenuation(rc);
             if( !attenuation.IsBlack() )
                 indirectIllum += contr * attenuation;
 #endif
@@ -175,7 +175,7 @@ Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene , bool ignoreL
             PixelSample ps;
             float gather_dist;
             Ray gather_ray( ip.intersect , wi , r.m_Depth + 1 , 0.001f , m_fMinDist - 0.001f );
-            Spectrum li = _li( gather_ray , scene , true , &gather_dist );
+            Spectrum li = _li( gather_ray , scene , rc, true , &gather_dist);
 
             if( !li.IsBlack() ){
                 float dgterm = std::max( 0.0f , 1.0f - gather_dist * gather_dist / m_fMinSqrDist );

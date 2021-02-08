@@ -247,7 +247,6 @@ public:
             m_integrator->Serialize( stream );
 
         m_imageSensor = std::make_unique<RenderTargetImage>( m_resWidth , m_resHeight );
-        m_imageSensor->PreProcess();
 
         std::string s = logTimeString();
         m_title = m_outputFile + s;

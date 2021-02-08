@@ -41,6 +41,7 @@
 #include "medium/heterogeneous.h"
 #include "material/material.h"
 #include "core/mesh.h"
+#include "core/render_context.h"
 
 USE_TSL_NAMESPACE
 
@@ -101,7 +102,7 @@ namespace {
          //! @param param       Closure parameter.
          //! @param w           Weight of the current closure.
          //! @param se          This is the output of the function, the scattering event.
-         virtual void Process(const ClosureParamPtr param, const float3& w, ScatteringEvent& se) const = 0;
+         virtual void Process(const ClosureParamPtr param, const float3& w, ScatteringEvent& se, RenderContext& rc) const = 0;
 
          //! @brief     Evaluate the opacity of the closure.
          //!
@@ -123,7 +124,7 @@ namespace {
          //! @param flag        Some useful properties used during processing.
          //! @param material    The material that holds the volume.
          //! @param mesh        The mesh holds the volume.
-         virtual void Process(const ClosureParamPtr param, const float3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) const = 0;
+         virtual void Process(const ClosureParamPtr param, const float3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh, RenderContext& rc) const = 0;
 
          //! @brief     This the interface for evaluating volume density inside a volume.
          //!
@@ -154,7 +155,7 @@ namespace {
      struct Surface_Closure_Empty: public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeEmpty)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              // nothing inside the closure needs to be processed.
          }
      };
@@ -162,25 +163,25 @@ namespace {
      struct Surface_Closure_Lambert : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeLambert)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              ClosureTypeLambert* bxdf_param = (ClosureTypeLambert*)param;
-             se.AddBxdf(SORT_MALLOC(Lambert)(*bxdf_param, w));
+             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena, Lambert)(*bxdf_param, w));
          }
      };
 
      struct Surface_Closure_OrenNayar : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeOrenNayar)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              ClosureTypeOrenNayar* bxdf_param = (ClosureTypeOrenNayar*)param;
-             se.AddBxdf(SORT_MALLOC(OrenNayar)(*bxdf_param, w));
+             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena, OrenNayar)(*bxdf_param, w));
          }
      };
 
      struct Surface_Closure_Disney : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeDisney)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto weight = w;
              const auto sample_weight = ( weight.x + weight.y + weight.z ) / 3.0f;
              auto& params = *(ClosureTypeDisney*)param;
@@ -230,18 +231,18 @@ namespace {
                  const auto bxdf_sampling_weight = DisneyBRDF::Evaluate_Sampling_Weight( params );
 
                  if( bxdf_sampling_weight > 0.0f )
-                     se.AddBxdf(SORT_MALLOC(DisneyBRDF)(params, weight, bxdf_sampling_weight * sample_weight));
+                     se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,DisneyBRDF)(params, weight, bxdf_sampling_weight * sample_weight));
 
                  const auto diffuseWeight = (Spectrum)( weight * (1.0f - params.metallic) * (1.0 - params.specTrans) );
                  if (!sssBaseColor.IsBlack() && bxdf_sampling_weight < 1.0f && !diffuseWeight.IsBlack() )
-                     se.AddBssrdf( SORT_MALLOC(DisneyBssrdf)(&se.GetInteraction(), sssBaseColor, params.scatterDistance, diffuseWeight , ( 1.0f - bxdf_sampling_weight ) * sample_weight * bssrdf_pdf ) );
+                     se.AddBssrdf( SORT_MALLOC_PROXY(rc.m_memory_arena,DisneyBssrdf)(&se.GetInteraction(), sssBaseColor, params.scatterDistance, diffuseWeight , ( 1.0f - bxdf_sampling_weight ) * sample_weight * bssrdf_pdf ) );
 
  #ifdef SSS_REPLACE_WITH_LAMBERT
                  if (addExtraLambert && !is_tsl_color_black(baseColor))
-                     se.AddBxdf(SORT_MALLOC(Lambert)(baseColor, diffuseWeight, ( 1.0f - bxdf_sampling_weight ) * sample_weight * ( 1.0f - bssrdf_pdf ) , params.normal));
+                     se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,Lambert)(baseColor, diffuseWeight, ( 1.0f - bxdf_sampling_weight ) * sample_weight * ( 1.0f - bssrdf_pdf ) , params.normal));
  #endif
              }else{
-                 se.AddBxdf(SORT_MALLOC(DisneyBRDF)(params, weight, sample_weight));
+                 se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,DisneyBRDF)(params, weight, sample_weight));
              }
          }
      };
@@ -249,184 +250,184 @@ namespace {
      struct Surface_Closure_MicrofacetReflectionGGX : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionGGX)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeMicrofacetReflectionGGX*)param;
-             se.AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, w));
+             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,MicroFacetReflection)(params, w));
          }
      };
 
      struct Surface_Closure_MicrofacetReflectionBlinn: public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionBlinn)
 
-        void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+        void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeMicrofacetReflectionBlinn*)param;
-             se.AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, w));
+             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,MicroFacetReflection)(params, w));
          }
      };
 
      struct Surface_Closure_MicrofacetReflectionBeckmann : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionBeckmann)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeMicrofacetReflectionBeckmann*)param;
-             se.AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, w));
+             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,MicroFacetReflection)(params, w));
          }
      };
 
      struct Surface_Closure_MicrofacetRefractionGGX : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeMicrofacetRefractionGGX)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeMicrofacetRefractionGGX*)param;
-             se.AddBxdf(SORT_MALLOC(MicroFacetRefraction)(params, w));
+             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,MicroFacetRefraction)(params, w));
          }
      };
 
      struct Surface_Closure_MicrofacetRefractionBlinn : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeMicrofacetRefractionBlinn)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeMicrofacetRefractionBlinn*)param;
-             se.AddBxdf(SORT_MALLOC(MicroFacetRefraction)(params, w));
+             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,MicroFacetRefraction)(params, w));
          }
      };
 
      struct Surface_Closure_MicrofacetRefractionBeckmann : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeMicrofacetRefractionBeckmann)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeMicrofacetRefractionBeckmann*)param;
-             se.AddBxdf(SORT_MALLOC(MicroFacetRefraction)(params, w));
+             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,MicroFacetRefraction)(params, w));
          }
      };
 
      struct Surface_Closure_AshikhmanShirley : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeAshikhmanShirley)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(ClosureTypeAshikhmanShirley*)param;
-             se.AddBxdf(SORT_MALLOC(AshikhmanShirley)(params, w));
+             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,AshikhmanShirley)(params, w));
          }
      };
 
      struct Surface_Closure_Phong : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypePhong)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(ClosureTypePhong*)param;
-             se.AddBxdf(SORT_MALLOC(Phong)(params, w));
+             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,Phong)(params, w));
          }
      };
 
      struct Surface_Closure_LambertTransmission : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeLambertTransmission)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeLambertTransmission*)param;
-             se.AddBxdf(SORT_MALLOC(LambertTransmission)(params, w));
+             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,LambertTransmission)(params, w));
          }
      };
 
      struct Surface_Closure_Mirror : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeMirror)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(ClosureTypeMirror*)param;
-             se.AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, w));
+             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,MicroFacetReflection)(params, w));
          }
      };
 
      struct Surface_Closure_Dielectric : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeDielectric)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(ClosureTypeDielectric*)param;
-             se.AddBxdf(SORT_MALLOC(Dielectric)(params, w));
+             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,Dielectric)(params, w));
          }
      };
 
      struct Surface_Closure_MicrofacetReflectionDielectric : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionDielectric)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3 & w, ScatteringEvent & se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3 & w, ScatteringEvent & se, RenderContext& rc) const override {
              const auto& params = *(ClosureTypeMicrofacetReflectionDielectric*)param;
-             se.AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, w));
+             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,MicroFacetReflection)(params, w));
          }
      };
 
      struct Surface_Closure_Hair : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeHair)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeHair*)param;
-             se.AddBxdf(SORT_MALLOC(Hair)(params, w));
+             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,Hair)(params, w));
          }
      };
 
      struct Surface_Closure_FourierBRDF : public Surface_Closure_Base {
         DEFINE_CLOSURETYPE(ClosureTypeFourier)
 
-        void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+        void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeFourier*)param;
-             se.AddBxdf(SORT_MALLOC(FourierBxdf)(params, w));
+             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,FourierBxdf)(params, w));
          }
      };
 
      struct Surface_Closure_MERL : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeMERL)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeMERL*)param;
-             se.AddBxdf(SORT_MALLOC(Merl)(params, w));
+             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,Merl)(params, w));
          }
      };
 
      struct Surface_Closure_Coat : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeCoat)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeCoat*)param;
-             ScatteringEvent* bottom = SORT_MALLOC(ScatteringEvent)(se.GetInteraction(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
-             ProcessSurfaceClosure((const ClosureTreeNodeBase*)params.closure, make_float3(1.0f, 1.0f, 1.0f), *bottom);
-             se.AddBxdf(SORT_MALLOC(Coat)(params, w, bottom));
+             ScatteringEvent* bottom = SORT_MALLOC_PROXY(rc.m_memory_arena,ScatteringEvent)(se.GetInteraction(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
+             ProcessSurfaceClosure((const ClosureTreeNodeBase*)params.closure, make_float3(1.0f, 1.0f, 1.0f), *bottom, rc);
+             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,Coat)(params, w, bottom));
          }
      };
 
      struct Surface_Closure_DoubleSided : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeDoubleSided)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3 & w, ScatteringEvent & se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3 & w, ScatteringEvent & se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeDoubleSided*)param;
-             ScatteringEvent* se0 = SORT_MALLOC(ScatteringEvent)(se.GetInteraction(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
-             ScatteringEvent* se1 = SORT_MALLOC(ScatteringEvent)(se.GetInteraction(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
-             ProcessSurfaceClosure((const ClosureTreeNodeBase*)params.closure0, make_float3(1.0f, 1.0f, 1.0f), *se0);
-             ProcessSurfaceClosure((const ClosureTreeNodeBase*)params.closure1, make_float3(1.0f, 1.0f, 1.0f), *se1);
-             se.AddBxdf(SORT_MALLOC(DoubleSided)(se0, se1, w));
+             ScatteringEvent* se0 = SORT_MALLOC_PROXY(rc.m_memory_arena,ScatteringEvent)(se.GetInteraction(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
+             ScatteringEvent* se1 = SORT_MALLOC_PROXY(rc.m_memory_arena,ScatteringEvent)(se.GetInteraction(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
+             ProcessSurfaceClosure((const ClosureTreeNodeBase*)params.closure0, make_float3(1.0f, 1.0f, 1.0f), *se0, rc);
+             ProcessSurfaceClosure((const ClosureTreeNodeBase*)params.closure1, make_float3(1.0f, 1.0f, 1.0f), *se1, rc);
+             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,DoubleSided)(se0, se1, w));
          }
      };
 
      struct Surface_Closure_DistributionBRDF : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeDistributionBRDF)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeDistributionBRDF*)param;
-             se.AddBxdf(SORT_MALLOC(DistributionBRDF)(params, w));
+             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,DistributionBRDF)(params, w));
          }
      };
 
      struct Surface_Closure_Fabric : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeFabric)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeFabric*)param;
-             se.AddBxdf(SORT_MALLOC(Fabric)(params, w));
+             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,Fabric)(params, w));
          }
      };
 
      struct Surface_Closure_SSS : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeSSS)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3 & w, ScatteringEvent & se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3 & w, ScatteringEvent & se, RenderContext& rc) const override {
              const auto& params = *(ClosureTypeSSS*)param;
              if(is_tsl_color_black(params.base_color))
                  return;
@@ -470,18 +471,18 @@ namespace {
 
                  const auto bssrdf_pdf = bssrdf_channel_weight / total_channel_weight;
                  if (!is_tsl_color_black(mfp) && !is_tsl_color_black(sssBaseColor))
-                     se.AddBssrdf(SORT_MALLOC(DisneyBssrdf)(&se.GetInteraction(), sssBaseColor, mfp, weight, pdf_weight * bssrdf_pdf ));
+                     se.AddBssrdf(SORT_MALLOC_PROXY(rc.m_memory_arena,DisneyBssrdf)(&se.GetInteraction(), sssBaseColor, mfp, weight, pdf_weight * bssrdf_pdf ));
 
                  if (addExtraLambert && !is_tsl_color_black(baseColor))
-                     se.AddBxdf(SORT_MALLOC(Lambert)(baseColor, weight, pdf_weight * ( 1.0f - bssrdf_pdf ), params.normal));
+                     se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,Lambert)(baseColor, weight, pdf_weight * ( 1.0f - bssrdf_pdf ), params.normal));
  #else
                  if(is_tsl_color_black(params.scatter_distance))
-                    se.AddBxdf(SORT_MALLOC(Lambert)(params.base_color, weight, params.normal));
+                    se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,Lambert)(params.base_color, weight, params.normal));
                  else
-                    se.AddBssrdf(SORT_MALLOC(DisneyBssrdf)(&se.GetInteraction(), params, weight ));
+                    se.AddBssrdf(SORT_MALLOC_PROXY(rc.m_memory_arena,DisneyBssrdf)(&se.GetInteraction(), params, weight ));
  #endif
              }else{
-                 se.AddBxdf(SORT_MALLOC(Lambert)(params.base_color, weight , params.normal));
+                 se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,Lambert)(params.base_color, weight , params.normal));
              }
          }
      };
@@ -489,9 +490,9 @@ namespace {
      struct Surface_Closure_Transparent : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeTransparent)
 
-         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeTransparent*)param;
-             se.AddBxdf(SORT_MALLOC(Transparent)(params, w));
+             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,Transparent)(params, w));
          }
 
          Spectrum EvaluateOpacity(const ClosureParamPtr param, const float3& w) const override{
@@ -504,10 +505,10 @@ namespace {
      struct Volume_Closure_Absorption : public Volume_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeAbsorption)
 
-         void Process(const ClosureParamPtr param, const float3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) const override {
+         void Process(const ClosureParamPtr param, const float3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh, RenderContext& rc) const override {
              if (SE_ENTERING == flag) {
                  const auto& params = *(const ClosureTypeAbsorption*)param;
-                 ms.AddMedium(SORT_MALLOC(AbsorptionMedium)(params, material));
+                 ms.AddMedium(SORT_MALLOC_PROXY(rc.m_memory_arena, AbsorptionMedium)(params, material));
              } else if (SE_LEAVING == flag) {
                  ms.RemoveMedium(material->GetUniqueID());
              }
@@ -517,10 +518,10 @@ namespace {
      struct Volume_Closure_Homogeneous : public Volume_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeHomogeneous)
 
-         void Process(const ClosureParamPtr param, const float3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) const override {
+         void Process(const ClosureParamPtr param, const float3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh, RenderContext& rc) const override {
              if (SE_ENTERING == flag) {
                  const auto& params = *(const ClosureTypeHomogeneous*)param;
-                 ms.AddMedium(SORT_MALLOC(HomogeneousMedium)(params, material));
+                 ms.AddMedium(SORT_MALLOC_PROXY(rc.m_memory_arena, HomogeneousMedium)(params, material));
              } else if (SE_LEAVING == flag) {
                  ms.RemoveMedium(material->GetUniqueID());
              }
@@ -530,9 +531,9 @@ namespace {
      struct Volume_Closure_Heterogeneous : public Volume_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeHeterogenous)
 
-         void Process(const ClosureParamPtr param, const float3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) const override {
+         void Process(const ClosureParamPtr param, const float3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh, RenderContext& rc) const override {
              if (SE_ENTERING == flag)
-                 ms.AddMedium(SORT_MALLOC(HeterogenousMedium)(material, mesh));
+                 ms.AddMedium(SORT_MALLOC_PROXY(rc.m_memory_arena, HeterogenousMedium)(material, mesh));
              else if (SE_LEAVING == flag)
                  ms.RemoveMedium(material->GetUniqueID());
          }
@@ -555,7 +556,7 @@ void RegisterClosures() {
 #undef CLOSURE_ACTION
 }
 
-void ProcessSurfaceClosure(const ClosureTreeNodeBase* closure, const float3& w, ScatteringEvent& se) {
+void ProcessSurfaceClosure(const ClosureTreeNodeBase* closure, const float3& w, ScatteringEvent& se, RenderContext& rc) {
     if (!closure)
         return;
 
@@ -563,25 +564,25 @@ void ProcessSurfaceClosure(const ClosureTreeNodeBase* closure, const float3& w, 
         case Tsl_Namespace::CLOSURE_ADD:
             {
                 const ClosureTreeNodeAdd* closure_add = (const ClosureTreeNodeAdd*)closure;
-                ProcessSurfaceClosure(closure_add->m_closure0, w, se);
-                ProcessSurfaceClosure(closure_add->m_closure1, w, se);
+                ProcessSurfaceClosure(closure_add->m_closure0, w, se, rc);
+                ProcessSurfaceClosure(closure_add->m_closure1, w, se, rc);
             }
             break;
         case Tsl_Namespace::CLOSURE_MUL:
             {
                 const ClosureTreeNodeMul* closure_mul = (const ClosureTreeNodeMul*)closure;
                 const float3 weight = make_float3(w.x * closure_mul->m_weight, w.y * closure_mul->m_weight, w.z * closure_mul->m_weight);
-                ProcessSurfaceClosure(closure_mul->m_closure, weight, se);
+                ProcessSurfaceClosure(closure_mul->m_closure, weight, se, rc);
             }
             break;
         default:
             auto closure_base = getSurfaceClosureBase(closure->m_id);
-            closure_base->Process(closure->m_params, w, se);
+            closure_base->Process(closure->m_params, w, se, rc);
             break;
     }
 }
 
-void ProcessVolumeClosure(const ClosureTreeNodeBase* closure, const float3& w, MediumStack& mediumStack, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) {
+void ProcessVolumeClosure(const ClosureTreeNodeBase* closure, const float3& w, MediumStack& mediumStack, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh, RenderContext& rc) {
     if (!closure)
         return;
 
@@ -593,7 +594,7 @@ void ProcessVolumeClosure(const ClosureTreeNodeBase* closure, const float3& w, M
             break;
         default: {
             auto volume_closure = getVolumeClosureBase(closure->m_id);
-            volume_closure->Process(closure->m_params, w, mediumStack, flag, material, mesh);
+            volume_closure->Process(closure->m_params, w, mediumStack, flag, material, mesh, rc);
         }
     }
 }

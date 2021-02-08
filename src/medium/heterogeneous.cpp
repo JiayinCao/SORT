@@ -18,6 +18,7 @@
 #include "heterogeneous.h"
 #include "core/rand.h"
 #include "core/memory.h"
+#include "core/render_context.h"
 #include "material/material.h"
 #include "phasefunction.h"
 
@@ -60,7 +61,7 @@ Spectrum HeterogenousMedium::Tr(const Ray& ray, const float max_t) const {
     return exponent.Exp();
 }
 
-Spectrum HeterogenousMedium::Sample(const Ray& ray, const float max_t, MediumInteraction*& mi, Spectrum& emission) const {
+Spectrum HeterogenousMedium::Sample(const Ray& ray, const float max_t, MediumInteraction*& mi, Spectrum& emission, RenderContext& rc) const {
     // Distance Sample, Jan Novak
     // https://cs.dartmouth.edu/~wjarosz/publications/novak18monte-slides-3-distance-sampling.pdf
 
@@ -101,9 +102,9 @@ Spectrum HeterogenousMedium::Sample(const Ray& ray, const float max_t, MediumInt
             // sample a medium and scatter the ray
             const auto new_dt = -log(1.0f - r) / extinction[ch];
 
-            mi = SORT_MALLOC(MediumInteraction)();
+            mi = SORT_MALLOC_PROXY(rc.m_memory_arena, MediumInteraction)();
             mi->intersect = ray(t + new_dt);
-            mi->phaseFunction = SORT_MALLOC(HenyeyGreenstein)(ms.anisotropy);
+            mi->phaseFunction = SORT_MALLOC_PROXY(rc.m_memory_arena, HenyeyGreenstein)(ms.anisotropy);
             
             const auto new_exponent = -new_dt * extinction;
             const auto new_beam_transmitancy = new_exponent.Exp();

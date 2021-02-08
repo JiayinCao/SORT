@@ -53,8 +53,8 @@ public:
     //! @ms             Medium stack during shadow evaluation. Medium aware integrator needs 
     //!                 to pass non-empty pointer.
     //! @return         The attenuation along the ray.
-    Spectrum    GetAttenuation( MediumStack* ms = nullptr ) const {
-        return m_scene.GetAttenuation( ray , ms );
+    Spectrum    GetAttenuation( RenderContext& rc, MediumStack* ms = nullptr ) const {
+        return m_scene.GetAttenuation( ray , rc, ms );
     }
 #endif
 

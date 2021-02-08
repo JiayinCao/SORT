@@ -141,7 +141,7 @@ public:
     //! @param  po          Extant position.
     //! @param  inter       Incident intersection sampled.
     //! @param  pdf         The pdf of sampling this bssrdf among all bssrdfs.
-    void        Sample_BSSRDF( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter , float& pdf ) const;
+    void        Sample_BSSRDF( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter , float& pdf , RenderContext& rc) const;
 
 private:
     const Bxdf*         m_bxdfs[SE_MAX_BXDF_COUNT]      = { nullptr };     /**< All bsdfs in the scattering event. */

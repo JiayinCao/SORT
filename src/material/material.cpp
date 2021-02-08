@@ -240,22 +240,22 @@ void Material::Serialize(IStreamBase& stream){
     stream >> m_volumeStepCnt;
 }
 
-void Material::UpdateScatteringEvent( ScatteringEvent& se ) const {
+void Material::UpdateScatteringEvent( ScatteringEvent& se, RenderContext& rc ) const {
     // all lambert surfaces if the render is in no material mode.
     if (UNLIKELY(g_noMaterial || ( !m_surface_shader_valid && !m_special_transparent ))) {
-        se.AddBxdf(SORT_MALLOC(Lambert)(WHITE_SPECTRUM, FULL_WEIGHT, DIR_UP));
+        se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena, Lambert)(WHITE_SPECTRUM, FULL_WEIGHT, DIR_UP));
         return;
     }
 
     if( m_surface_shader_valid )
-        ExecuteSurfaceShader(m_surface_shader.get() , se );
+        ExecuteSurfaceShader(m_surface_shader.get() , se , rc);
     else if( m_special_transparent )
-        se.AddBxdf(SORT_MALLOC(Transparent)());
+        se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena, Transparent)());
 }
 
-void Material::UpdateMediumStack( const MediumInteraction& mi , const SE_Interaction flag , MediumStack& ms ) const {
+void Material::UpdateMediumStack( const MediumInteraction& mi , const SE_Interaction flag , MediumStack& ms, RenderContext& rc ) const {
     if (m_volume_shader_valid)
-        ExecuteVolumeShader(m_volume_shader.get(), mi, ms, flag, this);
+        ExecuteVolumeShader(m_volume_shader.get(), mi, ms, flag, this, rc);
 }
 
 void Material::EvaluateMediumSample(const MediumInteraction& mi, MediumSample& ms) const {
@@ -263,12 +263,12 @@ void Material::EvaluateMediumSample(const MediumInteraction& mi, MediumSample& m
         EvaluateVolumeSample(m_volume_shader.get(), mi, ms);
 }
 
-void MaterialProxy::UpdateScatteringEvent(ScatteringEvent& se) const {
-    return m_material.UpdateScatteringEvent(se);
+void MaterialProxy::UpdateScatteringEvent(ScatteringEvent& se, RenderContext& rc) const {
+    return m_material.UpdateScatteringEvent(se, rc);
 }
 
-void MaterialProxy::UpdateMediumStack(const MediumInteraction& mi, const SE_Interaction flag, MediumStack& ms) const {
-    return m_material.UpdateMediumStack(mi, flag, ms);
+void MaterialProxy::UpdateMediumStack(const MediumInteraction& mi, const SE_Interaction flag, MediumStack& ms, RenderContext& rc) const {
+    return m_material.UpdateMediumStack(mi, flag, ms, rc);
 }
 
 void MaterialProxy::EvaluateMediumSample(const MediumInteraction& mi, MediumSample& ms) const {

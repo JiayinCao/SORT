@@ -25,6 +25,10 @@
 #include "sampler/random.h"
 #include "medium/medium.h"
 #include "core/display_mgr.h"
+#include "core/render_context.h"
+
+// this will be replaced with a render context pool eventually once the new job system is used.
+thread_local RenderContext g_render_context;
 
 std::atomic<int> g_render_task_cnt = 0;
 
@@ -38,6 +42,12 @@ Render_Task::Render_Task(const Vector2i& ori , const Vector2i& size , const Scen
 }
 
 void Render_Task::Execute(){
+    if(UNLIKELY(!g_render_context.IsInitialized()))
+        g_render_context.Init();
+
+    // make sure to reset so that resources can be reused.
+    g_render_context.Reset();
+
     if(IS_PTR_INVALID(g_integrator))
         return;
 
@@ -145,7 +155,7 @@ void Render_Task::Execute(){
                 // generate rays
                 auto r = camera->GenerateRay( (float)j , (float)i , m_pixelSamples[k] );
                 // accumulate the radiance
-                auto li = g_integrator->Li( r , m_pixelSamples[k] , m_scene );
+                auto li = g_integrator->Li( r , m_pixelSamples[k] , m_scene , g_render_context);
                 if( g_clammping > 0.0f )
                     li = li.Clamp( 0.0f , g_clammping );
                 
@@ -192,5 +202,5 @@ void Render_Task::Execute(){
 }
 
 void PreRender_Task::Execute(){
-    g_integrator->PreProcess(m_scene);
+    g_integrator->PreProcess(m_scene, g_render_context);
 }

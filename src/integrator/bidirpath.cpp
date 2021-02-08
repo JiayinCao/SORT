@@ -32,7 +32,7 @@ SORT_STATS_COUNTER("Bi-directional Path Tracing", "Primary Ray Count" , sPrimary
 SORT_STATS_AVG_COUNT("Bi-directional Path Tracing", "Average Path Length Starting from Eye", sTotalLengthPathFromEye , sPrimaryRayCount);            // This also counts the case where ray hits sky
 SORT_STATS_AVG_COUNT("Bi-directional Path Tracing", "Average Path Length Starting from Lights", sTotalLengthPathFromLight , sPrimaryRayCount);       // This also counts the case where ray hits sky
 
-Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& scene ) const{
+Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& scene, RenderContext& rc) const{
     SORT_STATS(++sPrimaryRayCount);
 
     // pick a light randomly
@@ -80,8 +80,8 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
         vert.n = vert.inter.normal;
         vert.wi = -wi.m_Dir;
 
-        vert.se = SORT_MALLOC(ScatteringEvent)(vert.inter, SE_EVALUATE_ALL_NO_SSS);
-        vert.inter.primitive->GetMaterial()->UpdateScatteringEvent(*vert.se);
+        vert.se = SORT_MALLOC_PROXY(rc.m_memory_arena, ScatteringEvent)(vert.inter, SE_EVALUATE_ALL_NO_SSS);
+        vert.inter.primitive->GetMaterial()->UpdateScatteringEvent(*vert.se, rc);
 
         vert.throughput = throughput;
         vert.vcm = vcm;
@@ -93,7 +93,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
 
         //-----------------------------------------------------------------------------------------------------
         // Path evaluation: light tracing
-        _ConnectCamera( vert , (unsigned)light_path.size() , light , scene );
+        _ConnectCamera( vert , (unsigned)light_path.size() , light , scene, rc );
 
         // russian roulette
         if (sort_canonical() > rr)
@@ -181,8 +181,8 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
         vert.n = vert.inter.normal;
         vert.wi = -wi.m_Dir;
 
-        vert.se = SORT_MALLOC(ScatteringEvent)( vert.inter , SE_EVALUATE_ALL_NO_SSS );
-        vert.inter.primitive->GetMaterial()->UpdateScatteringEvent(*vert.se);
+        vert.se = SORT_MALLOC_PROXY(rc.m_memory_arena, ScatteringEvent)( vert.inter , SE_EVALUATE_ALL_NO_SSS );
+        vert.inter.primitive->GetMaterial()->UpdateScatteringEvent(*vert.se, rc);
 
         vert.throughput = throughput;
         vert.vc = vc;
@@ -191,12 +191,12 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
 
         //-----------------------------------------------------------------------------------------------------
         // Path evaluation: connect light sample first
-        li += _ConnectLight(vert, light, scene) / pdf;
+        li += _ConnectLight(vert, light, scene, rc) / pdf;
 
         //-----------------------------------------------------------------------------------------------------
         // Path evaluation: connect vertices
         for (unsigned j = 0; j < lps; ++j)
-            li += _ConnectVertices( light_path[j] , vert , light , scene );
+            li += _ConnectVertices( light_path[j] , vert , light , scene , rc);
 
         ++light_path_len;
 
@@ -233,7 +233,7 @@ void BidirPathTracing::RequestSample( Sampler* sampler , PixelSample* ps , unsig
 }
 
 // connect vertices
-Spectrum BidirPathTracing::_ConnectVertices( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 , const Light* light , const Scene& scene ) const{
+Spectrum BidirPathTracing::_ConnectVertices( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 , const Light* light , const Scene& scene , RenderContext& rc ) const{
     if( p0.depth + p1.depth >= max_recursive_depth )
         return 0.0f;
 
@@ -271,13 +271,13 @@ Spectrum BidirPathTracing::_ConnectVertices( const BDPT_Vertex& p0 , const BDPT_
         return 0.0f;
     return li;
 #else
-    const auto attenuation = visibility.GetAttenuation();
+    const auto attenuation = visibility.GetAttenuation(rc);
     return attenuation.IsBlack() ? Spectrum( 0.0f ) : li * attenuation;
 #endif
 }
 
 // connect light sample
-Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const Light* light , const Scene& scene ) const{
+Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const Light* light , const Scene& scene , RenderContext& rc) const{
     if( eye_vertex.depth >= max_recursive_depth )
         return 0.0f;
 
@@ -303,7 +303,7 @@ Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const L
     if( visibility.IsVisible() == false )
         return 0.0f;
 #else
-    const auto attenuation = visibility.GetAttenuation();
+    const auto attenuation = visibility.GetAttenuation(rc);
     if( attenuation.IsBlack() )
         return 0.0f;
 #endif
@@ -323,7 +323,7 @@ Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const L
 #endif
 }
 
-void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len , const Light* light , const Scene& scene ) const{
+void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len , const Light* light , const Scene& scene , RenderContext& rc) const{
     if( light_vertex.depth > max_recursive_depth )
         return;
 
@@ -358,7 +358,7 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
     if( visibility.IsVisible() == false )
         return;
 #else
-    const auto attenuation = visibility.GetAttenuation();
+    const auto attenuation = visibility.GetAttenuation(rc);
     if( attenuation.IsBlack() )
         return;
 #endif

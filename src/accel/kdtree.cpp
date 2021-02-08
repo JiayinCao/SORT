@@ -309,7 +309,7 @@ bool KDTree::traverse( const Kd_Node* node , const Ray& ray , SurfaceInteraction
     return inter;
 }
 
-void KDTree::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const StringID matID ) const{
+void KDTree::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , RenderContext& rc, const StringID matID ) const{
     SORT_PROFILE("Traverse KD-Tree");
     SORT_STATS(++sRayCount);
     
@@ -323,10 +323,10 @@ void KDTree::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , con
     if( fmin < 0.0f )
         return;
 
-    traverse( m_root.get() , ray , intersect , fmin , fmax , matID );
+    traverse( m_root.get() , ray , intersect , fmin , fmax , rc , matID );
 }
 
-void KDTree::traverse( const Kd_Node* node , const Ray& ray , BSSRDFIntersections& intersect , float fmin , float fmax , const StringID matID ) const{
+void KDTree::traverse( const Kd_Node* node , const Ray& ray , BSSRDFIntersections& intersect , float fmin , float fmax , RenderContext& rc, const StringID matID ) const{
     static const auto       mask = 0x00000003u;
     static const auto       delta = 0.001f;
 
@@ -361,7 +361,7 @@ void KDTree::traverse( const Kd_Node* node , const Ray& ray , BSSRDFIntersection
             const auto intersected = primitive->GetIntersect( ray , &intersection );
             if( intersected ){
                 if( intersect.cnt < TOTAL_SSS_INTERSECTION_CNT ){
-                    intersect.intersections[intersect.cnt] = SORT_MALLOC(BSSRDFIntersection)();
+                    intersect.intersections[intersect.cnt] = SORT_MALLOC_PROXY(rc.m_memory_arena,BSSRDFIntersection)();
                     intersect.intersections[intersect.cnt++]->intersection = intersection;
                 }else{
                     auto picked_i = -1;
@@ -396,9 +396,9 @@ void KDTree::traverse( const Kd_Node* node , const Ray& ray , BSSRDFIntersection
         std::swap(first, second);
 
     if( t > fmin - delta )
-        traverse( first , ray , intersect , fmin , std::min( fmax , t ) , matID );
+        traverse( first , ray , intersect , fmin , std::min( fmax , t ) , rc , matID );
     if( ( fmax + delta ) > t )
-        traverse( second , ray , intersect , std::max( t , fmin ) , fmax , matID );
+        traverse( second , ray , intersect , std::max( t , fmin ) , fmax , rc , matID );
 }
 
 std::unique_ptr<Accelerator> KDTree::Clone() const {

@@ -28,6 +28,7 @@
 #include "entity/entity.h"
 #include "core/primitive.h"
 #include "core/samplemethod.h"
+#include "core/render_context.h"
 
 class Light;
 struct BSSRDFIntersections;
@@ -73,14 +74,14 @@ public:
     //! @param  r           The ray to be tested.
     //! @param  ms          The medium stack to be passed in. Medium aware integrator needs to pass non-empty pointer.
     //! @return             The occlusion along the ray.
-    Spectrum    GetAttenuation( const Ray& r , MediumStack* ms = nullptr ) const;
+    Spectrum    GetAttenuation( const Ray& r , RenderContext& rc , MediumStack* ms = nullptr ) const;
 #endif
 
 	//! @brief	Restore the medium stack at a specific point.
 	//!
 	//! @param	p			The point where the evaluation is done.
 	//! @param	ms			The medium stack to be populated.
-	void		RestoreMediumStack( const Point& p , MediumStack& ms ) const ;
+	void		RestoreMediumStack( const Point& p , RenderContext& rc , MediumStack& ms ) const ;
 
     //! @brief Get multiple intersections between the ray and the primitive set using spatial data structure.
     //!
@@ -92,7 +93,7 @@ public:
     //! @param  r           The input ray to be tested.
     //! @param  intersect   The intersection result that holds all intersection.
     //! @param  matID       We are only interested in intersection with the same material, whose material id should be set to matID.
-    void    GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID = INVALID_SID ) const;
+    void    GetIntersect( const Ray& r , BSSRDFIntersections& intersect , RenderContext& rc, const StringID matID = INVALID_SID ) const;
 
     // get light
     const Light* GetLight( unsigned i ) const{

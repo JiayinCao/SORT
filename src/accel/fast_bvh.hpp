@@ -653,7 +653,7 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 }
 #endif
 
-void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const StringID matID ) const{
+void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , RenderContext& rc, const StringID matID ) const{
     // std::stack is by no means an option here due to its overhead under the hood.
     static thread_local std::unique_ptr<std::pair<Fbvh_Node*, float>[]> bvh_stack = nullptr;
     if ( UNLIKELY(IS_PTR_INVALID(bvh_stack) ) )
@@ -700,7 +700,7 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
             // Line is usually used for hair, which has its own hair shader.
             // Triangle is the only major primitive that has SSS.
             for ( auto i = 0u ; i < node->tri_cnt ; ++i )
-                intersectTriangleMulti_SIMD(ray, simd_ray, node->tri_list[i] , matID, intersect);
+                intersectTriangleMulti_SIMD(ray, simd_ray, node->tri_list[i] , matID, rc, intersect);
             SORT_STATS(sIntersectionTest += node->tri_cnt);
             continue;
         }
@@ -772,7 +772,7 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
                 const auto intersected = m_bvhpri[i].primitive->GetIntersect(ray, &intersection);
                 if (intersected) {
                     if (intersect.cnt < TOTAL_SSS_INTERSECTION_CNT) {
-                        intersect.intersections[intersect.cnt] = SORT_MALLOC(BSSRDFIntersection)();
+                        intersect.intersections[intersect.cnt] = SORT_MALLOC_PROXY(rc.m_memory_arena,BSSRDFIntersection)();
                         intersect.intersections[intersect.cnt++]->intersection = intersection;
                     }
                     else {

@@ -71,7 +71,7 @@ public:
     //! @param  r           The input ray to be tested.
     //! @param  intersect   The intersection result that holds all intersection.
     //! @param  matID       We are only interested in intersection with the same material, whose material id should be set to matID.
-    void GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID = INVALID_SID ) const override;
+    void GetIntersect( const Ray& r , BSSRDFIntersections& intersect , RenderContext& rc, const StringID matID = INVALID_SID ) const override;
 
     //! Build uniform grid structure in O(N).
     //!
@@ -136,7 +136,7 @@ private:
     //! @param nextT        The intersected position of the ray and the next to-be-traversed voxel along
     //!                     the ray.
     //! @param matID        Material ID to avoid if it is not invalid.
-    void traverse( const Ray& r , BSSRDFIntersections& intersect , unsigned voxelId , float nextT , const StringID matID ) const;
+    void traverse( const Ray& r , BSSRDFIntersections& intersect , unsigned voxelId , float nextT, RenderContext& rc , const StringID matID ) const;
 
     SORT_STATS_ENABLE( "Spatial-Structure(UniformGrid)" )
 };
