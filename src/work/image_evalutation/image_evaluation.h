@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "../job.h"
+#include "../work.h"
 
 //! @brief  Generating an image using ray tracing algorithms.
 /**
@@ -25,24 +25,24 @@
  * spawning render tasks for image tiles, storing the results to an image and send it to display server
  * through sockets if needed.
  */
-class ImageEvaluation : public Job {
+class ImageEvaluation : public Work {
 public:
-    DEFINE_RTTI(ImageEvaluation, Job);
+    DEFINE_RTTI(ImageEvaluation, Work);
 
-    //! @brief  Start job evaluation.
+    //! @brief  Start work evaluation.
     //!
     //! @param stream       The stream as input.
     void    StartRunning(int argc, char** argv, IStreamBase& stream) override;
 
-    //! @brief  Wait for the job evaluation to be done.
+    //! @brief  Wait for the work evaluation to be done.
     //!
     //! Ideally, if the task system supports it, it should take over the ownership of the main thread 
     //! and converting it to a worker fiber. So that the rest of the system has no concept of main thread
     //! at all. However, this doesn't seem to be supported in marl. I will have to workaround it to turn
     //! the main thread into some sort of 'background' thread that gains lower priority.
-    //! This function will work synchronizely and once it returns the control back, the whole job is considered
+    //! This function will work synchronizely and once it returns the control back, the whole work is considered
     //! done.
-    int     WaitForJobToBeDone() override;
+    int     WaitForWorkToBeDone() override;
 
 private:
 };

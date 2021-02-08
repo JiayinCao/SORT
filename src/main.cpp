@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
     // I need to investigate how TEV doesn't require this
     if(g_blenderMode)
     #ifdef SORT_IN_WINDOWS
-        Sleep(1000);
+        Sleep(1);
     #else
         sleep(1);
     #endif

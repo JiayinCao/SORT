@@ -15,23 +15,16 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#pragma once
+#include "thirdparty/gtest/gtest.h"
+#include "unit_tests.h"
 
-#include "../job.h"
+void UnitTests::StartRunning(int argc, char** argv, IStreamBase& stream) {
+    // we don't care the about the stream anymore, which is probably not even valid depending on how we get here
+    // simply run all unit tests and see what happens.
+    ::testing::InitGoogleTest(&argc, argv);
+    m_result = RUN_ALL_TESTS();
+}
 
-//! @brief  This is a job for unit testing.
-class UnitTests : public Job {
-public:
-    DEFINE_RTTI(UnitTests, Job);
-
-    //! @brief  Start job evaluation.
-    //!
-    //! @param stream       The stream as input.
-    void    StartRunning(int argc, char** argv, IStreamBase& stream) override;
-
-    //! @brief  Wait for all the unit tests to be done.
-    int     WaitForJobToBeDone() override;
-
-private:
-    int     m_result = 0;
-};
+int UnitTests::WaitForWorkToBeDone() {
+    return m_result;
+}

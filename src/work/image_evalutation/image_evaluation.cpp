@@ -70,6 +70,6 @@ void ImageEvaluation::StartRunning(int argc, char** argv, IStreamBase& stream) {
     }
 }
 
-int ImageEvaluation::WaitForJobToBeDone() {
+int ImageEvaluation::WaitForWorkToBeDone() {
     return 0;
 }

@@ -51,7 +51,7 @@ elif sys.platform == 'darwin':
     str = decoded_str.decode('utf-8').rstrip()
     if str == 'Apple Silicon':
         print('Sycning arm version marl...')
-        sync_dep_utility('marl', 'https://raw.githubusercontent.com/JiayinCao/SORT/dependencies/Master/win/marl.zip')
+        sync_dep_utility('marl', 'https://raw.githubusercontent.com/JiayinCao/SORT/dependencies/Master/mac/marl_arm64.zip')
     elif str == 'x86_64':
         print('Syncing x86_64 version marl...')
         sync_dep_utility('marl', 'https://raw.githubusercontent.com/JiayinCao/SORT/dependencies/Master/mac/marl_intel.zip')

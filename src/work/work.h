@@ -20,35 +20,35 @@
 #include "core/rtti.h"
 #include "stream/stream.h"
 
-//! @brief  A job to be evaluated.
+//! @brief  Work to be evaluated.
 /**
- * A job is just a set of evaluations to be performed. Commonly, it will parse some sort of inputs,
+ * Work is just a set of evaluations to be performed. Commonly, it will parse some sort of inputs,
  * do some ray tracing evaluation and then store the results to somewhere.
  *
  * This is a new abstractuion I added in my renderer to isolate all image generation logic so that
  * the renderer could be used in other applications like light probe evaluation, light map generation,
  * instead of just image generation.
  *
- * By the time this code was written, only one single instance of job is supposed to be running each time
+ * By the time this code was written, only one single instance of work is supposed to be running each time
  * SORT gets run. But this could be extended for other purposes in the future to allow more possibilities.
  */
-class Job {
+class Work {
 public:
     //! @brief  Make sure the destructor is virtual
-    ~Job() = default;
+    ~Work() = default;
 
-    //! @brief  Start job evaluation.
+    //! @brief  Start work evaluation.
     //!
     //! @param stream       The stream as input.
     virtual void    StartRunning(int argc, char** argv, IStreamBase& stream) = 0;
 
-    //! @brief  Wait for the job evaluation to be done.
+    //! @brief  Wait for the work evaluation to be done.
     //!
     //! Ideally, if the task system supports it, it should take over the ownership of the main thread 
     //! and converting it to a worker fiber. So that the rest of the system has no concept of main thread
     //! at all. However, this doesn't seem to be supported in marl. I will have to workaround it to turn
     //! the main thread into some sort of 'background' thread that gains lower priority.
-    //! This function will work synchronizely and once it returns the control back, the whole job is considered
+    //! This function will work synchronizely and once it returns the control back, the whole work is considered
     //! done.
-    virtual int     WaitForJobToBeDone() = 0;
+    virtual int     WaitForWorkToBeDone() = 0;
 };
