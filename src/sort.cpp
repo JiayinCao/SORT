@@ -25,6 +25,7 @@
 #include "stream/fstream.h"
 #include "material/tsl_system.h"
 #include "old_task/display_task.h"
+#include "job/unit_tests/unit_tests.h"
 
 using namespace old_task;
 
@@ -115,12 +116,16 @@ int RunSORT( int argc , char** argv ){
         slog(INFO, GENERAL, "Profiling system is %s.", SORT_PROFILE_ISENABLED ? "enabled" : "disabled");
     }
 
+    std::unique_ptr<Job> job;
+
     // Run in unit test mode if required.
     if( g_unitTestMode ){
-        ::testing::InitGoogleTest(&argc, argv);
-        auto ret = RUN_ALL_TESTS();
-        slog( INFO , GENERAL , ( ret ? "There are broken tests." : "All tests are passed." ) ) ;
-        return ret;
+        job = std::make_unique<UnitTests>();
+
+        IMemoryStream dummy_stream(0,0);
+        job->StartRunning(argc, argv, dummy_stream);
+
+        return job->WaitForJobToBeDone();
     }
 
     // Load the global configuration from stream
