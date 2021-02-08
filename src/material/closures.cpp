@@ -165,7 +165,7 @@ namespace {
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              ClosureTypeLambert* bxdf_param = (ClosureTypeLambert*)param;
-             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena, Lambert)(rc, *bxdf_param, w));
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena, Lambert)(rc, *bxdf_param, w));
          }
      };
 
@@ -174,7 +174,7 @@ namespace {
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              ClosureTypeOrenNayar* bxdf_param = (ClosureTypeOrenNayar*)param;
-             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena, OrenNayar)(rc, *bxdf_param, w));
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena, OrenNayar)(rc, *bxdf_param, w));
          }
      };
 
@@ -231,18 +231,18 @@ namespace {
                  const auto bxdf_sampling_weight = DisneyBRDF::Evaluate_Sampling_Weight( params );
 
                  if( bxdf_sampling_weight > 0.0f )
-                     se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,DisneyBRDF)(rc, params, weight, bxdf_sampling_weight * sample_weight));
+                     se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,DisneyBRDF)(rc, params, weight, bxdf_sampling_weight * sample_weight));
 
                  const auto diffuseWeight = (Spectrum)( weight * (1.0f - params.metallic) * (1.0 - params.specTrans) );
                  if (!sssBaseColor.IsBlack() && bxdf_sampling_weight < 1.0f && !diffuseWeight.IsBlack() )
-                     se.AddBssrdf( SORT_MALLOC_PROXY(rc.m_memory_arena,DisneyBssrdf)(&se.GetInteraction(), sssBaseColor, params.scatterDistance, diffuseWeight , ( 1.0f - bxdf_sampling_weight ) * sample_weight * bssrdf_pdf ) );
+                     se.AddBssrdf( SORT_MALLOC(rc.m_memory_arena,DisneyBssrdf)(&se.GetInteraction(), sssBaseColor, params.scatterDistance, diffuseWeight , ( 1.0f - bxdf_sampling_weight ) * sample_weight * bssrdf_pdf ) );
 
  #ifdef SSS_REPLACE_WITH_LAMBERT
                  if (addExtraLambert && !is_tsl_color_black(baseColor))
-                     se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,Lambert)(rc, baseColor, diffuseWeight, ( 1.0f - bxdf_sampling_weight ) * sample_weight * ( 1.0f - bssrdf_pdf ) , params.normal));
+                     se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,Lambert)(rc, baseColor, diffuseWeight, ( 1.0f - bxdf_sampling_weight ) * sample_weight * ( 1.0f - bssrdf_pdf ) , params.normal));
  #endif
              }else{
-                 se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,DisneyBRDF)(rc, params, weight, sample_weight));
+                 se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,DisneyBRDF)(rc, params, weight, sample_weight));
              }
          }
      };
@@ -252,7 +252,7 @@ namespace {
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeMicrofacetReflectionGGX*)param;
-             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,MicroFacetReflection)(rc, params, w));
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,MicroFacetReflection)(rc, params, w));
          }
      };
 
@@ -261,7 +261,7 @@ namespace {
 
         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeMicrofacetReflectionBlinn*)param;
-             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,MicroFacetReflection)(rc, params, w));
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,MicroFacetReflection)(rc, params, w));
          }
      };
 
@@ -270,7 +270,7 @@ namespace {
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeMicrofacetReflectionBeckmann*)param;
-             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,MicroFacetReflection)(rc, params, w));
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,MicroFacetReflection)(rc, params, w));
          }
      };
 
@@ -279,7 +279,7 @@ namespace {
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeMicrofacetRefractionGGX*)param;
-             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,MicroFacetRefraction)(rc, params, w));
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,MicroFacetRefraction)(rc, params, w));
          }
      };
 
@@ -288,7 +288,7 @@ namespace {
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeMicrofacetRefractionBlinn*)param;
-             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,MicroFacetRefraction)(rc, params, w));
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,MicroFacetRefraction)(rc, params, w));
          }
      };
 
@@ -297,7 +297,7 @@ namespace {
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeMicrofacetRefractionBeckmann*)param;
-             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,MicroFacetRefraction)(rc, params, w));
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,MicroFacetRefraction)(rc, params, w));
          }
      };
 
@@ -306,7 +306,7 @@ namespace {
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(ClosureTypeAshikhmanShirley*)param;
-             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,AshikhmanShirley)(rc, params, w));
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,AshikhmanShirley)(rc, params, w));
          }
      };
 
@@ -315,7 +315,7 @@ namespace {
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(ClosureTypePhong*)param;
-             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,Phong)(rc, params, w));
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,Phong)(rc, params, w));
          }
      };
 
@@ -324,7 +324,7 @@ namespace {
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeLambertTransmission*)param;
-             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,LambertTransmission)(rc, params, w));
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,LambertTransmission)(rc, params, w));
          }
      };
 
@@ -333,7 +333,7 @@ namespace {
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(ClosureTypeMirror*)param;
-             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,MicroFacetReflection)(rc, params, w));
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,MicroFacetReflection)(rc, params, w));
          }
      };
 
@@ -342,7 +342,7 @@ namespace {
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(ClosureTypeDielectric*)param;
-             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,Dielectric)(rc, params, w));
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,Dielectric)(rc, params, w));
          }
      };
 
@@ -351,7 +351,7 @@ namespace {
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3 & w, ScatteringEvent & se, RenderContext& rc) const override {
              const auto& params = *(ClosureTypeMicrofacetReflectionDielectric*)param;
-             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,MicroFacetReflection)(rc, params, w));
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,MicroFacetReflection)(rc, params, w));
          }
      };
 
@@ -360,7 +360,7 @@ namespace {
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeHair*)param;
-             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,Hair)(rc, params, w));
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,Hair)(rc, params, w));
          }
      };
 
@@ -369,7 +369,7 @@ namespace {
 
         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeFourier*)param;
-             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,FourierBxdf)(rc, params, w));
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,FourierBxdf)(rc, params, w));
          }
      };
 
@@ -378,7 +378,7 @@ namespace {
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeMERL*)param;
-             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,Merl)(rc, params, w));
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,Merl)(rc, params, w));
          }
      };
 
@@ -387,9 +387,9 @@ namespace {
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeCoat*)param;
-             ScatteringEvent* bottom = SORT_MALLOC_PROXY(rc.m_memory_arena,ScatteringEvent)(se.GetInteraction(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
+             ScatteringEvent* bottom = SORT_MALLOC(rc.m_memory_arena,ScatteringEvent)(se.GetInteraction(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
              ProcessSurfaceClosure((const ClosureTreeNodeBase*)params.closure, make_float3(1.0f, 1.0f, 1.0f), *bottom, rc);
-             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,Coat)(rc, params, w, bottom));
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,Coat)(rc, params, w, bottom));
          }
      };
 
@@ -398,11 +398,11 @@ namespace {
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3 & w, ScatteringEvent & se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeDoubleSided*)param;
-             ScatteringEvent* se0 = SORT_MALLOC_PROXY(rc.m_memory_arena,ScatteringEvent)(se.GetInteraction(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
-             ScatteringEvent* se1 = SORT_MALLOC_PROXY(rc.m_memory_arena,ScatteringEvent)(se.GetInteraction(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
+             ScatteringEvent* se0 = SORT_MALLOC(rc.m_memory_arena,ScatteringEvent)(se.GetInteraction(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
+             ScatteringEvent* se1 = SORT_MALLOC(rc.m_memory_arena,ScatteringEvent)(se.GetInteraction(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
              ProcessSurfaceClosure((const ClosureTreeNodeBase*)params.closure0, make_float3(1.0f, 1.0f, 1.0f), *se0, rc);
              ProcessSurfaceClosure((const ClosureTreeNodeBase*)params.closure1, make_float3(1.0f, 1.0f, 1.0f), *se1, rc);
-             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,DoubleSided)(rc, se0, se1, w));
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,DoubleSided)(rc, se0, se1, w));
          }
      };
 
@@ -411,7 +411,7 @@ namespace {
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeDistributionBRDF*)param;
-             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,DistributionBRDF)(rc, params, w));
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,DistributionBRDF)(rc, params, w));
          }
      };
 
@@ -420,7 +420,7 @@ namespace {
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeFabric*)param;
-             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,Fabric)(rc, params, w));
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,Fabric)(rc, params, w));
          }
      };
 
@@ -471,18 +471,18 @@ namespace {
 
                  const auto bssrdf_pdf = bssrdf_channel_weight / total_channel_weight;
                  if (!is_tsl_color_black(mfp) && !is_tsl_color_black(sssBaseColor))
-                     se.AddBssrdf(SORT_MALLOC_PROXY(rc.m_memory_arena,DisneyBssrdf)(&se.GetInteraction(), sssBaseColor, mfp, weight, pdf_weight * bssrdf_pdf ));
+                     se.AddBssrdf(SORT_MALLOC(rc.m_memory_arena,DisneyBssrdf)(&se.GetInteraction(), sssBaseColor, mfp, weight, pdf_weight * bssrdf_pdf ));
 
                  if (addExtraLambert && !is_tsl_color_black(baseColor))
-                     se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,Lambert)(rc, baseColor, weight, pdf_weight * ( 1.0f - bssrdf_pdf ), params.normal));
+                     se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,Lambert)(rc, baseColor, weight, pdf_weight * ( 1.0f - bssrdf_pdf ), params.normal));
  #else
                  if(is_tsl_color_black(params.scatter_distance))
-                    se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,Lambert)(rc, params.base_color, weight, params.normal));
+                    se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,Lambert)(rc, params.base_color, weight, params.normal));
                  else
-                    se.AddBssrdf(SORT_MALLOC_PROXY(rc.m_memory_arena,DisneyBssrdf)(&se.GetInteraction(), params, weight ));
+                    se.AddBssrdf(SORT_MALLOC(rc.m_memory_arena,DisneyBssrdf)(&se.GetInteraction(), params, weight ));
  #endif
              }else{
-                 se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,Lambert)(rc, params.base_color, weight , params.normal));
+                 se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,Lambert)(rc, params.base_color, weight , params.normal));
              }
          }
      };
@@ -492,7 +492,7 @@ namespace {
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeTransparent*)param;
-             se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena,Transparent)(rc, params, w));
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,Transparent)(rc, params, w));
          }
 
          Spectrum EvaluateOpacity(const ClosureParamPtr param, const float3& w) const override{
@@ -508,7 +508,7 @@ namespace {
          void Process(const ClosureParamPtr param, const float3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh, RenderContext& rc) const override {
              if (SE_ENTERING == flag) {
                  const auto& params = *(const ClosureTypeAbsorption*)param;
-                 ms.AddMedium(SORT_MALLOC_PROXY(rc.m_memory_arena, AbsorptionMedium)(params, material));
+                 ms.AddMedium(SORT_MALLOC(rc.m_memory_arena, AbsorptionMedium)(params, material));
              } else if (SE_LEAVING == flag) {
                  ms.RemoveMedium(material->GetUniqueID());
              }
@@ -521,7 +521,7 @@ namespace {
          void Process(const ClosureParamPtr param, const float3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh, RenderContext& rc) const override {
              if (SE_ENTERING == flag) {
                  const auto& params = *(const ClosureTypeHomogeneous*)param;
-                 ms.AddMedium(SORT_MALLOC_PROXY(rc.m_memory_arena, HomogeneousMedium)(params, material));
+                 ms.AddMedium(SORT_MALLOC(rc.m_memory_arena, HomogeneousMedium)(params, material));
              } else if (SE_LEAVING == flag) {
                  ms.RemoveMedium(material->GetUniqueID());
              }
@@ -533,7 +533,7 @@ namespace {
 
          void Process(const ClosureParamPtr param, const float3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh, RenderContext& rc) const override {
              if (SE_ENTERING == flag)
-                 ms.AddMedium(SORT_MALLOC_PROXY(rc.m_memory_arena, HeterogenousMedium)(material, mesh));
+                 ms.AddMedium(SORT_MALLOC(rc.m_memory_arena, HeterogenousMedium)(material, mesh));
              else if (SE_LEAVING == flag)
                  ms.RemoveMedium(material->GetUniqueID());
          }

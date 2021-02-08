@@ -370,7 +370,7 @@ void UniGrid::traverse( const Ray& ray , BSSRDFIntersections& intersect , unsign
         const auto intersected = primitive->GetIntersect( ray , &intersection );
         if( intersected ){
             if( intersect.cnt < TOTAL_SSS_INTERSECTION_CNT ){
-                intersect.intersections[intersect.cnt] = SORT_MALLOC_PROXY(rc.m_memory_arena,BSSRDFIntersection)();
+                intersect.intersections[intersect.cnt] = SORT_MALLOC(rc.m_memory_arena,BSSRDFIntersection)();
                 intersect.intersections[intersect.cnt++]->intersection = intersection;
             }else{
                 auto picked_i = -1;

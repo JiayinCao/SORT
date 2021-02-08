@@ -434,7 +434,7 @@ SORT_FORCEINLINE void intersectTriangleMulti_SIMD(const Ray& ray, const Simd_Ray
             continue;
 
         if (intersections.cnt < TOTAL_SSS_INTERSECTION_CNT) {
-            intersections.intersections[intersections.cnt] = SORT_MALLOC_PROXY(rc.m_memory_arena, BSSRDFIntersection)();
+            intersections.intersections[intersections.cnt] = SORT_MALLOC(rc.m_memory_arena, BSSRDFIntersection)();
             setupIntersection(tri_simd, ray, t_simd, u_simd, v_simd, res_i, &intersections.intersections[intersections.cnt++]->intersection);
         } else {
             auto picked_i = -1;
@@ -462,7 +462,7 @@ SORT_FORCEINLINE void intersectTriangleMulti_SIMD(const Ray& ray, const Simd_Ray
         const auto intersected = primitive->GetIntersect(ray, &intersection);
         if (intersected) {
             if (intersections.cnt < TOTAL_SSS_INTERSECTION_CNT) {
-                intersections.intersections[intersections.cnt] = SORT_MALLOC_PROXY(rc.m_memory_arena, BSSRDFIntersection)();
+                intersections.intersections[intersections.cnt] = SORT_MALLOC(rc.m_memory_arena, BSSRDFIntersection)();
                 intersections.intersections[intersections.cnt++]->intersection = intersection;
             }
             else {

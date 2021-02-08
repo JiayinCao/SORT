@@ -80,7 +80,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
         vert.n = vert.inter.normal;
         vert.wi = -wi.m_Dir;
 
-        vert.se = SORT_MALLOC_PROXY(rc.m_memory_arena, ScatteringEvent)(vert.inter, SE_EVALUATE_ALL_NO_SSS);
+        vert.se = SORT_MALLOC(rc.m_memory_arena, ScatteringEvent)(vert.inter, SE_EVALUATE_ALL_NO_SSS);
         vert.inter.primitive->GetMaterial()->UpdateScatteringEvent(*vert.se, rc);
 
         vert.throughput = throughput;
@@ -181,7 +181,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
         vert.n = vert.inter.normal;
         vert.wi = -wi.m_Dir;
 
-        vert.se = SORT_MALLOC_PROXY(rc.m_memory_arena, ScatteringEvent)( vert.inter , SE_EVALUATE_ALL_NO_SSS );
+        vert.se = SORT_MALLOC(rc.m_memory_arena, ScatteringEvent)( vert.inter , SE_EVALUATE_ALL_NO_SSS );
         vert.inter.primitive->GetMaterial()->UpdateScatteringEvent(*vert.se, rc);
 
         vert.throughput = throughput;

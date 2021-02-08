@@ -44,9 +44,9 @@ Spectrum HomogeneousMedium::Sample( const Ray& ray , const float max_t , MediumI
 
     const auto sample_medium = d < max_t;
     if (sample_medium) {
-        mi = SORT_MALLOC_PROXY(rc.m_memory_arena, MediumInteraction)();
+        mi = SORT_MALLOC(rc.m_memory_arena, MediumInteraction)();
         mi->intersect = ray(d);
-        mi->phaseFunction = SORT_MALLOC_PROXY(rc.m_memory_arena, HenyeyGreenstein)(m_globalMediumSample.anisotropy);
+        mi->phaseFunction = SORT_MALLOC(rc.m_memory_arena, HenyeyGreenstein)(m_globalMediumSample.anisotropy);
     }
 
     const auto e = extinction * (-fmin( d , FLT_MAX ));

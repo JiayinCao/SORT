@@ -243,14 +243,14 @@ void Material::Serialize(IStreamBase& stream){
 void Material::UpdateScatteringEvent( ScatteringEvent& se, RenderContext& rc ) const {
     // all lambert surfaces if the render is in no material mode.
     if (UNLIKELY(g_noMaterial || ( !m_surface_shader_valid && !m_special_transparent ))) {
-        se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena, Lambert)(rc, WHITE_SPECTRUM, FULL_WEIGHT, DIR_UP));
+        se.AddBxdf(SORT_MALLOC(rc.m_memory_arena, Lambert)(rc, WHITE_SPECTRUM, FULL_WEIGHT, DIR_UP));
         return;
     }
 
     if( m_surface_shader_valid )
         ExecuteSurfaceShader(m_surface_shader.get() , se , rc);
     else if( m_special_transparent )
-        se.AddBxdf(SORT_MALLOC_PROXY(rc.m_memory_arena, Transparent)(rc));
+        se.AddBxdf(SORT_MALLOC(rc.m_memory_arena, Transparent)(rc));
 }
 
 void Material::UpdateMediumStack( const MediumInteraction& mi , const SE_Interaction flag , MediumStack& ms, RenderContext& rc ) const {

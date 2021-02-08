@@ -102,9 +102,9 @@ Spectrum HeterogenousMedium::Sample(const Ray& ray, const float max_t, MediumInt
             // sample a medium and scatter the ray
             const auto new_dt = -log(1.0f - r) / extinction[ch];
 
-            mi = SORT_MALLOC_PROXY(rc.m_memory_arena, MediumInteraction)();
+            mi = SORT_MALLOC(rc.m_memory_arena, MediumInteraction)();
             mi->intersect = ray(t + new_dt);
-            mi->phaseFunction = SORT_MALLOC_PROXY(rc.m_memory_arena, HenyeyGreenstein)(ms.anisotropy);
+            mi->phaseFunction = SORT_MALLOC(rc.m_memory_arena, HenyeyGreenstein)(ms.anisotropy);
             
             const auto new_exponent = -new_dt * extinction;
             const auto new_beam_transmitancy = new_exponent.Exp();

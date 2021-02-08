@@ -102,7 +102,7 @@ Spectrum FourierBxdfData::f( const Vector& wo , const Vector& wi , RenderContext
         !getCatmullRomWeights( muO , offsetO , weightsO ) )
         return 0.0f;
 
-    auto ak = (float*)SORT_MALLOC_ARRAY_PROXY(rc.m_memory_arena, float, bsdfTable.nMax * bsdfTable.nChannels );
+    auto ak = (float*)SORT_MALLOC_ARRAY(rc.m_memory_arena, float, bsdfTable.nMax * bsdfTable.nChannels );
     memset( ak , 0 , sizeof( float ) * bsdfTable.nMax * bsdfTable.nChannels );
     auto nMax = blendCoefficients( ak , bsdfTable.nChannels , offsetI, offsetO, weightsI, weightsO );
 
@@ -136,7 +136,7 @@ Spectrum FourierBxdfData::sample_f( const Vector& wo , Vector& wi , const BsdfSa
         return 0.0f;
     }
 
-    auto ak = (float*)SORT_MALLOC_ARRAY_PROXY(rc.m_memory_arena, float, bsdfTable.nMax * bsdfTable.nChannels );
+    auto ak = (float*)SORT_MALLOC_ARRAY(rc.m_memory_arena, float, bsdfTable.nMax * bsdfTable.nChannels );
     memset( ak , 0 , sizeof( float ) * bsdfTable.nMax * bsdfTable.nChannels );
     auto nMax = blendCoefficients( ak , bsdfTable.nChannels , offsetI, offsetO, weightsI, weightsO );
 
@@ -180,7 +180,7 @@ float FourierBxdfData::pdf( const Vector& wo , const Vector& wi, RenderContext& 
         !getCatmullRomWeights( muO , offsetO , weightsO ) )
         return 0.0f;
 
-    auto ak = (float*)SORT_MALLOC_ARRAY_PROXY(rc.m_memory_arena, float, bsdfTable.nMax );
+    auto ak = (float*)SORT_MALLOC_ARRAY(rc.m_memory_arena, float, bsdfTable.nMax );
     memset( ak , 0 , sizeof( float ) * bsdfTable.nMax );
     auto nMax = blendCoefficients( ak , 1 , offsetI, offsetO, weightsI, weightsO );
 

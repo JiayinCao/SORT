@@ -42,7 +42,7 @@ IMPLEMENT_TSLGLOBAL_END()
 class TSL_ShadingSystemInterface : public ShadingSystemInterface {
 public:
     void*   allocate(unsigned int size) const override {
-        return SORT_MALLOC_ARRAY(char, size);
+        return SORT_MALLOC_ARRAY_OLD(char, size);
     }
 
     void    catch_debug(const TSL_DEBUG_LEVEL level, const char* error) const override {

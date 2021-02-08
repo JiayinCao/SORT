@@ -31,8 +31,8 @@ IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeDielectric)
 
  Dielectric::Dielectric(RenderContext& rc, const ClosureTypeDielectric& params, const Spectrum& weight):
  Bxdf(rc, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, true), R(params.reflectance), T(params.transmittance), fresnel(1.0f,1.5f),
-         mf_reflect(rc, params.reflectance, &fresnel, SORT_MALLOC_PROXY(rc.m_memory_arena, GGX)(params.roughness_u, params.roughness_v), FULL_WEIGHT, params.normal, true),
-         mf_refract(rc, params.transmittance, SORT_MALLOC_PROXY(rc.m_memory_arena, GGX)(params.roughness_u, params.roughness_v), 1.0f, 1.5f, FULL_WEIGHT, params.normal){
+         mf_reflect(rc, params.reflectance, &fresnel, SORT_MALLOC(rc.m_memory_arena, GGX)(params.roughness_u, params.roughness_v), FULL_WEIGHT, params.normal, true),
+         mf_refract(rc, params.transmittance, SORT_MALLOC(rc.m_memory_arena, GGX)(params.roughness_u, params.roughness_v), 1.0f, 1.5f, FULL_WEIGHT, params.normal){
  }
 
 Spectrum Dielectric::f(const Vector& wo, const Vector& wi) const{
