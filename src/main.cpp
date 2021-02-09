@@ -40,12 +40,6 @@ int main(int argc, char* argv[])
 
     const auto ret = RunSORT(argc, argv);
 
-    // Flush main thread data
-    SortStatsFlushData(true);
-    // Output stats data
-    if(ret == 0 && !g_unitTestMode)
-        SortStatsPrintData();
-
     SORT_PROFILE_END; // Main Thread
 
     // dump profile data

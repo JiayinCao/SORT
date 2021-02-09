@@ -20,12 +20,12 @@
 #include "material.h"
 #include "matmanager.h"
 #include "core/log.h"
-#include "core/globalconfig.h"
 #include "core/strid.h"
 #include "scatteringevent/scatteringevent.h"
 #include "scatteringevent/bsdf/lambert.h"
 #include "scatteringevent/bsdf/transparent.h"
 #include "texture/imagetexture2d.h"
+#include "core/profile.h"
 
 USE_TSL_NAMESPACE
 

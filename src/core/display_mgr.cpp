@@ -16,7 +16,6 @@
  */
 
 #include "display_mgr.h"
-#include "core/globalconfig.h"
 #include "core/socket_mgr.h"
 #include "core/sassert.h"
 

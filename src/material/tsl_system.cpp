@@ -20,7 +20,6 @@
 #include <tsl_system.h>
 #include "core/profile.h"
 #include "core/thread.h"
-#include "core/globalconfig.h"
 #include "math/interaction.h"
 #include "scatteringevent/scatteringevent.h"
 #include "medium/medium.h"

@@ -21,7 +21,6 @@
 #include "core/sassert.h"
 #include "sampler/sample.h"
 #include "core/samplemethod.h"
-#include "core/globalconfig.h"
 #include "light/light.h"
 
 void PerspectiveCamera::PreProcess()

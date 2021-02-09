@@ -25,7 +25,6 @@
 #include "core/sassert.h"
 #include "core/sassert.h"
 #include "core/stats.h"
-#include "core/globalconfig.h"
 #include "core/strid.h"
 #include "core/primitive.h"
 #include "entity/visual_entity.h"

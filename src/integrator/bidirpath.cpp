@@ -22,7 +22,6 @@
 #include "integratormethod.h"
 #include "camera/camera.h"
 #include "core/memory.h"
-#include "core/globalconfig.h"
 
 SORT_STATS_DEFINE_COUNTER(sTotalLengthPathFromEye)
 SORT_STATS_DEFINE_COUNTER(sTotalLengthPathFromLight)

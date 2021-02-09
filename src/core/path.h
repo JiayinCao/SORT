@@ -27,7 +27,6 @@
 #include <unistd.h>
 #define GetCurrentDir getcwd
 #endif
-#include "core/globalconfig.h"
 
 //! @brief  Full path of files in the executable folder.
 //!

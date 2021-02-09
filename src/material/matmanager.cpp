@@ -19,7 +19,6 @@
 #include "material/material.h"
 #include "stream/stream.h"
 #include "core/profile.h"
-#include "core/globalconfig.h"
 #include "core/log.h"
 #include "core/timer.h"
 #include "scatteringevent/bsdf/merl.h"

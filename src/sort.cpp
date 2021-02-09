@@ -21,7 +21,7 @@
 #include "work/unit_tests/unit_tests.h"
 #include "core/parse_args.h"
 
-int RunSORT( int argc , char** argv ){
+int RunSORT(int argc, char** argv) {
     // Parse command line arguments.
     const auto& args = parse_args(argc, argv);
 
@@ -35,16 +35,18 @@ int RunSORT( int argc , char** argv ){
 
         if (key_str == "input") {
             valid_args = true;
-        } else if (key_str == "unittest") {
+        }
+        else if (key_str == "unittest") {
             unit_test_mode = true;
             valid_args = true;
-        } else if (key_str == "profiling") {
+        }
+        else if (key_str == "profiling") {
             profiling_enabled = value_str == "on";
         }
     }
 
     // Disable profiling if necessary
-    if( !profiling_enabled)
+    if (!profiling_enabled)
         SORT_PROFILE_DISABLE;
 
     if (!valid_args) {
@@ -55,27 +57,37 @@ int RunSORT( int argc , char** argv ){
         slog(INFO, GENERAL, "  --nomaterial         Disable materials in SORT.");
         slog(INFO, GENERAL, "  --profiling:<on|off> Toggling profiling option, false by default.");
         return -1;
-    }else{
+    }
+    else {
         slog(INFO, GENERAL, "Number of CPU cores %d", std::thread::hardware_concurrency());
-        #ifdef SORT_ENABLE_STATS_COLLECTION
-            slog(INFO, GENERAL, "Stats collection is enabled.");
-        #else
-            slog(INFO, GENERAL, "Stats collection is disabled.");
-        #endif
+#ifdef SORT_ENABLE_STATS_COLLECTION
+        slog(INFO, GENERAL, "Stats collection is enabled.");
+#else
+        slog(INFO, GENERAL, "Stats collection is disabled.");
+#endif
         slog(INFO, GENERAL, "Profiling system is %s.", SORT_PROFILE_ISENABLED ? "enabled" : "disabled");
     }
 
     std::unique_ptr<Work> work;
 
     // Run in unit test mode if required.
-    if(unit_test_mode){
+    int ret = 0;
+    if (unit_test_mode) {
         work = std::make_unique<UnitTests>();
         work->StartRunning(argc, argv);
-        return work->WaitForWorkToBeDone();
+        ret = work->WaitForWorkToBeDone();
+    } else {
+        // we only support one other work for now
+        work = std::make_unique<ImageEvaluation>();
+        work->StartRunning(argc, argv);
+        ret = work->WaitForWorkToBeDone();
     }
 
-    // we only support one other work for now
-    work = std::make_unique<ImageEvaluation>();
-    work->StartRunning(argc, argv);
-    return work->WaitForWorkToBeDone();
+    // Flush main thread data
+    SortStatsFlushData(true);
+    // Output stats data
+    if (ret == 0 && !unit_test_mode)
+        SortStatsPrintData();
+
+    return ret;
 }

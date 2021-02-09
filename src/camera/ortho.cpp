@@ -17,7 +17,6 @@
 
 #include "ortho.h"
 #include "core/sassert.h"
-#include "core/globalconfig.h"
 #include "sampler/sample.h"
 
 // generate camera ray
