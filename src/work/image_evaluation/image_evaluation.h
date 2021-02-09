@@ -49,6 +49,8 @@ public:
 private:
     // Input file name
     std::string     m_input_file;
+    // image title, this is only for TEV
+    std::string     m_image_title;
     // Blender mode
     bool            m_blender_mode = false;
     // Enable profiling
@@ -67,6 +69,8 @@ private:
     std::unique_ptr<Accelerator>    m_accelerator_vol;  // acceleration structure for only the meshes with volume
 
     std::unique_ptr<Integrator>     m_integrator;       // the algorithm used for ray tracing
+
+    std::atomic<int>                m_tile_cnt;         // number of total tiles
 
     void    parseCommandArgs(int argc, char** argv);
 

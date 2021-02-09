@@ -25,6 +25,8 @@
 #include "stream/fstream.h"
 #include "core/strid.h"
 #include "material/matmanager.h"
+#include "core/timer.h"
+#include "sampler/random.h"
 
 static constexpr unsigned int GLOBAL_CONFIGURATION_VERSION = 0;
 static constexpr unsigned int IMAGE_TILE_SIZE = 64;
@@ -53,7 +55,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
     DisplayManager::GetSingleton().ResolveDisplayServerConnection();
     if (DisplayManager::GetSingleton().IsDisplayServerConnected()) {
         std::shared_ptr<DisplayImageInfo> image_info = std::make_shared<DisplayImageInfo>();
-        image_info->title = IMAGE_TILE_SIZE; // just hard code it for now
+        image_info->title = m_image_title;
         image_info->w = m_image_width;
         image_info->h = m_image_height;
         DisplayManager::GetSingleton().QueueDisplayItem(image_info);
@@ -103,9 +105,214 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
         sAssert(m_accelerator_vol, SPATIAL_ACCELERATOR);
         m_integrator->PreProcess(m_scene, rc);
     });
+
+    // make sure preprocessing is done
+    pre_processing_done.wait();
+
+    // get the number of total task
+    const auto tilesize = IMAGE_TILE_SIZE;
+    Vector2i tile_num = Vector2i((int)ceil(m_image_width / (float)tilesize), (int)ceil(m_image_height / (float)tilesize));
+
+    // start tile from center instead of top-left corner
+    Vector2i cur_pos(tile_num / 2);
+    int cur_dir = 0;
+    int cur_len = 0;
+    int cur_dir_len = 1;
+    const Vector2i dir[4] = { Vector2i(0 , -1) , Vector2i(-1 , 0) , Vector2i(0 , 1) , Vector2i(1 , 0) };
+
+    unsigned int priority = DEFAULT_TASK_PRIORITY;
+    while (true) {
+        // only process node inside the image region
+        if (cur_pos.x >= 0 && cur_pos.x < tile_num.x && cur_pos.y >= 0 && cur_pos.y < tile_num.y) {
+            Vector2i tl(cur_pos.x * tilesize, cur_pos.y * tilesize);
+            Vector2i size((tilesize < (m_image_width - tl.x)) ? tilesize : (m_image_width - tl.x),
+                (tilesize < (m_image_height - tl.y)) ? tilesize : (m_image_height - tl.y));
+
+            // pre-processing for integrators, like instant radiosity
+            ++m_tile_cnt;
+            marl::schedule([&](const Vector2i& ori, const Vector2i& size) {
+                // get a render context
+                auto& rc = pullRenderContext();
+
+                // get camera
+                auto camera = m_scene.GetCamera();
+
+                auto sampler = std::make_unique<RandomSampler>();
+                auto pixelSamples = std::make_unique<PixelSample[]>(m_sample_per_pixel);
+
+                // request samples
+                m_integrator->RequestSample(sampler.get(), pixelSamples.get(), m_sample_per_pixel);
+
+                const bool display_server_connected = DisplayManager::GetSingleton().IsDisplayServerConnected();
+                const bool need_refresh_tile = m_integrator->NeedRefreshTile();
+
+                const auto total_pixel = size.x * size.y;
+                std::shared_ptr<DisplayTile> display_tile;
+                if (display_server_connected && need_refresh_tile) {
+                    std::shared_ptr<DisplayTile> indicate_tile;
+                    indicate_tile = std::make_shared<DisplayTile>();
+                    indicate_tile->x = ori.x;
+                    indicate_tile->y = ori.y;
+                    indicate_tile->w = size.x;
+                    indicate_tile->h = size.y;
+                    indicate_tile->title = tilesize;
+
+                    const auto indication_intensity = 0.3f;
+                    if (m_blender_mode) {
+                        indicate_tile->m_data[0] = std::make_unique<float[]>(total_pixel * 4);
+                        auto data = indicate_tile->m_data[0].get();
+                        memset(data, 0, sizeof(float) * total_pixel * 4);
+
+                        for (auto i = 0u; i < indicate_tile->w; ++i) {
+                            if ((i >> 2) % 2 == 0)
+                                continue;
+
+                            for (auto c = 0; c < 3; ++c) {
+                                data[4 * i + c] = indication_intensity;
+                                data[4 * (total_pixel - 1 - i) + c] = indication_intensity;
+                            }
+                            data[4 * i + 3] = 1.0f;
+                            data[4 * (total_pixel - 1 - i) + 3] = 1.0f;
+                        }
+                        for (auto i = 0u; i < indicate_tile->h; ++i) {
+                            if ((i >> 2) % 2 == 0)
+                                continue;
+
+                            for (auto c = 0; c < 3; ++c) {
+                                data[4 * (i * indicate_tile->w) + c] = indication_intensity;
+                                data[4 * (i * indicate_tile->w + indicate_tile->w - 1) + c] = indication_intensity;
+                            }
+                            data[4 * (i * indicate_tile->w) + 3] = 1.0f;
+                            data[4 * (i * indicate_tile->w + indicate_tile->w - 1) + 3] = 1.0f;
+                        }
+                    }
+                    else {
+                        for (auto i = 0u; i < RGBSPECTRUM_SAMPLE; ++i) {
+                            indicate_tile->m_data[i] = std::make_unique<float[]>(total_pixel);
+                            auto data = indicate_tile->m_data[i].get();
+                            memset(data, 0, sizeof(float) * total_pixel);
+
+                            for (auto i = 0u; i < indicate_tile->w; ++i) {
+                                if ((i >> 2) % 2 == 0)
+                                    continue;
+                                data[i] = indication_intensity;
+                                data[total_pixel - 1 - i] = indication_intensity;
+                            }
+                            for (auto i = 0u; i < indicate_tile->h; ++i) {
+                                if ((i >> 2) % 2 == 0)
+                                    continue;
+                                data[i * indicate_tile->w] = indication_intensity;
+                                data[i * indicate_tile->w + indicate_tile->w - 1] = indication_intensity;
+                            }
+                        }
+                    }
+
+                    // indicate that we are rendering this tile
+                    DisplayManager::GetSingleton().QueueDisplayItem(indicate_tile);
+
+                    display_tile = std::make_shared<DisplayTile>();
+                    display_tile->x = ori.x;
+                    display_tile->y = ori.y;
+                    display_tile->w = size.x;
+                    display_tile->h = size.y;
+                    display_tile->title = tilesize;
+
+                    if (m_blender_mode) {
+                        display_tile->m_data[0] = std::make_unique<float[]>(total_pixel * 4);
+                    } else {
+                        for (auto i = 0u; i < 3; ++i)
+                            display_tile->m_data[i] = std::make_unique<float[]>(total_pixel);
+                    }
+                }
+
+                Vector2i rb = ori + size;
+                for (int i = ori.y; i < rb.y; i++) {
+                    for (int j = ori.x; j < rb.x; j++) {
+                        // generate samples to be used later
+                        m_integrator->GenerateSample(sampler.get(), pixelSamples.get(), m_sample_per_pixel, m_scene, rc);
+
+                        // the radiance
+                        Spectrum radiance;
+
+                        auto valid_pixel_cnt = m_sample_per_pixel;
+                        for (unsigned k = 0; k < m_sample_per_pixel; ++k) {
+
+                            // generate rays
+                            auto r = camera->GenerateRay((float)j, (float)i, pixelSamples[k]);
+                            // accumulate the radiance
+                            auto li = m_integrator->Li(r, pixelSamples[k], m_scene, rc);
+                            if (m_clampping > 0.0f)
+                                li = li.Clamp(0.0f, m_clampping);
+
+                            sAssert(li.IsValid(), GENERAL);
+
+                            if (li.IsValid())
+                                radiance += li;
+                            else
+                                --valid_pixel_cnt;
+                        }
+
+                        if (valid_pixel_cnt > 0)
+                            radiance /= (float)valid_pixel_cnt;
+
+                        // update the value if display server is connected
+                        if (display_server_connected && need_refresh_tile) {
+                            auto local_i = i - ori.y;
+                            auto local_j = j - ori.x;
+
+                            if (m_blender_mode) {
+                                auto local_index = local_j + (size.y - 1 - local_i) * size.x;
+                                display_tile->m_data[0][4 * local_index] = radiance[0];
+                                display_tile->m_data[0][4 * local_index + 1] = radiance[1];
+                                display_tile->m_data[0][4 * local_index + 2] = radiance[2];
+                                display_tile->m_data[0][4 * local_index + 3] = 1.0f;
+                            }
+                            else {
+                                auto local_index = local_j + local_i * size.x;
+                                for (auto i = 0u; i < RGBSPECTRUM_SAMPLE; ++i)
+                                    display_tile->m_data[i][local_index] = radiance[i];
+                            }
+                        }
+                    }
+                }
+
+                // we are done with this tile
+                --m_tile_cnt;
+            }, tl, size);
+        }
+
+        // turn to the next direction
+        if (cur_len >= cur_dir_len) {
+            cur_dir = (cur_dir + 1) % 4;
+            cur_len = 0;
+            cur_dir_len += 1 - cur_dir % 2;
+        }
+
+        cur_pos += dir[cur_dir];
+        ++cur_len;
+        if ((cur_pos.x < 0 || cur_pos.x >= tile_num.x) && (cur_pos.y < 0 || cur_pos.y >= tile_num.y))
+            break;
+    }
 }
 
 int ImageEvaluation::WaitForWorkToBeDone() {
+    static Timer timer;
+
+    while (m_tile_cnt > 0) {
+        if (UNLIKELY(m_integrator->NeedFullTargetRealtimeUpdate())) {
+            // only update it every 1 second
+            if (timer.GetElapsedTime() > 1000) {
+                std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>();
+                di->title = m_image_title;
+                DisplayManager::GetSingleton().QueueDisplayItem(di);
+                timer.Reset();
+            }
+        }
+
+        DisplayManager::GetSingleton().ProcessDisplayQueue();
+        std::this_thread::yield();
+    }
+
     return 0;
 }
 
@@ -158,6 +365,9 @@ void ImageEvaluation::loadConfig(IStreamBase& stream) {
     stream >> m_resource_path;
     std::string dummy_str;
     stream >> dummy_str;
+
+    const std::string s = logTimeString();
+    m_image_title = dummy_str + s;
 
     // this doesn't need to come from input at all
     unsigned dummy_tile_size;

@@ -55,6 +55,7 @@ public:
 protected:
     Scene   m_scene;
 
+    std::mutex                                  m_rc_mutex;                     // a mutex to make sure pool is not accessed by two threads at the same time.
     std::vector<std::unique_ptr<RenderContext>> m_render_context_pool;          // this only controls the life time of the render contexts
     std::list<RenderContext*>                   m_available_render_context;     // the render context that are available
     std::unordered_set<RenderContext*>          m_running_render_context;       // the render context that are being ran

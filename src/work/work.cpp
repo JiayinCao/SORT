@@ -19,6 +19,9 @@
 #include "work.h"
 
 RenderContext& Work::pullRenderContext() {
+    // make sure only one thread is accessing this
+    std::lock_guard<std::mutex> lock(m_rc_mutex);
+
     // if we are running out of render context, just create one
     if (m_available_render_context.empty()) {
         // make sure it is initialized after it is born
