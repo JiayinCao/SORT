@@ -26,6 +26,7 @@
 #include "medium/medium.h"
 #include "core/log.h"
 #include "material.h"
+#include "core/mesh.h"
 #include "texture/imagetexture2d.h"
 
 USE_TSL_NAMESPACE

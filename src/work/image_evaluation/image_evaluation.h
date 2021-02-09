@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <atomic>
 #include "../work.h"
 #include "integrator/integrator.h"
 

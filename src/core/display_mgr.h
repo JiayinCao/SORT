@@ -30,7 +30,8 @@ public:
     virtual void Process(std::unique_ptr<OSocketStream>& streams) = 0;
 
     std::string     title;
-    int w, h;   // the size of the tile
+    int             w, h;   // the size of the tile
+    bool            is_blender_mode;
 };
 
 //! @brief  A tile for displaying

@@ -29,17 +29,6 @@
 #endif
 #include "core/globalconfig.h"
 
-//! @brief  Full path of files in the resource folder.
-//!
-//! This is just a very simple function that appends the resource folder to the filename.
-//! It is the caller's responsibilty to make sure the file is in the resource folder.
-//!
-//! @param filename     Name of the file in the resource folder.
-//! @return             Full path that has the file name.
-SORT_FORCEINLINE std::string GetFilePathInResourceFolder( const std::string& filename ){
-    return g_resourcePath + filename;
-}
-
 //! @brief  Full path of files in the executable folder.
 //!
 //! This is just a very simple function that appends the executable folder to the filename.

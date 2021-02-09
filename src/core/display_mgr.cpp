@@ -87,7 +87,7 @@ void DisplayManager::QueueDisplayItem(std::shared_ptr<DisplayItemBase> item) {
 void DisplayTile::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
     OSocketStream& stream = *ptr_stream;
 
-    if (g_blenderMode){
+    if (is_blender_mode){
         // [0] Length of the package, it doesn't count itself
         // [1] Width of the tile
         // [2] Height of the tile
@@ -127,7 +127,7 @@ void DisplayTile::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
 
 void DisplayImageInfo::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
     // Blender doesn't care about creating a new image, only TEV does.
-    if (!g_blenderMode) {
+    if (!is_blender_mode) {
         OSocketStream& stream = *ptr_stream;
 
         const int image_width = w;
@@ -154,7 +154,7 @@ void DisplayImageInfo::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
 
 void TerminateIndicator::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
     // Tev won't response this well
-    if (g_blenderMode) {
+    if (is_blender_mode) {
         // Blender doesn't care about creating a new image, only TEV does.
         OSocketStream& stream = *ptr_stream;
         stream << int(0);   // 0 as length indicating that we are done, no more package will be received.

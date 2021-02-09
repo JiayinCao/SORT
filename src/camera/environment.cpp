@@ -22,7 +22,6 @@
 #include "core/sassert.h"
 #include "core/define.h"
 #include "sampler/sample.h"
-#include "core/globalconfig.h"
 
 // generate a ray given a pixel
 Ray EnvironmentCamera::GenerateRay( float x , float y , const PixelSample& ps ) const{

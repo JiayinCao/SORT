@@ -27,6 +27,7 @@
 #include "material/matmanager.h"
 #include "core/timer.h"
 #include "sampler/random.h"
+#include "core/parse_args.h"
 
 static constexpr unsigned int GLOBAL_CONFIGURATION_VERSION = 0;
 static constexpr unsigned int IMAGE_TILE_SIZE = 64;
@@ -58,6 +59,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
         image_info->title = m_image_title;
         image_info->w = m_image_width;
         image_info->h = m_image_height;
+        image_info->is_blender_mode = m_blender_mode;
         DisplayManager::GetSingleton().QueueDisplayItem(image_info);
     }
 
@@ -145,6 +147,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
                     indicate_tile->y = ori.y;
                     indicate_tile->w = size.x;
                     indicate_tile->h = size.y;
+                    indicate_tile->is_blender_mode = m_blender_mode;
                     indicate_tile->title = m_image_title;
 
                     const auto indication_intensity = 0.3f;
@@ -206,6 +209,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
                     display_tile->w = size.x;
                     display_tile->h = size.y;
                     display_tile->title = m_image_title;
+                    display_tile->is_blender_mode = m_blender_mode;
 
                     if (m_blender_mode) {
                         display_tile->m_data[0] = std::make_unique<float[]>(total_pixel * 4);
@@ -298,6 +302,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
                 di->title = m_image_title;
                 di->w = m_image_width;
                 di->h = m_image_height;
+                di->is_blender_mode = m_blender_mode;
                 DisplayManager::GetSingleton().QueueDisplayItem(di);
                 timer.Reset();
             }
@@ -317,12 +322,14 @@ int ImageEvaluation::WaitForWorkToBeDone() {
         if (UNLIKELY(m_integrator->NeedFinalUpdate())) {
             std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>();
             di->title = m_image_title;
+            di->is_blender_mode = m_blender_mode;
             DisplayManager::GetSingleton().QueueDisplayItem(di);
         }
 
         // terminator is only needed in blender mode
         if (m_blender_mode) {
             std::shared_ptr<TerminateIndicator> terminator = std::make_shared<TerminateIndicator>();
+            terminator->is_blender_mode = m_blender_mode;
             DisplayManager::GetSingleton().QueueDisplayItem(terminator);
         }
 
@@ -335,27 +342,15 @@ int ImageEvaluation::WaitForWorkToBeDone() {
 }
 
 void ImageEvaluation::parseCommandArgs(int argc, char** argv){
-    std::string commandline = "Command line arguments: \t";
-    for (int i = 0; i < argc; ++i) {
-        commandline += std::string(argv[i]);
-        commandline += " ";
-    }
-    slog( INFO , GENERAL , "%s" , commandline.c_str() );
+    // Parse command line arguments.
+    const auto& args = parse_args(argc, argv);
 
-    bool com_arg_valid = false;
-    std::regex word_regex("--(\\w+)(?:\\s*:\\s*([^ \\n]+)\\s*)?");
-    auto words_begin = std::sregex_iterator(commandline.begin(), commandline.end(), word_regex);
-    for (std::sregex_iterator it = words_begin; it != std::sregex_iterator(); ++it) {
-        const auto m = *it;
-        std::string key_str = m[1];
-        std::string value_str = m.size() >= 3 ? std::string(m[2]) : "";
-
-        // not case sensitive for key, but it is for value.
-        std::transform(key_str.begin(), key_str.end(), key_str.begin(), ::tolower);
+    for (auto& arg : args) {
+        const std::string& key_str = arg.first;
+        const std::string& value_str = arg.second;
 
         if (key_str == "input") {
             m_input_file = value_str;
-            com_arg_valid = true;
         }else if (key_str == "blendermode"){
             m_blender_mode = true;
         }else if (key_str == "profiling"){
