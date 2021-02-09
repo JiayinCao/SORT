@@ -130,8 +130,8 @@ void DisplayImageInfo::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
     if (!g_blenderMode) {
         OSocketStream& stream = *ptr_stream;
 
-        const int image_width = g_resultResollutionWidth;
-        const int image_height = g_resultResollutionHeight;
+        const int image_width = w;
+        const int image_height = h;
         stream << int(0);            // reserved for length
         stream << char(CreateImage); // indicate to update some of the images
         stream << char(1);           // indicate to grab the current image
@@ -170,9 +170,6 @@ void FullTargetUpdate::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
     // deal to reveal slightly inconsistent data as long as the final result is fine.
 
     OSocketStream& stream = *ptr_stream;
-
-    auto w = g_imageSensor->GetWidth();
-    auto h = g_imageSensor->GetHeight();
 
     if (g_blenderMode) {
         // [0] Length of the package, it doesn't count itself

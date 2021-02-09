@@ -75,4 +75,7 @@ protected:
     float           m_aspectRatioW = 0.0f;      /**< Aspect ratio along x axis. */
     float           m_aspectRatioH = 0.0f;      /**< Aspect ratio along y axis. */
     int             m_aspectFit = 0;            /**< Aspect fit. It equals to 1 if it fits horizontally, otherwise it is 2. */
+
+    unsigned        m_image_width;              /**< Resolution of the final image. */
+    unsigned        m_image_height;             /**< Resolution of the final image. */
 };

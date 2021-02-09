@@ -70,7 +70,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
     defer(scheduler.unbind());  // Automatically unbind before returning.
 
     // Create a WaitGroup with an initial count of numTasks.
-    marl::WaitGroup accel_structure_done(2);
+    marl::WaitGroup accel_structure_done(1);
     marl::WaitGroup pre_processing_done(1);
 
     // build acceleration structure
@@ -78,17 +78,8 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
         // Decrement the WaitGroup counter when the task has finished.
         defer(accel_structure_done.done());
 
-        sAssert(m_accelerator, SPATIAL_ACCELERATOR);
-        m_accelerator->Build(m_scene.GetPrimitives(), m_scene.GetBBox());
-    });
-
-    // bulid acceleration structure for volumes
-    marl::schedule([&]() {
-        // Decrement the WaitGroup counter when the task has finished.
-        defer(accel_structure_done.done());
-
-        sAssert(m_accelerator_vol, SPATIAL_ACCELERATOR);
-        m_accelerator_vol->Build(m_scene.GetPrimitivesVol(), m_scene.GetBBoxVol());
+        // Build acceleration structures, commonly QBVH
+        m_scene.BuildAccelerationStructure();
     });
 
     // pre-processing for integrators, like instant radiosity
@@ -102,7 +93,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
         // get a render context
         auto& rc = pullRenderContext();
 
-        sAssert(m_accelerator_vol, SPATIAL_ACCELERATOR);
+        // preprocessing for integrators
         m_integrator->PreProcess(m_scene, rc);
     });
 
@@ -155,7 +146,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
                     indicate_tile->y = ori.y;
                     indicate_tile->w = size.x;
                     indicate_tile->h = size.y;
-                    indicate_tile->title = tilesize;
+                    indicate_tile->title = m_image_title;
 
                     const auto indication_intensity = 0.3f;
                     if (m_blender_mode) {
@@ -215,7 +206,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
                     display_tile->y = ori.y;
                     display_tile->w = size.x;
                     display_tile->h = size.y;
-                    display_tile->title = tilesize;
+                    display_tile->title = m_image_title;
 
                     if (m_blender_mode) {
                         display_tile->m_data[0] = std::make_unique<float[]>(total_pixel * 4);
@@ -276,6 +267,10 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
                     }
                 }
 
+                // update display server if needed
+                if (display_server_connected && need_refresh_tile)
+                    DisplayManager::GetSingleton().QueueDisplayItem(display_tile);
+
                 // we are done with this tile
                 --m_tile_cnt;
             }, tl, size);
@@ -293,9 +288,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
         if ((cur_pos.x < 0 || cur_pos.x >= tile_num.x) && (cur_pos.y < 0 || cur_pos.y >= tile_num.y))
             break;
     }
-}
 
-int ImageEvaluation::WaitForWorkToBeDone() {
     static Timer timer;
 
     while (m_tile_cnt > 0) {
@@ -304,15 +297,22 @@ int ImageEvaluation::WaitForWorkToBeDone() {
             if (timer.GetElapsedTime() > 1000) {
                 std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>();
                 di->title = m_image_title;
+                di->w = m_image_width;
+                di->h = m_image_height;
                 DisplayManager::GetSingleton().QueueDisplayItem(di);
                 timer.Reset();
             }
         }
 
-        DisplayManager::GetSingleton().ProcessDisplayQueue();
+        DisplayManager::GetSingleton().ProcessDisplayQueue(6);
         std::this_thread::yield();
     }
 
+    DisplayManager::GetSingleton().ProcessDisplayQueue(-1);
+}
+
+int ImageEvaluation::WaitForWorkToBeDone() {
+    
     return 0;
 }
 
@@ -378,13 +378,7 @@ void ImageEvaluation::loadConfig(IStreamBase& stream) {
     stream >> m_image_width >> m_image_height;
     stream >> m_clampping;
 
-    StringID accelType, integratorType;
-    stream >> accelType;
-    m_accelerator = MakeUniqueInstance<Accelerator>(accelType);
-    if (m_accelerator)
-        m_accelerator->Serialize(stream);
-    m_accelerator_vol = std::move(m_accelerator->Clone());
-
+    StringID integratorType;
     stream >> integratorType;
     m_integrator = MakeUniqueInstance<Integrator>(integratorType);
     if (IS_PTR_VALID(m_integrator))

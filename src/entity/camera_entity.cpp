@@ -22,6 +22,7 @@ void PerspectiveCameraEntity::Serialize(IStreamBase& stream) {
     stream >> m_camera->m_eye;
     stream >> m_camera->m_up;
     stream >> m_camera->m_target;
+    stream >> m_camera->m_image_width >> m_camera->m_image_height;
     stream >> m_camera->m_lensRadius;
     stream >> m_camera->m_sensorW >> m_camera->m_sensorH >> m_camera->m_aspectFit;
     stream >> m_camera->m_aspectRatioW >> m_camera->m_aspectRatioH;

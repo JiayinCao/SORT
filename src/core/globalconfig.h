@@ -234,12 +234,17 @@ public:
         stream >> m_samplePerPixel;
         stream >> m_resWidth >> m_resHeight;
         stream >> m_clampping;
-        StringID accelType , integratorType;
+        StringID integratorType;
+        
+
+#if 0
+        StringID accelType;
         stream >> accelType;
         m_accelerator = MakeUniqueInstance<Accelerator>(accelType);
         if( m_accelerator )
             m_accelerator->Serialize( stream );
 		m_acceleratorVol = std::move(m_accelerator->Clone());
+#endif
 
         stream >> integratorType;
         m_integrator = MakeUniqueInstance<Integrator>(integratorType);

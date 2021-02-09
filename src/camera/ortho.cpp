@@ -25,8 +25,8 @@ Ray OrthoCamera::GenerateRay( float x, float y, const PixelSample &ps) const{
     x += ps.img_u;
     y += ps.img_v;
 
-    const auto w = (float)g_resultResollutionWidth;
-    const auto h = (float)g_resultResollutionHeight;
+    const auto w = (float)m_image_width;
+    const auto h = (float)m_image_height;
 
     x = ( ( x / w ) - 0.5f ) * m_camWidth;
     y = -1.0f * ( ( y / h - 0.5f ) ) * m_camHeight;

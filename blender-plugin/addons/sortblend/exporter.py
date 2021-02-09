@@ -260,10 +260,15 @@ def export_scene(depsgraph, is_preview, fs):
     aspect_ratio_y = scene.render.pixel_aspect_y
     fov_angle = bpy.data.cameras[0].angle
 
+    # resolution of the final image
+    xres = scene.render.resolution_x * scene.render.resolution_percentage / 100
+    yres = scene.render.resolution_y * scene.render.resolution_percentage / 100
+
     fs.serialize(SID('PerspectiveCameraEntity'))
     fs.serialize(vec3_to_tuple(pos))
     fs.serialize(vec3_to_tuple(up))
     fs.serialize(vec3_to_tuple(target))
+    fs.serialize((int(xres),int(yres)))
     fs.serialize(camera.data.sort_data.lens_size)
     fs.serialize((sensor_w,sensor_h))
     fs.serialize(int(sensor_fit))
@@ -364,35 +369,9 @@ def export_scene(depsgraph, is_preview, fs):
     # to indicate the scene stream comes to an end
     fs.serialize(SID('End of Entities'))
 
-# avoid having space in material name
-def name_compat(name):
-    if name is None:
-        return 'None'
-    else:
-        return name.replace(' ', '_')
-
-# export glocal settings for the renderer
-def export_global_config(scene, fs, sort_resource_path):
-    # global renderer configuration
-    sort_output_file = 'blender_generated.exr'
-    xres = scene.render.resolution_x * scene.render.resolution_percentage / 100
-    yres = scene.render.resolution_y * scene.render.resolution_percentage / 100
-
+    # the accelerator
     sort_data = scene.sort_data
-
-    integrator_type = sort_data.integrator_type_prop
     accelerator_type = sort_data.accelerator_type_prop
-
-    fs.serialize( 0 )
-    fs.serialize( sort_resource_path )
-    fs.serialize( sort_output_file )
-    fs.serialize( 64 )    # tile size, hard-coded it until I need to update it throught exposed interface later.
-    fs.serialize( int(sort_data.thread_num_prop) )
-    fs.serialize( int(sort_data.sampler_count_prop) )
-    fs.serialize( int(xres) )
-    fs.serialize( int(yres) )
-    fs.serialize( sort_data.clampping )
-
     if accelerator_type == "bvh":
         fs.serialize( SID('Bvh') )
         fs.serialize( int(sort_data.bvh_max_node_depth) )
@@ -415,6 +394,34 @@ def export_global_config(scene, fs, sort_resource_path):
         fs.serialize( int(sort_data.obvh_max_pri_in_leaf) )
     else:
         fs.serialize( SID('UniGrid') )
+
+# avoid having space in material name
+def name_compat(name):
+    if name is None:
+        return 'None'
+    else:
+        return name.replace(' ', '_')
+
+# export glocal settings for the renderer
+def export_global_config(scene, fs, sort_resource_path):
+    # global renderer configuration
+    sort_output_file = 'blender_generated.exr'
+    xres = scene.render.resolution_x * scene.render.resolution_percentage / 100
+    yres = scene.render.resolution_y * scene.render.resolution_percentage / 100
+
+    sort_data = scene.sort_data
+
+    integrator_type = sort_data.integrator_type_prop
+    
+    fs.serialize( 0 )
+    fs.serialize( sort_resource_path )
+    fs.serialize( sort_output_file )
+    fs.serialize( 64 )    # tile size, hard-coded it until I need to update it throught exposed interface later.
+    fs.serialize( int(sort_data.thread_num_prop) )
+    fs.serialize( int(sort_data.sampler_count_prop) )
+    fs.serialize( int(xres) )
+    fs.serialize( int(yres) )
+    fs.serialize( sort_data.clampping )
 
     fs.serialize( SID(integrator_type) )
     fs.serialize( int(sort_data.inte_max_recur_depth) )

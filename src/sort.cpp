@@ -126,7 +126,7 @@ int RunSORT( int argc , char** argv ){
         return work->WaitForWorkToBeDone();
     }
 
-#if 0
+#if 1
     // we only support one other work for now
     work = std::make_unique<ImageEvaluation>();
     work->StartRunning(argc, argv);

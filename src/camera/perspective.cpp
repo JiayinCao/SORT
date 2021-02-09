@@ -26,8 +26,8 @@
 
 void PerspectiveCamera::PreProcess()
 {
-    float w = (float)g_resultResollutionWidth;
-    float h = (float)g_resultResollutionHeight;
+    const float w = (float)m_image_width;
+    const float h = (float)m_image_height;
     float aspect = w/h * m_aspectRatioW/m_aspectRatioH;
 
     float yScale = 1.0f / tan( m_fov * 0.5f );
