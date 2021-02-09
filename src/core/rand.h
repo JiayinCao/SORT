@@ -17,11 +17,30 @@
 
 #pragma once
 
-/*
-description :
-    Random number generation method, the default 'rand' function provided by c++ standard library is not so good,
-    another random number generation method is adapted here.
-*/
+struct RenderContext;
+
+
+// Ideally, I should do some research and have a proper random number generation algorithm since this is so
+// important in lots of parts of the renderer. Since it works, I'll leave it this way for now.
+#define MT_CNT  624
+class RandomNumberGenerator{
+public:
+    RandomNumberGenerator();
+
+    // Generate a random unsigned number
+    unsigned    rand();
+
+private:
+    unsigned long mt[MT_CNT]; /* the array for the state vector  */
+    int mti;
+    bool seed_setup = false;
+};
+
+template<class T>
+T sort_rand( RenderContext& rc );
+
+
+// Following code is to be deleted
 
 // set the seed
 void        sort_seed();

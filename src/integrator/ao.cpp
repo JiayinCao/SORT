@@ -43,7 +43,7 @@ Spectrum AmbientOcclusion::Li( const Ray& r , const PixelSample& ps , const Scen
     Vector nn = faceForward( ip.normal , r.m_Dir ) ? -ip.normal : ip.normal;
     Vector tn = normalize(cross( nn , ip.tangent ));
     Vector sn = normalize(cross( tn , nn ));
-    Vector _wi = CosSampleHemisphere( sort_canonical() , sort_canonical() );
+    Vector _wi = CosSampleHemisphere( sort_rand<float>(rc) , sort_rand<float>(rc) );
     const float pdf = CosHemispherePdf(_wi);
     Vector wi = Vector( _wi.x * sn.x + _wi.y * nn.x + _wi.z * tn.x ,
                         _wi.x * sn.y + _wi.y * nn.y + _wi.z * tn.y ,

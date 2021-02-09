@@ -251,7 +251,7 @@ protected:
     //! @brief  Sample a channel
     //!
     //! @return        Randomly pick a channel in spectrum, in which the mean free path is not zero.
-    int         Sample_Ch() const override;
+    int         Sample_Ch(RenderContext& rc) const override;
 
     //! @brief  Get maximum profile sampling distance
     //!

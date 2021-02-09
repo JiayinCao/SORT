@@ -45,10 +45,10 @@ Spectrum Fabric::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, fl
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
     const auto N = ceil(1 + 29 * SQR(1 - roughness));
-    const auto sign = sort_canonical() > 0.5f ? 1.0f : -1.0f;
-    const auto sin_theta_h = sign * saturate( 1.0f - pow( sort_canonical() , 1.0f / ( N + 1 ) ) );
+    const auto sign = sort_rand<float>(rc) > 0.5f ? 1.0f : -1.0f;
+    const auto sin_theta_h = sign * saturate( 1.0f - pow( sort_rand<float>(rc) , 1.0f / ( N + 1 ) ) );
     const auto cos_theta_h = sqrt( saturate( 1.0f - SQR( sin_theta_h ) ) );
-    const auto phi_h = PI * sort_canonical();
+    const auto phi_h = PI * sort_rand<float>(rc);
 
     const auto wh = Vector3f( sin_theta_h , cos_theta_h * sin( phi_h ) , cos_theta_h * cos( phi_h ) );
     wi = reflect( wo , wh );

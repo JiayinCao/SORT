@@ -18,20 +18,24 @@
 #include "thirdparty/gtest/gtest.h"
 #include "medium/phasefunction.h"
 #include "unittest_common.h"
+#include "core/render_context.h"
 
 // This should work. For some reason, it doesn't. I need to figure out what is wrong.
 // This is probably because the quality of the random number generated is not good.
 // With the tolorance of 4%, there is still 0.2% failing rate, for which reason this unit test won't be activated.
 TEST(PHASE_FUNCTION, DISABLED_HenyeyGreenstein_PDF_Sample_Accuracy) {
-    const auto u = sort_canonical();
-    const auto v = sort_canonical();
+    RenderContext rc;
+    rc.Init();
+
+    const auto u = sort_rand<float>(rc);
+    const auto v = sort_rand<float>(rc);
     const auto wo = UniformSampleSphere( u , v );
 	
     // Check whether the pdf actually matches the way rays are sampled
     const auto total0 = ParrallReduction<double, 8, 8 * 1024 * 1024>( [&](){
         Vector wi;
         float pdf = 0.0f;
-        const HenyeyGreenstein hg( sort_canonical() );
+        const HenyeyGreenstein hg( sort_rand<float>(rc) );
         hg.Sample( wo , wi , pdf );
         return pdf != 0.0f ? 1.0f / pdf : 0.0f;
     } );
@@ -49,15 +53,18 @@ TEST(PHASE_FUNCTION, DISABLED_HenyeyGreenstein_PDF_Sample_Accuracy) {
 }
 
 TEST(PHASE_FUNCTION, HenyeyGreenstein_PDF_Sample) {
-    const auto u = sort_canonical();
-    const auto v = sort_canonical();
+    RenderContext rc;
+    rc.Init();
+
+    const auto u = sort_rand<float>(rc);
+    const auto v = sort_rand<float>(rc);
     const auto wo = UniformSampleSphere( u , v );
 	
     // since HenyeyGreenstein has a precise pdf sampling policy, its pdf should be exactly the same with its value.
     ParrallRun<8, 1024 * 1024>( [&](){
         Vector wi;
         auto pdf = 0.0f;
-        const HenyeyGreenstein hg( sort_canonical() );
+        const HenyeyGreenstein hg( sort_rand<float>(rc) );
         hg.Sample( wo , wi , pdf );
 
         const auto hg_value = hg.P( wo , wi );

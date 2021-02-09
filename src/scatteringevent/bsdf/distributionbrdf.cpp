@@ -58,9 +58,9 @@ Spectrum DistributionBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSamp
     /*
     // Somehow the importance sampling algorithm is even worse than the default sampling algorithm, keep 20% chance of default sampling to remove fireflies
     const auto specRatio = specular * 0.8f;
-    const auto r = sort_canonical();
+    const auto r = sort_rand<float>(rc);
     if( r < specRatio ){
-        const auto v = sort_canonical() * ( 1.0f + A * alphaSqr );
+        const auto v = sort_rand<float>(rc) * ( 1.0f + A * alphaSqr );
 
         // The equation to importance sample the pdf is
         //  epsilon = ( sin(\theta)^2 + A * alpha^2 * exp( ( 1.0f - 1.0f / sin(\theta)^2 ) ) / alpha^2 ) ) / ( 1 + A * alpha^2 )
@@ -77,7 +77,7 @@ Spectrum DistributionBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSamp
         }
         const auto sin_theta = sqrt( l );
         const auto cos_theta = sqrt( 1.0f - l );
-        const auto phi = TWO_PI * sort_canonical();
+        const auto phi = TWO_PI * sort_rand<float>(rc);
         const auto wh = sphericalVec( sin_theta , cos_theta , phi );
         wi = reflect( wo , wh );
     }else{

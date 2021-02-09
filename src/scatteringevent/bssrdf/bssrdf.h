@@ -162,7 +162,7 @@ protected:
     //! @brief  Sample a channel
     //!
     //! @return         Randomly pick a channel in spectrum, in which the mean free path is not zero.
-    virtual int         Sample_Ch() const = 0;
+    virtual int         Sample_Ch(RenderContext& rc) const = 0;
 
     Vector nn;          /**< Normal at the point to be Evaluated. */
     Vector btn;         /**< Bi-tangent at the point to be evaluated. */

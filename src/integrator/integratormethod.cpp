@@ -220,7 +220,7 @@ Spectrum    EvaluateDirect(const Point& ip, const PhaseFunction* ph, const Vecto
 Spectrum SampleOneLight( const ScatteringEvent& se , const Ray& r, const SurfaceInteraction& inter, const Scene& scene, const MaterialBase* material, const MediumStack& ms, RenderContext& rc) {
     // Uniformly choose a light, this may not be the optimal solution in case of more lights, need more research in this topic later.
     float light_pick_pdf = 0.0f;
-    const auto light = scene.SampleLight( sort_canonical() , &light_pick_pdf );
+    const auto light = scene.SampleLight( sort_rand<float>(rc) , &light_pick_pdf );
     if(IS_PTR_INVALID(light))
         return 0.0f;
 

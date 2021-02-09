@@ -225,18 +225,18 @@ Spectrum Hair::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, floa
 
     float apPdf[PMAX + 1] = {0.0f};
     ComputeApPdf( cosThetaO , cosThetaT , cosGammaO , cosGammaT , m_eta , m_sigma , apPdf );
-    auto r = sort_canonical();
+    auto r = sort_rand<float>(rc);
     auto p = 0;
     for( ; p < PMAX ; ++p ){
         if( r < apPdf[p] ) break;
         r -= apPdf[p];
     }
 
-    r = sort_canonical();
+    r = sort_rand<float>(rc);
     // special handling for corner case where 'r' equals to 0, leading exp( -2.0f / m_v[p] ) potentially reaches 0, eventually resulting in a 'Nan'
     const auto cosTheta = r > 0.0f ? ( 1.0f + m_v[p] * log( r + ( 1.0f - r ) * exp( -2.0f / m_v[p] ) ) ) : -1.0f ;
     const auto sinTheta = ssqrt( 1.0f - SQR( cosTheta ) );
-    const auto cosPhi = cos( TWO_PI * sort_canonical() );
+    const auto cosPhi = cos( TWO_PI * sort_rand<float>(rc) );
     auto sinThetaI = -cosTheta * sinThetaO + sinTheta * cosPhi * cosThetaO;
     auto cosThetaI = ssqrt( 1.0f - SQR( sinThetaI ) );
 
@@ -260,7 +260,7 @@ Spectrum Hair::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, floa
 
     const auto gammaO = asin( clamp( sinGammaO , -1.0f , 1.0f ) );
     const auto gammaT = asin( clamp( sinGammaT , -1.0f , 1.0f ) );
-    const auto dphi = ( p < PMAX ) ? Phi( p , gammaO , gammaT ) + SampleTrimmedLogistic( sort_canonical() , m_scale , -PI , PI ) : TWO_PI * sort_canonical();
+    const auto dphi = ( p < PMAX ) ? Phi( p , gammaO , gammaT ) + SampleTrimmedLogistic( sort_rand<float>(rc) , m_scale , -PI , PI ) : TWO_PI * sort_rand<float>(rc);
 
     const auto phiI = phiO + dphi;
     wi = Vector3f( sinThetaI , cosThetaI * sin( phiI ) , cosThetaI * cos( phiI ) );

@@ -47,12 +47,20 @@ struct RenderContextWrapper{
 static RenderContextWrapper g_rc;
 }
 
+static float sort_rand_float(){
+    thread_local static RenderContext rc;
+    if(!rc.IsInitialized())
+        rc.Init();
+    
+    return sort_rand<float>(rc);
+}
+
 // A physically based BRDF should obey the rule of reciprocity
 void checkReciprocity(const Bxdf* bxdf) {
     spinlock_mutex mutex;
     ParrallRun<8,128>( [&]() {
-        const Vector wi = UniformSampleSphere(sort_canonical(), sort_canonical());
-        const Vector wo = UniformSampleSphere(sort_canonical(), sort_canonical());
+        const Vector wi = UniformSampleSphere(sort_rand_float(), sort_rand_float());
+        const Vector wo = UniformSampleSphere(sort_rand_float(), sort_rand_float());
 
         const auto f0 = bxdf->F(wo, wi) * absCosTheta(wo);
         const auto f1 = bxdf->F(wi, wo) * absCosTheta(wi);
@@ -81,7 +89,7 @@ void checkEnergyConservation(const Bxdf* bxdf) {
 // The exact algorithm is mentioned in my blog, except that the following algorithm also evaluates BTDF
 // https://agraphicsguy.wordpress.com/2018/03/09/how-does-pbrt-verify-bxdf/
 void checkPdf( const Bxdf* bxdf ){
-    Vector wo = UniformSampleHemisphere( sort_canonical() , sort_canonical() );
+    Vector wo = UniformSampleHemisphere( sort_rand_float() , sort_rand_float() );
 
     // Check whether pdf and spectrum value from Sample_F matches the Pdf and F functions
     spinlock_mutex mutex;
@@ -109,7 +117,7 @@ void checkPdf( const Bxdf* bxdf ){
     // leading to 'invalid' sampling, which is simply dropped by setting pdf to 0.0.
     {
         double total = ParrallReduction<double, 8, 1024 * 1024 * 2>( [&](){
-            Vector wi = UniformSampleSphere(sort_canonical(), sort_canonical());
+            Vector wi = UniformSampleSphere(sort_rand_float(), sort_rand_float());
             float pdf = UniformSpherePdf();
             return pdf > 0.0f ? bxdf->Pdf(wo, wi) / pdf : 0.0f;
         } );
@@ -148,28 +156,28 @@ TEST(BXDF, LabmertTransmittion) {
 }
 
 TEST(BXDF, OrenNayar) {
-    OrenNayar orenNayar(*g_rc.rc, WHITE_SPECTRUM, sort_canonical(), FULL_WEIGHT, DIR_UP);
+    OrenNayar orenNayar(*g_rc.rc, WHITE_SPECTRUM, sort_rand_float(), FULL_WEIGHT, DIR_UP);
     checkAll(&orenNayar);
 }
 
 TEST(BXDF, Phong) {
-    const float ratio = sort_canonical();
-    Phong phong(*g_rc.rc, WHITE_SPECTRUM * ratio , WHITE_SPECTRUM * ( 1.0f - ratio ) , sort_canonical(), FULL_WEIGHT , DIR_UP);
+    const float ratio = sort_rand_float();
+    Phong phong(*g_rc.rc, WHITE_SPECTRUM * ratio , WHITE_SPECTRUM * ( 1.0f - ratio ) , sort_rand_float(), FULL_WEIGHT , DIR_UP);
     checkAll(&phong, false);
 }
 
 // Sometimes it doesn't always pass, need investigation.
 TEST(BXDF, DISABLED_AshikhmanShirley) {
-    AshikhmanShirley as(*g_rc.rc, WHITE_SPECTRUM , sort_canonical() , sort_canonical() , sort_canonical() , FULL_WEIGHT , DIR_UP );
+    AshikhmanShirley as(*g_rc.rc, WHITE_SPECTRUM , sort_rand_float() , sort_rand_float() , sort_rand_float() , FULL_WEIGHT , DIR_UP );
     checkAll(&as);
 }
 
 // https://blog.selfshadow.com/publications/s2015-shading-course/burley/s2015_pbs_disney_bsdf_notes.pdf
 // Disney BRDF is not strictly energy conserving, please refer the above link for further detail ( chapter 5.1 ).
 TEST(BXDF, DISABLED_Disney) {
-    DisneyBRDF disney(*g_rc.rc, WHITE_SPECTRUM , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() ,
-                       sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() ,
-                       sort_canonical() , sort_canonical() , 0 , FULL_WEIGHT , DIR_UP );
+    DisneyBRDF disney(*g_rc.rc, WHITE_SPECTRUM , sort_rand_float() , sort_rand_float() , sort_rand_float() , sort_rand_float() , sort_rand_float() ,
+                       sort_rand_float() , sort_rand_float() , sort_rand_float() , sort_rand_float() , sort_rand_float() , sort_rand_float() ,
+                       sort_rand_float() , sort_rand_float() , 0 , FULL_WEIGHT , DIR_UP );
     checkAll(&disney);
 }
 
@@ -182,15 +190,15 @@ TEST(BXDF, DISABLED_MicroFacetReflection) {
 
 TEST(BXDF, MicroFacetRefraction) {
     const FresnelConductor fresnel( 1.0f , 1.5f );
-    const GGX ggx( sort_canonical() , sort_canonical() );
-    MicroFacetRefraction mr( *g_rc.rc, WHITE_SPECTRUM , &ggx , sort_canonical() , sort_canonical() , FULL_WEIGHT , DIR_UP );
+    const GGX ggx( sort_rand_float() , sort_rand_float() );
+    MicroFacetRefraction mr( *g_rc.rc, WHITE_SPECTRUM , &ggx , sort_rand_float() , sort_rand_float() , FULL_WEIGHT , DIR_UP );
     checkAll( &mr , false , false , true );
 }
 
 TEST(BXDF, Dielectric) {
     const FresnelConductor fresnel( 1.0f , 1.5f );
-    const GGX ggx( sort_canonical() , sort_canonical() );
-    Dielectric dielectric( *g_rc.rc, WHITE_SPECTRUM , WHITE_SPECTRUM , &ggx , sort_canonical() , sort_canonical() , FULL_WEIGHT , DIR_UP );
+    const GGX ggx( sort_rand_float() , sort_rand_float() );
+    Dielectric dielectric( *g_rc.rc, WHITE_SPECTRUM , WHITE_SPECTRUM , &ggx , sort_rand_float() , sort_rand_float() , FULL_WEIGHT , DIR_UP );
     checkAll( &dielectric , false , false , true );
 }
 
@@ -208,7 +216,7 @@ TEST(BXDF, DISABLED_DreamWork_Fabric) {
 TEST(BXDF, DISABLED_HairFurnace) {
     Spectrum sigma_a = 0.0f;
 
-    Vector3f wo = UniformSampleHemisphere(sort_canonical(), sort_canonical());
+    Vector3f wo = UniformSampleHemisphere(sort_rand_float(), sort_rand_float());
     for (float beta_m = 0.0f; beta_m <= 1.0f; beta_m += 0.2f) {
         for (float beta_n = 0.0f; beta_n <= 1.0f; beta_n += 0.2f) {
             // Estimate reflected uniform incident radiance from hair
@@ -216,7 +224,7 @@ TEST(BXDF, DISABLED_HairFurnace) {
             constexpr int CNT = 1024 * 256;
             Hair hair(*g_rc.rc, sigma_a, beta_m, beta_n, 1.55f, FULL_WEIGHT);
             sum += ParrallReduction<float, 8, CNT>([&]() {
-                Vector3f wi = UniformSampleSphere(sort_canonical(), sort_canonical());
+                Vector3f wi = UniformSampleSphere(sort_rand_float(), sort_rand_float());
                 EXPECT_GE(hair.f(wo, wi).GetIntensity(), 0.00f);
                 return hair.f(wo, wi).GetIntensity() / UniformSpherePdf();
             });
@@ -233,7 +241,7 @@ TEST(BXDF, HairPDFConsistant) {
 
     // Since the PDF of hair BXDF matches exactly with its BXDF value itself, there is a special PDF verification process for hair.
     auto checkPDF = [] ( const Bxdf* bxdf ){
-        const auto wo = UniformSampleHemisphere( sort_canonical() , sort_canonical() );
+        const auto wo = UniformSampleHemisphere( sort_rand_float() , sort_rand_float() );
 
         spinlock_mutex mutex0;
         ParrallRun<8,128>( [&]() {
@@ -273,7 +281,7 @@ TEST(BXDF, DISABLED_HairSamplingConsistance) {
         constexpr int CNT = 1024 * 64;
         const auto Li = []( const Vector& w ) -> Spectrum { return w.y * w.y ; };
 
-        Vector wo = UniformSampleHemisphere( sort_canonical() , sort_canonical() );
+        Vector wo = UniformSampleHemisphere( sort_rand_float() , sort_rand_float() );
         spinlock_mutex mutex1;
         Spectrum uni , imp;
         ParrallRun<8, CNT>( [&](){
@@ -281,7 +289,7 @@ TEST(BXDF, DISABLED_HairSamplingConsistance) {
             float pdf;
             auto f0 = bxdf->Sample_F( wo , wi0 , BsdfSample() , &pdf );
             f0 = pdf > 0.0f ? f0 * Li( wi0 ) / pdf : Spectrum(0.0f);
-            const auto wi1 = UniformSampleSphere( sort_canonical() , sort_canonical() );
+            const auto wi1 = UniformSampleSphere( sort_rand_float() , sort_rand_float() );
             const auto f1 = bxdf->F( wo , wi1 ) * Li( wi1 ) / UniformSpherePdf();
 
             std::lock_guard<spinlock_mutex> lock(mutex1);

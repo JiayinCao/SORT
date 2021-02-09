@@ -19,10 +19,14 @@
 #include "stream/fstream.h"
 #include "stream/mstream.h"
 #include "core/rand.h"
+#include "core/render_context.h"
 
 #define STREAM_SAMPLE_COUNT 10000
 
 TEST(STREAM, FileStream) {
+    RenderContext rc;
+    rc.Init();
+
     std::vector<float>           vec_f;
     std::vector<int>             vec_i;
     std::vector<unsigned int>    vec_u;
@@ -34,9 +38,9 @@ TEST(STREAM, FileStream) {
     std::string empty_str = "";
     ofile<<empty_str;
     for (unsigned i = 0; i < STREAM_SAMPLE_COUNT; ++i) {
-        vec_f.push_back( sort_canonical() );
-        vec_i.push_back( (int)( ( 2.0f * sort_canonical() - 1.0f ) * STREAM_SAMPLE_COUNT ) );
-        vec_u.push_back( (unsigned int)( sort_canonical() * STREAM_SAMPLE_COUNT ) );
+        vec_f.push_back( sort_rand<float>(rc) );
+        vec_i.push_back( (int)( ( 2.0f * sort_rand<float>(rc) - 1.0f ) * STREAM_SAMPLE_COUNT ) );
+        vec_u.push_back( (unsigned int)( sort_rand<float>(rc) * STREAM_SAMPLE_COUNT ) );
         ofile << vec_f.back() << vec_i.back() ;
         ofile << vec_u.back();
     }
@@ -64,6 +68,9 @@ TEST(STREAM, FileStream) {
 }
 
 TEST(STREAM, MemoryStream) {
+    RenderContext rc;
+    rc.Init();
+    
     std::vector<float>           vec_f;
     std::vector<int>             vec_i;
     std::vector<unsigned int>    vec_u;
@@ -75,9 +82,9 @@ TEST(STREAM, MemoryStream) {
     std::string empty_str = "";
     ostream <<empty_str;
     for (unsigned i = 0; i < STREAM_SAMPLE_COUNT; ++i) {
-        vec_f.push_back( sort_canonical() );
-        vec_i.push_back( (int)( ( 2.0f * sort_canonical() - 1.0f ) * STREAM_SAMPLE_COUNT ) );
-        vec_u.push_back( (unsigned int)( sort_canonical() * STREAM_SAMPLE_COUNT ) );
+        vec_f.push_back( sort_rand<float>(rc) );
+        vec_i.push_back( (int)( ( 2.0f * sort_rand<float>(rc) - 1.0f ) * STREAM_SAMPLE_COUNT ) );
+        vec_u.push_back( (unsigned int)( sort_rand<float>(rc) * STREAM_SAMPLE_COUNT ) );
         ostream << vec_f.back() << vec_i.back() ;
         ostream << vec_u.back();
     }

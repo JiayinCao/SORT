@@ -48,7 +48,7 @@ void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Po
         vz = btn;
     }
 
-    const auto ch = Sample_Ch();
+    const auto ch = Sample_Ch(rc);
     const auto tmp = sort_canonical();
     const auto r = Sample_Sr(ch, tmp);
 

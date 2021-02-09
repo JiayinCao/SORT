@@ -37,7 +37,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
 
     // pick a light randomly
     float pdf;
-    const auto light = scene.SampleLight( sort_canonical() , &pdf );
+    const auto light = scene.SampleLight( sort_rand<float>(rc) , &pdf );
     if( light == 0 || pdf == 0.0f )
         return 0.0f;
 
@@ -96,7 +96,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
         _ConnectCamera( vert , (unsigned)light_path.size() , light , scene, rc );
 
         // russian roulette
-        if (sort_canonical() > rr)
+        if (sort_rand<float>(rc) > rr)
             break;
 
         float bsdf_pdf;
@@ -201,7 +201,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
         ++light_path_len;
 
         // Russian Roulette
-        if (sort_canonical() > rr)
+        if (sort_rand<float>(rc) > rr)
             break;
 
         float bsdf_pdf;

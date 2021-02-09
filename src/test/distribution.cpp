@@ -36,8 +36,11 @@ void checkDist( const MicroFacetDistribution* dist ){
 
 // Check Pdf
 void checkPdf( const MicroFacetDistribution* dist ){
+    RenderContext rc;
+    rc.Init();
+
     double final_total = ParrallReduction<double, 8>( [&](){
-            const Vector h = UniformSampleHemisphere(sort_canonical(), sort_canonical());
+            const Vector h = UniformSampleHemisphere(sort_rand<float>(rc), sort_rand<float>(rc));
             const float pdf = UniformHemispherePdf();
             return pdf > 0.0f ? dist->Pdf(h) / pdf : 0.0f;
         } );

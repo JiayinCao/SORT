@@ -84,7 +84,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
 
             // evaluate direct light illumination
             float light_pdf = 0.0f;
-            const auto  light = scene.SampleLight(sort_canonical(), &light_pdf);
+            const auto  light = scene.SampleLight(sort_rand<float>(rc), &light_pdf);
             L += throughput * EvaluateDirect(pMi->intersect, pMi->phaseFunction, -r.m_Dir, scene, light, ms, rc) / light_pdf;
 
             // update path weight
@@ -100,7 +100,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             // apply Prussian Roulette in volume scattering too
             if (bounces > 3 && throughput.GetMaxComponent() < 0.1f) {
                 auto continueProperbility = std::max(0.05f, 1.0f - throughput.GetMaxComponent());
-                if (sort_canonical() < continueProperbility)
+                if (sort_rand<float>(rc) < continueProperbility)
                     break;
                 throughput /= 1 - continueProperbility;
             }
@@ -243,7 +243,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
 
         if( bounces > 3 && throughput.GetMaxComponent() < 0.1f ){
             auto continueProperbility = std::max( 0.05f , 1.0f - throughput.GetMaxComponent() );
-            if( sort_canonical() < continueProperbility )
+            if( sort_rand<float>(rc) < continueProperbility )
                 break;
             throughput /= 1 - continueProperbility;
         }

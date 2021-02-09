@@ -130,8 +130,8 @@ DisneyBssrdf::DisneyBssrdf( const SurfaceInteraction* intersection , const Spect
     d = l.Clamp( 0.0001f , FLT_MAX ) / s;
 }
 
-int DisneyBssrdf::Sample_Ch() const{
-    auto ch = clamp( (int)(sort_canonical() * channels) , 0 , channels - 1 );
+int DisneyBssrdf::Sample_Ch(RenderContext& rc) const{
+    auto ch = clamp( (int)(sort_rand<float>(rc) * channels) , 0 , channels - 1 );
 #ifdef SSS_REPLACE_WITH_LAMBERT
     // Here it is assumed that the spectrum is RGB only. 
     // This code needs change if SORT needs to support full spectrum rendering, which is not my plan for now.
@@ -324,7 +324,7 @@ Spectrum DisneyBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
     //const auto dt_w = diffuse_transmission_weight * inv_total_weight + dr_w;
 
     const GGX ggx(roughness / aspect, roughness * aspect);
-    const auto r = sort_canonical();
+    const auto r = sort_rand<float>(rc);
     if (r <= cc_w) {
         BsdfSample sample(true);
         Vector wh;
@@ -357,7 +357,7 @@ Spectrum DisneyBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
             // it is intentional to leave it empty
             sAssertMsg( false , MATERIAL , "Incorrect sampling in Disney BRDF, something is wrong." );
         }else{
-            wi = CosSampleHemisphere(sort_canonical(), sort_canonical());
+            wi = CosSampleHemisphere(sort_rand<float>(rc), sort_rand<float>(rc));
         }
     }else // if( r <= dt_w )
     {

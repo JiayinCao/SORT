@@ -39,7 +39,7 @@ void InstantRadiosity::PreProcess( const Scene& scene , RenderContext& rc )
         for( int i = 0 ; i < m_nLightPaths ; ++i ){
             // pick a light first
             float light_pick_pdf;
-            const Light* light = scene.SampleLight( sort_canonical() , &light_pick_pdf );
+            const Light* light = scene.SampleLight( sort_rand<float>(rc) , &light_pick_pdf );
 
             // sample a ray from the light source
             float   light_emission_pdf = 0.0f;
@@ -75,7 +75,7 @@ void InstantRadiosity::PreProcess( const Scene& scene , RenderContext& rc )
 
                 // apply russian roulette
                 float continueProperbility = std::min( 1.0f , throughput.GetIntensity() );
-                if( sort_canonical() > continueProperbility )
+                if( sort_rand<float>(rc) > continueProperbility )
                     break;
                 throughput /= continueProperbility;
 
@@ -120,7 +120,7 @@ Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene, RenderContext
         *first_intersect_dist = ip.t;
 
     // pick a virtual light source randomly
-    const unsigned lps_id = std::min( m_nLightPathSet - 1 , (int)(sort_canonical() * m_nLightPathSet) );
+    const unsigned lps_id = std::min( m_nLightPathSet - 1 , (int)(sort_rand<float>(rc) * m_nLightPathSet) );
     std::list<VirtualLightSource> vps = m_pVirtualLightSources[lps_id];
 
     ScatteringEvent se( ip , SE_EVALUATE_ALL_NO_SSS );

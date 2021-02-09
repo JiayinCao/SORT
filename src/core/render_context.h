@@ -20,6 +20,7 @@
 #include <memory>
 #include "core/define.h"
 #include "core/memory.h"
+#include "core/rand.h"
 
 struct Qbvh_Node;
 struct Obvh_Node;
@@ -39,15 +40,23 @@ struct RenderContext{
     //! Memory allocator for small piece of memory
     std::unique_ptr<MemoryAllocator>                m_memory_arena;
 
-    std::unique_ptr<std::pair<Qbvh_Node*, float>[]> m_fast_qbvh_stack = nullptr;
-    std::unique_ptr<Qbvh_Node*[]>                   m_fast_qbvh_stack_simple = nullptr;
+    std::unique_ptr<std::pair<Qbvh_Node*, float>[]> m_fast_qbvh_stack;
+    std::unique_ptr<Qbvh_Node*[]>                   m_fast_qbvh_stack_simple;
 
     std::unique_ptr<std::pair<Obvh_Node*, float>[]> m_fast_obvh_stack;
     std::unique_ptr<Obvh_Node*[]>                   m_fast_obvh_stack_simple;
 
+    std::unique_ptr<RandomNumberGenerator>          m_random_num_generator;
+
     //! @brief  Initialize the render context, only needs to be done once.
     void Init(){
         m_memory_arena = std::make_unique<MemoryAllocator>();
+        m_random_num_generator = std::make_unique<RandomNumberGenerator>();
+
+        m_fast_qbvh_stack = nullptr;
+        m_fast_qbvh_stack_simple = nullptr;
+        m_fast_obvh_stack = nullptr;
+        m_fast_obvh_stack_simple = nullptr;
     }
 
     //! @brief  If the render context is initialized
