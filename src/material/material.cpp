@@ -242,7 +242,7 @@ void Material::Serialize(IStreamBase& stream){
 
 void Material::UpdateScatteringEvent( ScatteringEvent& se, RenderContext& rc ) const {
     // all lambert surfaces if the render is in no material mode.
-    if (UNLIKELY(g_noMaterial || ( !m_surface_shader_valid && !m_special_transparent ))) {
+    if (UNLIKELY(MatManager::GetSingleton().IsNoMaterialMode() || ( !m_surface_shader_valid && !m_special_transparent ))) {
         se.AddBxdf(SORT_MALLOC(rc.m_memory_arena, Lambert)(rc, WHITE_SPECTRUM, FULL_WEIGHT, DIR_UP));
         return;
     }

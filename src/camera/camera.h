@@ -68,6 +68,11 @@ public:
     virtual Vector2i GetScreenCoord(const SurfaceInteraction& inter, float* pdfw, float* pdfa, float& cosAtCamera , Spectrum* we ,
                                     Point* eyeP , Visibility* visibility, RenderContext& rc) const = 0;
 
+    //! @brief Get targe image resolution
+    virtual Vector2i GetImageResolution() const {
+        return Vector2i(m_image_width, m_image_height);
+    }
+
 protected:
     Point           m_eye;                      /**< Viewing point of the camera. */
     float           m_sensorW = 0.0f;           /**< Image sensor width. */

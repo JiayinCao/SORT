@@ -169,6 +169,7 @@ void FullTargetUpdate::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
     // WARNING, this thread might result in some unknown results because of unguarded data racing. However, it is not a big
     // deal to reveal slightly inconsistent data as long as the final result is fine.
 
+#if 0
     OSocketStream& stream = *ptr_stream;
 
     if (g_blenderMode) {
@@ -231,4 +232,5 @@ void FullTargetUpdate::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
             stream.Flush();
         }
     }
+#endif
 }

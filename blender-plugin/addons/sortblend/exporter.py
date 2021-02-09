@@ -416,7 +416,6 @@ def export_global_config(scene, fs, sort_resource_path):
     fs.serialize( 0 )
     fs.serialize( sort_resource_path )
     fs.serialize( sort_output_file )
-    fs.serialize( 64 )    # tile size, hard-coded it until I need to update it throught exposed interface later.
     fs.serialize( int(sort_data.thread_num_prop) )
     fs.serialize( int(sort_data.sampler_count_prop) )
     fs.serialize( int(xres) )

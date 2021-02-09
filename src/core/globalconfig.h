@@ -25,7 +25,6 @@
 #include "accel/accelerator.h"
 #include "integrator/integrator.h"
 #include "core/rtti.h"
-#include "imagesensor/rendertargetimage.h"
 #include "core/display_mgr.h"
 #include "core/log.h"
 
@@ -130,37 +129,6 @@ public:
         return m_inputFile;
     }
 
-    //! @brief      Get image sensor.
-    //!
-    //! @return     Image sensor.
-    ImageSensor*    GetImageSensor(){
-        return m_imageSensor.get();
-    }
-
-    //! @brief      Whether there is material support in SORT.
-    //!
-    //! @return     'True' if there is no material support.
-    bool            GetNoMaterial() const{
-        return m_noMaterialSupport;
-    }
-
-    //! @brief      Get clampping of radiance value.
-    //!
-    //! Before there is a better firefly cancelling solution, clampping is the easy low hanging fruit.
-    //! Clampping value with 0 means there is no clampping.
-    //!
-    //! @return     Clampping value.
-    float           GetClampping() const{
-        return m_clampping;
-    }
-
-    //! @brief      Get title of the image.
-    //!
-    //! This is pretty much only for tev.
-    const std::string& GetTitle() const {
-        return m_title;
-    }
-
     //! @brief      Parse command line.
     //!
     //! This is not a perfect way to parse command line arguments. If there is a space in the path,
@@ -250,17 +218,11 @@ public:
         m_integrator = MakeUniqueInstance<Integrator>(integratorType);
         if(IS_PTR_VALID(m_integrator))
             m_integrator->Serialize( stream );
-
-        m_imageSensor = std::make_unique<RenderTargetImage>( m_resWidth , m_resHeight );
-
-        std::string s = logTimeString();
-        m_title = m_outputFile + s;
     };
 
 private:
     std::string                     m_resourcePath = "";            /**< Full path of the resource files. */
     std::string                     m_outputFile;                   /**< Name of the output file. */
-    std::string                     m_title;                        /**< Title of the file. */
     unsigned int                    m_tileSize = 64;                /**< Size of tile for tasks to render each time. */
     unsigned int                    m_resWidth = 1024;              /**< Width of the result resolution. */
     unsigned int                    m_resHeight = 1024;             /**< Height of the result resolution. */
@@ -269,8 +231,7 @@ private:
     std::unique_ptr<Accelerator>    m_accelerator = nullptr;        /**< Spatial accelerator for accelerating primitive/ray intersection test. */
     std::unique_ptr<Accelerator>    m_acceleratorVol = nullptr;     /**< Spatial accelerator for accelerating primitive/ray intersection test, this is only for primitives that has volumes attached to them. */
     std::unique_ptr<Integrator>     m_integrator = nullptr;         /**< Integrator used to evaluate rendering equation. */
-    std::unique_ptr<ImageSensor>    m_imageSensor = nullptr;        /**< Image sensor to hold the result of ray tracing. */
-
+    
     bool                            m_blenderMode = false;          /**< Whether the current running instance is attached with Blender. */
     bool                            m_unitTestMode = false;         /**< Whether the current running instance is in unit test mode. */
     bool                            m_profilingEnalbed = false;     /**< Whether profiling is enabled in SORT. Since there is a big performance issue during rendering, it is turned off by default.*/
@@ -299,9 +260,4 @@ private:
 #define g_resultResollutionWidth    GlobalConfiguration::GetSingleton().GetResultResolution().x
 #define g_resultResollutionHeight   GlobalConfiguration::GetSingleton().GetResultResolution().y
 #define g_unitTestMode              GlobalConfiguration::GetSingleton().GetIsUnitTestMode()
-#define g_inputFilePath             GlobalConfiguration::GetSingleton().GetInputFilePath()
-#define g_imageSensor               GlobalConfiguration::GetSingleton().GetImageSensor()
 #define g_profilingEnabled          GlobalConfiguration::GetSingleton().GetIsProfilingEnabled()
-#define g_noMaterial                GlobalConfiguration::GetSingleton().GetNoMaterial()
-#define g_clammping                 GlobalConfiguration::GetSingleton().GetClampping()
-#define g_imageTitle                GlobalConfiguration::GetSingleton().GetTitle();

@@ -46,7 +46,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
     loadConfig(stream);
 
     // Load materials from stream
-    MatManager::GetSingleton().ParseMatFile(stream);
+    MatManager::GetSingleton().ParseMatFile(stream, m_no_material_mode);
 
     // Serialize the scene entities
     m_scene.LoadScene(stream);
@@ -111,7 +111,6 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
     int cur_dir_len = 1;
     const Vector2i dir[4] = { Vector2i(0 , -1) , Vector2i(-1 , 0) , Vector2i(0 , 1) , Vector2i(1 , 0) };
 
-    unsigned int priority = DEFAULT_TASK_PRIORITY;
     while (true) {
         // only process node inside the image region
         if (cur_pos.x >= 0 && cur_pos.x < tile_num.x && cur_pos.y >= 0 && cur_pos.y < tile_num.y) {
@@ -285,12 +284,12 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
 
         cur_pos += dir[cur_dir];
         ++cur_len;
+
         if ((cur_pos.x < 0 || cur_pos.x >= tile_num.x) && (cur_pos.y < 0 || cur_pos.y >= tile_num.y))
             break;
     }
 
-    static Timer timer;
-
+    Timer timer;
     while (m_tile_cnt > 0) {
         if (UNLIKELY(m_integrator->NeedFullTargetRealtimeUpdate())) {
             // only update it every 1 second
@@ -312,7 +311,26 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
 }
 
 int ImageEvaluation::WaitForWorkToBeDone() {
-    
+    const bool display_server_connected = DisplayManager::GetSingleton().IsDisplayServerConnected();
+    if (display_server_connected) {
+        // some integrator might need a final refresh
+        if (UNLIKELY(m_integrator->NeedFinalUpdate())) {
+            std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>();
+            di->title = m_image_title;
+            DisplayManager::GetSingleton().QueueDisplayItem(di);
+        }
+
+        // terminator is only needed in blender mode
+        if (m_blender_mode) {
+            std::shared_ptr<TerminateIndicator> terminator = std::make_shared<TerminateIndicator>();
+            DisplayManager::GetSingleton().QueueDisplayItem(terminator);
+        }
+
+        // make sure flush all display items before quiting
+        DisplayManager::GetSingleton().ProcessDisplayQueue(-1);
+    }
+
+    DestroyTSLThreadContexts();
     return 0;
 }
 

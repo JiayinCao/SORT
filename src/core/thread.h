@@ -25,27 +25,6 @@
 #include <atomic>
 #include "core/define.h"
 
-class WorkerThread{
-public:
-    // Constructor
-    WorkerThread( unsigned tid ) : m_tid(tid) {}
-
-    // Begin thread
-    void BeginThread();
-
-    // Run the thread
-    void RunThread();
-
-    // Whether the thread is finished
-    void Join() {
-        return m_thread.join();
-    }
-
-private:
-    std::thread m_thread;
-    unsigned    m_tid = 0;
-};
-
 class spinlock_mutex{
 public:
     void lock() {

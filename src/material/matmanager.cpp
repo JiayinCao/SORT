@@ -30,31 +30,6 @@
 #include <future>
 #endif
 
-#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
-#include "old_task/task.h"
-#endif
-
-#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
-//! @brief  A task for compiling materials in a seperate thread
-class CompileMaterial_Task : public old_task::Task {
-public:
-    //! @brief Constructor
-    //!
-    //! @param priority     New priority of the task.
-    CompileMaterial_Task(Material* material, const char* name, unsigned int priority,
-        const Task::Task_Container& dependencies) :
-        Task(name, priority, dependencies), material(material) {}
-
-    //! @brief  Execute the task
-    void        Execute() override {
-        material->BuildMaterial();
-    }
-
-private:
-    Material* material;
-};
-#endif
-
 namespace {
     struct ShaderResourceBinding {
         std::string resource_handle_name;
@@ -74,8 +49,12 @@ static void async_build_material(MaterialBase* material) {
 }
 #endif
 
+bool MatManager::IsNoMaterialMode() const {
+    return m_no_material_mode;
+}
+
 // parse material file and add the materials into the manager
-unsigned MatManager::ParseMatFile( IStreamBase& stream ){
+unsigned MatManager::ParseMatFile( IStreamBase& stream , const bool no_mat){
     SORT_PROFILE("Parsing Materials");
 
     auto resource_cnt = 0u;
@@ -123,7 +102,7 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
         }
     }
 
-    const bool noMaterialSupport = g_noMaterial;
+    m_no_material_mode = no_mat;
 
     StringID material_type;
     while (true) {
@@ -303,13 +282,12 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
             // serialize the material
             mat->Serialize(stream);
 
-            if (LIKELY(!noMaterialSupport)) {
+            if (LIKELY(!m_no_material_mode)) {
          
 #ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION_CHEAP
                 async_material_building.push_back(std::async(std::launch::async, async_build_material, mat.get()));
 #elif defined(ENABLE_MULTI_THREAD_SHADER_COMPILATION)
                 // build the material asynchronously
-                SCHEDULE_TASK<CompileMaterial_Task>("Compiling Material", DEFAULT_TASK_PRIORITY, {}, mat.get());
 #else
                 // build the material
                 mat->BuildMaterial();
