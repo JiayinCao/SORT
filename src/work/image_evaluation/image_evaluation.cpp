@@ -41,6 +41,10 @@ SORT_STATS_COUNTER("Performance", "Worker thread number", sThreadCnt);
 static constexpr unsigned int GLOBAL_CONFIGURATION_VERSION = 0;
 static constexpr unsigned int IMAGE_TILE_SIZE = 64;
 
+void thread_shut_down(int id) {
+    SortStatsFlushData();
+}
+
 void ImageEvaluation::StartRunning(int argc, char** argv) {
     m_image_title = "sort_" + logTimeString() + ".exr";
 
@@ -84,6 +88,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
     // setup job system
     marl::Scheduler::Config cfg;
     cfg.setWorkerThreadCount(m_thread_cnt);
+    cfg.setWorkerThreadShutdown(thread_shut_down);
 
     marl::Scheduler scheduler(cfg);
     scheduler.bind();
