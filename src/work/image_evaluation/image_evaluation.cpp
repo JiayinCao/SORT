@@ -29,10 +29,21 @@
 #include "sampler/random.h"
 #include "core/parse_args.h"
 
+SORT_STATS_DEFINE_COUNTER(sRenderingTimeMS)
+SORT_STATS_DEFINE_COUNTER(sSamplePerPixel)
+SORT_STATS_DEFINE_COUNTER(sThreadCnt)
+
+SORT_STATS_TIME("Performance", "Rendering Time", sRenderingTimeMS);
+SORT_STATS_AVG_RAY_SECOND("Performance", "Number of rays per second", sRayCount, sRenderingTimeMS);
+SORT_STATS_COUNTER("Statistics", "Sample per Pixel", sSamplePerPixel);
+SORT_STATS_COUNTER("Performance", "Worker thread number", sThreadCnt);
+
 static constexpr unsigned int GLOBAL_CONFIGURATION_VERSION = 0;
 static constexpr unsigned int IMAGE_TILE_SIZE = 64;
 
 void ImageEvaluation::StartRunning(int argc, char** argv) {
+    m_image_title = "sort_" + logTimeString() + ".exr";
+
     // parse command arugments first
     parseCommandArgs(argc, argv);
 
@@ -45,6 +56,9 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
     
     // load configuration
     loadConfig(stream);
+
+    if (!m_blender_mode)
+        m_render_target = std::make_unique<RenderTarget>(m_image_width, m_image_height);
 
     // Load materials from stream
     MatManager::GetSingleton().ParseMatFile(stream, m_no_material_mode);
@@ -62,6 +76,10 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
         image_info->is_blender_mode = m_blender_mode;
         DisplayManager::GetSingleton().QueueDisplayItem(image_info);
     }
+
+    SORT_STATS(TIMING_EVENT_STAT("", sRenderingTimeMS));
+    SORT_STATS(sSamplePerPixel = m_sample_per_pixel);
+    SORT_STATS(sThreadCnt = m_thread_cnt);
 
     // setup job system
     marl::Scheduler::Config cfg;
@@ -249,6 +267,9 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
                         if (valid_pixel_cnt > 0)
                             radiance /= (float)valid_pixel_cnt;
 
+                        if (!m_blender_mode)
+                            m_render_target->SetColor(j, i, radiance);
+
                         // update the value if display server is connected
                         if (display_server_connected && need_refresh_tile) {
                             auto local_i = i - ori.y;
@@ -313,6 +334,9 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
     }
 
     DisplayManager::GetSingleton().ProcessDisplayQueue(-1);
+
+    if(!m_blender_mode)
+        m_render_target->Output("sort_" + logTimeStringStripped() + ".exr");
 }
 
 int ImageEvaluation::WaitForWorkToBeDone() {
@@ -376,12 +400,6 @@ void ImageEvaluation::loadConfig(IStreamBase& stream) {
     sAssertMsg(GLOBAL_CONFIGURATION_VERSION == version, GENERAL, "Incompatible resource file with this version SORT.");
 
     stream >> m_resource_path;
-    std::string dummy_str;
-    stream >> dummy_str;
-
-    const std::string s = logTimeString();
-    m_image_title = dummy_str + s;
-
     stream >> m_thread_cnt;
     stream >> m_sample_per_pixel;
     stream >> m_image_width >> m_image_height;

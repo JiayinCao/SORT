@@ -405,7 +405,6 @@ def name_compat(name):
 # export glocal settings for the renderer
 def export_global_config(scene, fs, sort_resource_path):
     # global renderer configuration
-    sort_output_file = 'blender_generated.exr'
     xres = scene.render.resolution_x * scene.render.resolution_percentage / 100
     yres = scene.render.resolution_y * scene.render.resolution_percentage / 100
 
@@ -415,7 +414,6 @@ def export_global_config(scene, fs, sort_resource_path):
     
     fs.serialize( 0 )
     fs.serialize( sort_resource_path )
-    fs.serialize( sort_output_file )
     fs.serialize( int(sort_data.thread_num_prop) )
     fs.serialize( int(sort_data.sampler_count_prop) )
     fs.serialize( int(xres) )

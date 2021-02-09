@@ -43,7 +43,9 @@ bool Texture2DBase::Output( const std::string& name ){
 
         int ret = SaveEXR(data.get(), GetWidth(), GetHeight(), 3, true, name.c_str());
         if (ret < 0)
-            slog(WARNING, MATERIAL, "Fail to save image file %s", name.c_str());
+            slog(WARNING, GENERAL, "Fail to save image file %s", name.c_str());
+        else
+            slog(INFO, GENERAL, "Image file saved %s", name.c_str());
         return ret >= 0;
     }
 

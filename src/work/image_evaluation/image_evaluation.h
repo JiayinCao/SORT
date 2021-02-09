@@ -20,6 +20,7 @@
 #include <atomic>
 #include "../work.h"
 #include "integrator/integrator.h"
+#include "texture/rendertarget.h"
 
 //! @brief  Generating an image using ray tracing algorithms.
 /**
@@ -68,6 +69,8 @@ private:
     std::unique_ptr<Integrator>     m_integrator;       // the algorithm used for ray tracing
 
     std::atomic<int>                m_tile_cnt;         // number of total tiles
+
+    std::unique_ptr<RenderTarget>   m_render_target;    // a temporary buffer for saving out the result
 
     void    parseCommandArgs(int argc, char** argv);
 
