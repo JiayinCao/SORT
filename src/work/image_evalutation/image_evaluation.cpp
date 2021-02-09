@@ -15,61 +15,60 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
+#include <regex>
 #include "image_evaluation.h"
-#include "marl/defer.h"
-#include "marl/event.h"
-#include "marl/scheduler.h"
-#include "marl/waitgroup.h"
+#include "core/display_mgr.h"
+#include "stream/fstream.h"
 
-void ImageEvaluation::StartRunning(int argc, char** argv, IStreamBase& stream) {
+void ImageEvaluation::StartRunning(int argc, char** argv) {
+    // parse command arugments first
+    parseCommandArgs(argc, argv);
 
-    // this is really just to make sure it compiles and runs well on all platforms
-    // this will be deleted immediately after I verify it.
-    {
-        // Create a marl scheduler using the 4 hardware threads.
-        // Bind this scheduler to the main thread so we can call marl::schedule()
-        marl::Scheduler::Config cfg;
-        cfg.setWorkerThreadCount(4);
-
-        marl::Scheduler scheduler(cfg);
-        scheduler.bind();
-        defer(scheduler.unbind());  // Automatically unbind before returning.
-
-        constexpr int numTasks = 10;
-
-        // Create an event that is manually reset.
-        marl::Event sayHello(marl::Event::Mode::Manual);
-
-        // Create a WaitGroup with an initial count of numTasks.
-        marl::WaitGroup saidHello(numTasks);
-
-        // Schedule some tasks to run asynchronously.
-        for (int i = 0; i < numTasks; i++) {
-            // Each task will run on one of the 4 worker threads.
-            marl::schedule([=] {  // All marl primitives are capture-by-value.
-                // Decrement the WaitGroup counter when the task has finished.
-                defer(saidHello.done());
-
-                printf("Task %d waiting to say hello...\n", i);
-
-                // Blocking in a task?
-                // The scheduler will find something else for this thread to do.
-                sayHello.wait();
-
-                printf("Hello from task %d!\n", i);
-                });
-        }
-
-        sayHello.signal();  // Unblock all the tasks.
-
-        saidHello.wait();  // Wait for all tasks to complete.
-
-        printf("All tasks said hello.\n");
-
-        // All tasks are guaranteed to complete before the scheduler is destructed.
-    }
+    // load the file
+    IFileStream stream( m_input_file );
+    
 }
 
 int ImageEvaluation::WaitForWorkToBeDone() {
     return 0;
+}
+
+void ImageEvaluation::parseCommandArgs(int argc, char** argv){
+    std::string commandline = "Command line arguments: \t";
+    for (int i = 0; i < argc; ++i) {
+        commandline += std::string(argv[i]);
+        commandline += " ";
+    }
+    slog( INFO , GENERAL , "%s" , commandline.c_str() );
+
+    bool com_arg_valid = false;
+    std::regex word_regex("--(\\w+)(?:\\s*:\\s*([^ \\n]+)\\s*)?");
+    auto words_begin = std::sregex_iterator(commandline.begin(), commandline.end(), word_regex);
+    for (std::sregex_iterator it = words_begin; it != std::sregex_iterator(); ++it) {
+        const auto m = *it;
+        std::string key_str = m[1];
+        std::string value_str = m.size() >= 3 ? std::string(m[2]) : "";
+
+        // not case sensitive for key, but it is for value.
+        std::transform(key_str.begin(), key_str.end(), key_str.begin(), ::tolower);
+
+        if (key_str == "input") {
+            m_input_file = value_str;
+            com_arg_valid = true;
+        }else if (key_str == "blendermode"){
+            m_blender_mode = true;
+        }else if (key_str == "profiling"){
+            m_enable_profiling = value_str == "on";
+        }else if (key_str == "nomaterial" ){
+            m_no_material_mode = true;
+        }else if (key_str == "displayserver") {
+            int split = value_str.find_last_of(':');
+            if (split < 0)
+                continue;
+
+            const auto ip = value_str.substr(0, split);
+            const auto port = value_str.substr(split + 1);
+            DisplayManager::GetSingleton().AddDisplayServer(ip, port);
+        }
+    }
 }

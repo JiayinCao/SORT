@@ -121,10 +121,7 @@ int RunSORT( int argc , char** argv ){
     // Run in unit test mode if required.
     if( g_unitTestMode ){
         work = std::make_unique<UnitTests>();
-
-        IMemoryStream dummy_stream(0,0);
-        work->StartRunning(argc, argv, dummy_stream);
-
+        work->StartRunning(argc, argv);
         return work->WaitForWorkToBeDone();
     }
 

@@ -27,7 +27,7 @@ public:
     //! @brief  Start work evaluation.
     //!
     //! @param stream       The stream as input.
-    void    StartRunning(int argc, char** argv, IStreamBase& stream) override;
+    void    StartRunning(int argc, char** argv) override;
 
     //! @brief  Wait for all the unit tests to be done.
     int     WaitForWorkToBeDone() override;

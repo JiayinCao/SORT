@@ -32,7 +32,7 @@ public:
     //! @brief  Start work evaluation.
     //!
     //! @param stream       The stream as input.
-    void    StartRunning(int argc, char** argv, IStreamBase& stream) override;
+    void    StartRunning(int argc, char** argv) override;
 
     //! @brief  Wait for the work evaluation to be done.
     //!
@@ -45,4 +45,14 @@ public:
     int     WaitForWorkToBeDone() override;
 
 private:
+    // Input file name
+    std::string     m_input_file;
+    // Blender mode
+    bool            m_blender_mode = false;
+    // Enable profiling
+    bool            m_enable_profiling = false;
+    // No material mode
+    bool            m_no_material_mode = false;
+
+    void    parseCommandArgs(int argc, char** argv);
 };

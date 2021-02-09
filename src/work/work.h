@@ -39,8 +39,7 @@ public:
 
     //! @brief  Start work evaluation.
     //!
-    //! @param stream       The stream as input.
-    virtual void    StartRunning(int argc, char** argv, IStreamBase& stream) = 0;
+    virtual void    StartRunning(int argc, char** argv) = 0;
 
     //! @brief  Wait for the work evaluation to be done.
     //!

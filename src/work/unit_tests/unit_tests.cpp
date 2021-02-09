@@ -18,7 +18,7 @@
 #include "thirdparty/gtest/gtest.h"
 #include "unit_tests.h"
 
-void UnitTests::StartRunning(int argc, char** argv, IStreamBase& stream) {
+void UnitTests::StartRunning(int argc, char** argv) {
     // we don't care the about the stream anymore, which is probably not even valid depending on how we get here
     // simply run all unit tests and see what happens.
     ::testing::InitGoogleTest(&argc, argv);
