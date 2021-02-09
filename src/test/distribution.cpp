@@ -24,6 +24,8 @@
 #include <thread>
 #include "core/samplemethod.h"
 
+using namespace unittest;
+
 // Check PDF evaluation
 void checkDist( const MicroFacetDistribution* dist ){
     double final_total = ParrallReduction<double, 8>( [&](){

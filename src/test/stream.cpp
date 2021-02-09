@@ -20,6 +20,9 @@
 #include "stream/mstream.h"
 #include "core/rand.h"
 #include "core/render_context.h"
+#include "unittest_common.h"
+
+using namespace unittest;
 
 #define STREAM_SAMPLE_COUNT 10000
 

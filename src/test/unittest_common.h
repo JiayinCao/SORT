@@ -22,6 +22,7 @@
 #include <vector>
 #include "core/render_context.h"
 
+namespace unittest{
 // TN : thread number
 // N :  task number in each thread
 template<typename T , int TN , int N = 1024 * 1024 * 8 >
@@ -90,4 +91,5 @@ inline RenderContext& GetRenderContext(){
     if(!g_unit_test_rcs.IsInitialized())
         g_unit_test_rcs.Init();
     return g_unit_test_rcs;
+}
 }

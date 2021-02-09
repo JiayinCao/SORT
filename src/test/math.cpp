@@ -19,6 +19,9 @@
 #include "core/define.h"
 #include "thirdparty/gtest/gtest.h"
 #include "math/exp.h"
+#include "unittest_common.h"
+
+using namespace unittest;
 
 SORT_FORCEINLINE void exp_accuracy_test( const double x ){
     const double e0 = exp( x );

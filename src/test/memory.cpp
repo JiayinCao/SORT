@@ -18,6 +18,9 @@
 #include "core/define.h"
 #include "thirdparty/gtest/gtest.h"
 #include "core/memory.h"
+#include "unittest_common.h"
+
+using namespace unittest;
 
 TEST(Memory, AlignedAllocation) {
     int i = 0;

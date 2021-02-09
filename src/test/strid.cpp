@@ -17,6 +17,9 @@
 
 #include "thirdparty/gtest/gtest.h"
 #include "core/strid.h"
+#include "unittest_common.h"
+
+using namespace unittest;
 
 TEST(StringID, BasicChecking) {
     // Make sure sid generated in different ways result in the same value

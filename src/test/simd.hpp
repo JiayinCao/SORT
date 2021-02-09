@@ -19,6 +19,9 @@
 #include "core/define.h"
 #include "thirdparty/gtest/gtest.h"
 #include "simd/simd_wrapper.h"
+#include "unittest_common.h"
+
+using namespace unittest;
 
 #ifdef SIMD_8WAY_IMPLEMENTATION
     #ifdef SORT_X64_TARGET

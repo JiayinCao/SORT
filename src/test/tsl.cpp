@@ -17,7 +17,9 @@
 
 #include <tsl_system.h>
 #include "thirdparty/gtest/gtest.h"
+#include "unittest_common.h"
 
+using namespace unittest;
 USE_TSL_NAMESPACE
 
 TEST(ShaderGroup, ShaderGroupWithoutClosure) {

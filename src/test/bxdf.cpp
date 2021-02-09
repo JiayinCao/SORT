@@ -35,6 +35,8 @@
 #include "scatteringevent/bsdf/fabric.h"
 #include "core/render_context.h"
 
+using namespace unittest;
+
 // A physically based BRDF should obey the rule of reciprocity
 void checkReciprocity(const Bxdf* bxdf) {
     spinlock_mutex mutex;

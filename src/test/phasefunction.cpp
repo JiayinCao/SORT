@@ -20,6 +20,8 @@
 #include "unittest_common.h"
 #include "core/render_context.h"
 
+using namespace unittest;
+
 // This should work. For some reason, it doesn't. I need to figure out what is wrong.
 // This is probably because the quality of the random number generated is not good.
 // With the tolorance of 4%, there is still 0.2% failing rate, for which reason this unit test won't be activated.
