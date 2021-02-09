@@ -98,7 +98,7 @@ public:
         auto shuffle = std::make_unique<unsigned[]>(ps);
         for (unsigned i = 0; i < ps; i++)
             shuffle[i] = i;
-        std::shuffle(shuffle.get(), shuffle.get() + ps, std::default_random_engine(sort_rand()));
+        std::shuffle(shuffle.get(), shuffle.get() + ps, std::default_random_engine(sort_rand<unsigned>(rc)));
 
         sampler->Generate2D(data.get(), ps, rc);
         for (unsigned i = 0; i < ps; ++i)
