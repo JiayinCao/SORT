@@ -18,6 +18,8 @@
 #pragma once
 
 #include "../work.h"
+#include "accel/accelerator.h"
+#include "integrator/integrator.h"
 
 //! @brief  Generating an image using ray tracing algorithms.
 /**
@@ -54,5 +56,19 @@ private:
     // No material mode
     bool            m_no_material_mode = false;
 
+    std::string     m_resource_path;            // resource path
+    unsigned        m_thread_cnt = 6;           // thread cnt
+    unsigned        m_sample_per_pixel = 16;    // sample per pixel to be evaluated.
+    unsigned        m_image_width = 0;          // width of the image to be generated
+    unsigned        m_image_height = 0;         // height of the image to be generated
+    float           m_clampping = 0.0f;         // radiance can't go higher than this, this is the cheapest way to do firefly reduction.
+
+    std::unique_ptr<Accelerator>    m_accelerator;      // acceleration structure for the whole scene.
+    std::unique_ptr<Accelerator>    m_accelerator_vol;  // acceleration structure for only the meshes with volume
+
+    std::unique_ptr<Integrator>     m_integrator;       // the algorithm used for ray tracing
+
     void    parseCommandArgs(int argc, char** argv);
+
+    void    loadConfig(IStreamBase& stream);
 };

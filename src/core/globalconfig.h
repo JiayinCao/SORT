@@ -30,7 +30,7 @@
 #include "core/log.h"
 
 //! @brief  This needs to be update every time the content of GlobalConfiguration changes.
-constexpr unsigned int GLOBAL_CONFIGURATION_VERSION = 0;
+static constexpr unsigned int GLOBAL_CONFIGURATION_VERSION = 0;
 
 //! @brief  GlobalConfiguration saves some global state.
 class GlobalConfiguration : public Singleton<GlobalConfiguration> , SerializableObject {

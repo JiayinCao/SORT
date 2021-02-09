@@ -18,6 +18,7 @@
 #pragma once
 
 #include "core/rtti.h"
+#include "core/scene.h"
 #include "stream/stream.h"
 
 //! @brief  Work to be evaluated.
@@ -50,4 +51,16 @@ public:
     //! This function will work synchronizely and once it returns the control back, the whole work is considered
     //! done.
     virtual int     WaitForWorkToBeDone() = 0;
+
+protected:
+    Scene   m_scene;
+
+    std::vector<std::unique_ptr<RenderContext>> m_render_context_pool;          // this only controls the life time of the render contexts
+    std::list<RenderContext*>                   m_available_render_context;     // the render context that are available
+    std::unordered_set<RenderContext*>          m_running_render_context;       // the render context that are being ran
+
+    //! @brief  Grab a render context from the render context pool.
+    //!
+    //! If there is no render context available, create and initialize one.
+    RenderContext&  pullRenderContext();
 };

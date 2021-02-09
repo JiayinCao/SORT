@@ -26,6 +26,7 @@
 #include "material/tsl_system.h"
 #include "old_task/display_task.h"
 #include "work/unit_tests/unit_tests.h"
+#include "work/image_evaluation/image_evaluation.h"
 
 using namespace old_task;
 
@@ -125,6 +126,13 @@ int RunSORT( int argc , char** argv ){
         return work->WaitForWorkToBeDone();
     }
 
+#if 0
+    // we only support one other work for now
+    work = std::make_unique<ImageEvaluation>();
+    work->StartRunning(argc, argv);
+    return work->WaitForWorkToBeDone();
+
+#else
     // Load the global configuration from stream
     IFileStream stream( g_inputFilePath );
     GlobalConfiguration::GetSingleton().Serialize(stream);
@@ -179,4 +187,5 @@ int RunSORT( int argc , char** argv ){
     DestroyTSLThreadContexts();
 
     return 0;
+#endif
 }

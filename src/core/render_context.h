@@ -65,7 +65,8 @@ struct RenderContext{
     }
 
     //! @brief  Reset the context so that it can be shared with future job instance
-    void Reset(){
+    RenderContext& Reset(){
         m_memory_arena->Reset();
+        return *this;
     }
 };
