@@ -107,12 +107,12 @@ bool Sphere::GetIntersect( const Ray& ray , SurfaceInteraction* intersect ) cons
 }
 
 // sample a ray from light
-void Sphere::Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const{
+void Sphere::Sample_l( RenderContext& rc, const LightSample& ls , Ray& r , Vector& n , float* pdf ) const{
     r.m_fMin = 0.0f;
     r.m_fMax = FLT_MAX;
     Vector normalized_dir = UniformSampleSphere( ls.u , ls.v );
     r.m_Ori = radius * normalized_dir;
-    r.m_Dir = UniformSampleSphere( sort_canonical() , sort_canonical() );
+    r.m_Dir = UniformSampleSphere( sort_rand<float>(rc) , sort_rand<float>(rc) );
     if( dot( r.m_Dir , Vector( r.m_Ori.x , r.m_Ori.y , r.m_Ori.z ) ) < 0.0f )
         r.m_Dir = -r.m_Dir;
     n = m_transform.TransformNormal( Vector( normalized_dir.x , normalized_dir.y , normalized_dir.z ) );

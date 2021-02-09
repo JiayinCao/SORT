@@ -35,26 +35,6 @@
 #include "scatteringevent/bsdf/fabric.h"
 #include "core/render_context.h"
 
-namespace {
-struct RenderContextWrapper{
-    RenderContextWrapper(){
-        rc = std::make_unique<RenderContext>();
-        rc->Init();
-    }
-
-    std::unique_ptr<RenderContext> rc;
-};
-static RenderContextWrapper g_rc;
-}
-
-static float sort_rand_float(){
-    thread_local static RenderContext rc;
-    if(!rc.IsInitialized())
-        rc.Init();
-    
-    return sort_rand<float>(rc);
-}
-
 // A physically based BRDF should obey the rule of reciprocity
 void checkReciprocity(const Bxdf* bxdf) {
     spinlock_mutex mutex;
@@ -77,7 +57,7 @@ void checkEnergyConservation(const Bxdf* bxdf) {
     Spectrum total = ParrallReduction<Spectrum, 8, 1024 * 1024 * 8>( [&](){
         Vector wi;
         float pdf = 0.0f;
-        Spectrum r = bxdf->Sample_F(DIR_UP, wi, BsdfSample(true), &pdf);
+        Spectrum r = bxdf->Sample_F(DIR_UP, wi, BsdfSample(GetRenderContext()), &pdf);
         return pdf > 0.0f ? r / pdf : 0.0f;
     } );
     EXPECT_LE(total.r, 1.03f);
@@ -96,7 +76,7 @@ void checkPdf( const Bxdf* bxdf ){
     ParrallRun<8,128>( [&]() {
         float pdf = 0.0f;
         Vector wi;
-        const auto f0 = bxdf->Sample_F( wo , wi , BsdfSample(true) , &pdf );
+        const auto f0 = bxdf->Sample_F( wo , wi , BsdfSample(GetRenderContext()) , &pdf );
         const float calculated_pdf = bxdf->Pdf( wo , wi );
         const auto f1 = bxdf->F( wo , wi );
 
@@ -129,7 +109,7 @@ void checkPdf( const Bxdf* bxdf ){
         double total = ParrallReduction<double, 8>( [&](){
             Vector wi;
             float pdf;
-            bxdf->Sample_F(wo, wi, BsdfSample(true), &pdf);
+            bxdf->Sample_F(wo, wi, BsdfSample(GetRenderContext()), &pdf);
             return pdf != 0.0f ? 1.0f / pdf : 0.0f;
         } );
         EXPECT_LE( fabs( total - TWO_PI ) , 0.03f );
@@ -146,65 +126,75 @@ void checkAll( const Bxdf* bxdf , bool cPdf = true , bool cReciprocity = true , 
 }
 
 TEST (BXDF, Labmert) {
-    Lambert lambert( *g_rc.rc, WHITE_SPECTRUM , WHITE_SPECTRUM , DIR_UP );
+    auto& rc = GetRenderContext();
+    Lambert lambert( rc, WHITE_SPECTRUM , WHITE_SPECTRUM , DIR_UP );
     checkAll( &lambert );
 }
 
 TEST(BXDF, LabmertTransmittion) {
-    LambertTransmission lambert(*g_rc.rc, WHITE_SPECTRUM, WHITE_SPECTRUM, DIR_UP);
+    auto& rc = GetRenderContext();
+    LambertTransmission lambert(rc, WHITE_SPECTRUM, WHITE_SPECTRUM, DIR_UP);
     checkAll(&lambert);
 }
 
 TEST(BXDF, OrenNayar) {
-    OrenNayar orenNayar(*g_rc.rc, WHITE_SPECTRUM, sort_rand_float(), FULL_WEIGHT, DIR_UP);
+    auto& rc = GetRenderContext();
+    OrenNayar orenNayar(rc, WHITE_SPECTRUM, sort_rand_float(), FULL_WEIGHT, DIR_UP);
     checkAll(&orenNayar);
 }
 
 TEST(BXDF, Phong) {
+    auto& rc = GetRenderContext();
     const float ratio = sort_rand_float();
-    Phong phong(*g_rc.rc, WHITE_SPECTRUM * ratio , WHITE_SPECTRUM * ( 1.0f - ratio ) , sort_rand_float(), FULL_WEIGHT , DIR_UP);
+    Phong phong(rc, WHITE_SPECTRUM * ratio , WHITE_SPECTRUM * ( 1.0f - ratio ) , sort_rand_float(), FULL_WEIGHT , DIR_UP);
     checkAll(&phong, false);
 }
 
 // Sometimes it doesn't always pass, need investigation.
 TEST(BXDF, DISABLED_AshikhmanShirley) {
-    AshikhmanShirley as(*g_rc.rc, WHITE_SPECTRUM , sort_rand_float() , sort_rand_float() , sort_rand_float() , FULL_WEIGHT , DIR_UP );
+    auto& rc = GetRenderContext();
+    AshikhmanShirley as(rc, WHITE_SPECTRUM , sort_rand_float() , sort_rand_float() , sort_rand_float() , FULL_WEIGHT , DIR_UP );
     checkAll(&as);
 }
 
 // https://blog.selfshadow.com/publications/s2015-shading-course/burley/s2015_pbs_disney_bsdf_notes.pdf
 // Disney BRDF is not strictly energy conserving, please refer the above link for further detail ( chapter 5.1 ).
 TEST(BXDF, DISABLED_Disney) {
-    DisneyBRDF disney(*g_rc.rc, WHITE_SPECTRUM , sort_rand_float() , sort_rand_float() , sort_rand_float() , sort_rand_float() , sort_rand_float() ,
+    auto& rc = GetRenderContext();
+    DisneyBRDF disney(rc, WHITE_SPECTRUM , sort_rand_float() , sort_rand_float() , sort_rand_float() , sort_rand_float() , sort_rand_float() ,
                        sort_rand_float() , sort_rand_float() , sort_rand_float() , sort_rand_float() , sort_rand_float() , sort_rand_float() ,
                        sort_rand_float() , sort_rand_float() , 0 , FULL_WEIGHT , DIR_UP );
     checkAll(&disney);
 }
 
 TEST(BXDF, DISABLED_MicroFacetReflection) {
+    auto& rc = GetRenderContext();
     const FresnelConductor fresnel( 1.0f , 1.5f );
     const GGX ggx(0.5f, 0.5f);
-    MicroFacetReflection mf(*g_rc.rc, WHITE_SPECTRUM , &fresnel , &ggx , FULL_WEIGHT , DIR_UP );
+    MicroFacetReflection mf(rc, WHITE_SPECTRUM , &fresnel , &ggx , FULL_WEIGHT , DIR_UP );
     checkAll(&mf);
 }
 
 TEST(BXDF, MicroFacetRefraction) {
+    auto& rc = GetRenderContext();
     const FresnelConductor fresnel( 1.0f , 1.5f );
     const GGX ggx( sort_rand_float() , sort_rand_float() );
-    MicroFacetRefraction mr( *g_rc.rc, WHITE_SPECTRUM , &ggx , sort_rand_float() , sort_rand_float() , FULL_WEIGHT , DIR_UP );
+    MicroFacetRefraction mr( rc, WHITE_SPECTRUM , &ggx , sort_rand_float() , sort_rand_float() , FULL_WEIGHT , DIR_UP );
     checkAll( &mr , false , false , true );
 }
 
 TEST(BXDF, Dielectric) {
+    auto& rc = GetRenderContext();
     const FresnelConductor fresnel( 1.0f , 1.5f );
     const GGX ggx( sort_rand_float() , sort_rand_float() );
-    Dielectric dielectric( *g_rc.rc, WHITE_SPECTRUM , WHITE_SPECTRUM , &ggx , sort_rand_float() , sort_rand_float() , FULL_WEIGHT , DIR_UP );
+    Dielectric dielectric( rc, WHITE_SPECTRUM , WHITE_SPECTRUM , &ggx , sort_rand_float() , sort_rand_float() , FULL_WEIGHT , DIR_UP );
     checkAll( &dielectric , false , false , true );
 }
 
 TEST(BXDF, DISABLED_DreamWork_Fabric) {
     auto test_fabric = []( const float roughness ){
-        Fabric fabric( *g_rc.rc, WHITE_SPECTRUM , roughness , FULL_WEIGHT , DIR_UP );
+        auto& rc = GetRenderContext();
+        Fabric fabric( rc, WHITE_SPECTRUM , roughness , FULL_WEIGHT , DIR_UP );
         checkAll( &fabric );
     };
 
@@ -215,14 +205,14 @@ TEST(BXDF, DISABLED_DreamWork_Fabric) {
 
 TEST(BXDF, DISABLED_HairFurnace) {
     Spectrum sigma_a = 0.0f;
-
+    auto& rc = GetRenderContext();
     Vector3f wo = UniformSampleHemisphere(sort_rand_float(), sort_rand_float());
     for (float beta_m = 0.0f; beta_m <= 1.0f; beta_m += 0.2f) {
         for (float beta_n = 0.0f; beta_n <= 1.0f; beta_n += 0.2f) {
             // Estimate reflected uniform incident radiance from hair
             auto sum = 0.f;
             constexpr int CNT = 1024 * 256;
-            Hair hair(*g_rc.rc, sigma_a, beta_m, beta_n, 1.55f, FULL_WEIGHT);
+            Hair hair(rc, sigma_a, beta_m, beta_n, 1.55f, FULL_WEIGHT);
             sum += ParrallReduction<float, 8, CNT>([&]() {
                 Vector3f wi = UniformSampleSphere(sort_rand_float(), sort_rand_float());
                 EXPECT_GE(hair.f(wo, wi).GetIntensity(), 0.00f);
@@ -245,9 +235,10 @@ TEST(BXDF, HairPDFConsistant) {
 
         spinlock_mutex mutex0;
         ParrallRun<8,128>( [&]() {
+            auto& rc = GetRenderContext();
             Vector wi;
             float pdf;
-            auto f = bxdf->Sample_F(wo, wi, BsdfSample(true), &pdf);
+            auto f = bxdf->Sample_F(wo, wi, BsdfSample(rc), &pdf);
 
             std::lock_guard<spinlock_mutex> lock(mutex0);
             if( pdf > 0.0f )
@@ -255,19 +246,22 @@ TEST(BXDF, HairPDFConsistant) {
         });
     };
 
+    auto& rc = GetRenderContext();
     for (float beta_m = 0.1f; beta_m < 1.0f; beta_m += 0.5f) {
         for (float beta_n = 0.1f; beta_n < 1.0f; beta_n += 0.5f) {
-            Hair hair( *g_rc.rc, sigma_a, beta_m, beta_n, 1.55f, FULL_WEIGHT);
+            Hair hair( rc, sigma_a, beta_m, beta_n, 1.55f, FULL_WEIGHT);
             checkPDF( &hair );
         }
     }
 }
 
 TEST(BXDF, DISABLED_HairStandardChecking) {
+    auto& rc = GetRenderContext();
+
     static Spectrum sigma_a = 0.f;
     for (float beta_m = 0.1f; beta_m < 1.0f; beta_m += 0.5f) {
         for (float beta_n = 0.1f; beta_n < 1.0f; beta_n += 0.5f) {
-            Hair hair(*g_rc.rc, sigma_a, beta_m, beta_n, 1.55f, FULL_WEIGHT);
+            Hair hair(rc, sigma_a, beta_m, beta_n, 1.55f, FULL_WEIGHT);
             checkAll(&hair , true , false , true );
         }
     }
@@ -305,9 +299,10 @@ TEST(BXDF, DISABLED_HairSamplingConsistance) {
         EXPECT_LE( fabs( ratio - 1.0f ) , 0.05f );
     };
 
+    auto& rc = GetRenderContext();
     for (float beta_m = 0.1f; beta_m < 1.0f; beta_m += 0.5f) {
         for (float beta_n = 0.1f; beta_n < 1.0f; beta_n += 0.5f) {
-            Hair hair( *g_rc.rc, sigma_a, beta_m, beta_n, 1.55f, FULL_WEIGHT);
+            Hair hair( rc, sigma_a, beta_m, beta_n, 1.55f, FULL_WEIGHT);
             checkPDF( &hair );
         }
     }

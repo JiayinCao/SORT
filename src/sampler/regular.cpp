@@ -20,7 +20,7 @@
 #include <math.h>
 
 // generate sample in one dimension
-void RegularSampler::Generate1D( float* sample , unsigned num , bool accept_uniform ) const
+void RegularSampler::Generate1D( float* sample , unsigned num , RenderContext& rc,  bool accept_uniform ) const
 {
     sAssert( sample != 0 , SAMPLING );
 
@@ -29,14 +29,14 @@ void RegularSampler::Generate1D( float* sample , unsigned num , bool accept_unif
         // fall back to random sampling if uniform sampling is not accepted.
         // For certain cases, like sampling brdf and light, uniform sampling is not acceptable
         if( !accept_uniform )
-            sample[i] = sort_canonical();
+            sample[i] = sort_rand<float>(rc);
         else
             sample[i] = ( (float)i + 0.5f ) / (float)num ;
     }
 }
 
 // generate sample in two dimension
-void RegularSampler::Generate2D( float* sample , unsigned num , bool accept_uniform ) const
+void RegularSampler::Generate2D( float* sample , unsigned num , RenderContext& rc, bool accept_uniform ) const
 {
     sAssert( sample != 0 , SAMPLING );
 
@@ -53,8 +53,8 @@ void RegularSampler::Generate2D( float* sample , unsigned num , bool accept_unif
             // For certain cases, like sampling brdf and light, uniform sampling is not acceptable
             if( !accept_uniform )
             {
-                sample[offset+j] = sort_canonical();
-                sample[offset+j+1] = sort_canonical();
+                sample[offset+j] = sort_rand<float>(rc);
+                sample[offset+j+1] = sort_rand<float>(rc);
                 continue;
             }
 

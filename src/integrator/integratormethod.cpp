@@ -68,7 +68,7 @@ Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Sce
     }
 
     if( !light->IsDelta() ){
-        const auto f = se.Sample_BSDF( wo , wi , bs , bsdf_pdf );
+        const auto f = se.Sample_BSDF( wo , wi , bs , bsdf_pdf, rc );
         if( !f.IsBlack() && bsdf_pdf != 0.0f ){
             const auto light_pdf = light->Pdf( ip.intersect , wi );
             if( light_pdf <= 0.0f )
@@ -148,7 +148,7 @@ Spectrum    EvaluateDirect(const ScatteringEvent& se, const Ray& r, const Scene&
     }
 
     if (!light->IsDelta()) {
-        const auto f = se.Sample_BSDF(wo, wi, bs, bsdf_pdf);
+        const auto f = se.Sample_BSDF(wo, wi, bs, bsdf_pdf, rc);
         if (!f.IsBlack() && bsdf_pdf != 0.0f) {
             float light_pdf;
             light_pdf = light->Pdf(ip.intersect, wi);
@@ -196,7 +196,7 @@ Spectrum    EvaluateDirect(const Point& ip, const PhaseFunction* ph, const Vecto
     Visibility visibility(scene);
     float light_pdf;
     Vector wi;
-    const LightSample ls(true);
+    const LightSample ls(rc);
     const auto li = light->sample_l(ip, &ls, wi, 0, &light_pdf, 0, nullptr, visibility);
     if (light_pdf > 0.0f && !li.IsBlack() ) {
         const auto f = ph->P(wo, wi);
@@ -228,7 +228,7 @@ Spectrum SampleOneLight( const ScatteringEvent& se , const Ray& r, const Surface
     Visibility visibility(scene);
     const auto wo = -r.m_Dir;
     Vector wi;
-    LightSample ls(true);
+    LightSample ls(rc);
     auto light_pdf = 0.0f;
     const auto li = light->sample_l( inter.intersect , &ls , wi , 0 , &light_pdf , 0 , 0 , visibility );
     if( light_pdf > 0.0f && !li.IsBlack() ){

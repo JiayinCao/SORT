@@ -46,7 +46,7 @@ Spectrum Dielectric::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
     const auto spec_Ratio = r / (r + t);
 
     Spectrum ret;
-    BsdfSample new_bs(true);
+    BsdfSample new_bs(rc);
     if (bs.u < spec_Ratio || spec_Ratio == 1.0f)
         ret = mf_reflect.sample_f(wo, wi, new_bs, pPdf);
     else

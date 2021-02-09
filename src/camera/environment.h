@@ -42,7 +42,7 @@ public:
     //! @param visibility       The structure holding visibility information.
     //! @return                 The coordinate on the image sensor. Its values range from 0 to width/height - 1.
     Vector2i GetScreenCoord(const SurfaceInteraction& inter, float* pdfw, float* pdfa, float& cosAtCamera , Spectrum* we ,
-                                    Point* eyeP , Visibility* visibility) const override {
+                                    Point* eyeP , Visibility* visibility, RenderContext& rc) const override {
         sAssert(false, GENERAL);
         return Vector2i();
     }

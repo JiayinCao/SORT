@@ -46,7 +46,7 @@ void InstantRadiosity::PreProcess( const Scene& scene , RenderContext& rc )
             float   light_pdfa = 0.0f;
             Ray     ray;
             float   cosAtLight = 1.0f;
-            Spectrum le = light->sample_l( LightSample(true) , ray , &light_emission_pdf , &light_pdfa , &cosAtLight );
+            Spectrum le = light->sample_l( rc, LightSample(rc) , ray , &light_emission_pdf , &light_pdfa , &cosAtLight );
 
             Spectrum throughput = le * cosAtLight / ( light_pick_pdf * light_emission_pdf );
 
@@ -68,7 +68,7 @@ void InstantRadiosity::PreProcess( const Scene& scene , RenderContext& rc )
                 
                 ScatteringEvent se( intersect , SE_EVALUATE_ALL_NO_SSS );
                 intersect.primitive->GetMaterial()->UpdateScatteringEvent(se, rc);
-                Spectrum bsdf_value = se.Sample_BSDF( ls.wi , wo, BsdfSample(true) , bsdf_pdf );
+                Spectrum bsdf_value = se.Sample_BSDF( ls.wi , wo, BsdfSample(rc) , bsdf_pdf, rc );
 
                 if( bsdf_pdf == 0.0f )
                     break;
@@ -113,7 +113,7 @@ Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene, RenderContext
     unsigned light_num = scene.LightNum();
     for( unsigned i = 0 ; i < light_num ; ++i ){
         const auto light = scene.GetLight(i);
-        radiance += EvaluateDirect( r , scene , light , ip , LightSample(true) , BsdfSample(true) , rc, true );
+        radiance += EvaluateDirect( r , scene , light , ip , LightSample(rc) , BsdfSample(rc) , rc, true );
     }
 
     if( first_intersect_dist )
@@ -169,7 +169,7 @@ Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene, RenderContext
     if( m_fMinDist > 0.0f ){
         Vector  wi;
         float   bsdf_pdf;
-        const auto f = se.Sample_BSDF( -r.m_Dir , wi , BsdfSample( true ) , bsdf_pdf );
+        const auto f = se.Sample_BSDF( -r.m_Dir , wi , BsdfSample(rc) , bsdf_pdf, rc );
 
         if( !f.IsBlack() && bsdf_pdf != 0.0f ){
             PixelSample ps;

@@ -47,6 +47,3 @@ void        sort_seed();
 
 // generate a unsigned integer
 unsigned    sort_rand();
-
-// generate a canonical random number
-float       sort_canonical();

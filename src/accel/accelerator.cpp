@@ -28,7 +28,7 @@ bool Accelerator::GetAttenuation( Ray& ray , Spectrum& attenuation , RenderConte
     intersection.query_shadow = true;
     if (!GetIntersect(rc, ray, intersection)) {
         if (ms)
-            attenuation *= ms->Tr(ray, ray.m_fMax);
+            attenuation *= ms->Tr(ray, ray.m_fMax, rc);
         return false;
     }
 
@@ -47,7 +47,7 @@ bool Accelerator::GetAttenuation( Ray& ray , Spectrum& attenuation , RenderConte
 
     // consider beam transmittance during ray traversal if medium is presented.
     if (ms && !attenuation.IsBlack() ) {
-        attenuation *= ms->Tr(ray, intersection.t);
+        attenuation *= ms->Tr(ray, intersection.t, rc);
 
         const auto theta_wi = dot(ray.m_Dir, intersection.gnormal);
         const auto theta_wo = -theta_wi;

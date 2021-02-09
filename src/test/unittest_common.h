@@ -20,6 +20,7 @@
 #include <functional>
 #include <thread>
 #include <vector>
+#include "core/render_context.h"
 
 // TN : thread number
 // N :  task number in each thread
@@ -75,4 +76,18 @@ void ParrallRun( std::function<void(int tid)> func ){
     // make sure all threads are finished
     for (int i = 0; i < TN; ++i)
         threads[i].join();
+}
+
+thread_local static RenderContext g_unit_test_rcs;
+
+inline float sort_rand_float(){
+    if(!g_unit_test_rcs.IsInitialized())
+        g_unit_test_rcs.Init();
+    return sort_rand<float>(g_unit_test_rcs);
+}
+
+inline RenderContext& GetRenderContext(){
+    if(!g_unit_test_rcs.IsInitialized())
+        g_unit_test_rcs.Init();
+    return g_unit_test_rcs;
 }

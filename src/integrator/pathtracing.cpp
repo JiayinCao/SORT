@@ -77,7 +77,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
         if (pMi && pMi->phaseFunction) {
             Vector wi;
             float pdf = 0.0f;
-            const auto pf = pMi->phaseFunction->Sample(-r.m_Dir, wi, pdf);
+            const auto pf = pMi->phaseFunction->Sample(rc, -r.m_Dir, wi, pdf);
 
             if ( UNLIKELY(pdf == 0.0f) )
                 break;
@@ -129,13 +129,13 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
         material->UpdateScatteringEvent(se, rc);
 
         SE_Flag scattering_type_flag;
-        auto pdf_scattering_type = se.SampleScatteringType(scattering_type_flag);
+        auto pdf_scattering_type = se.SampleScatteringType(rc, scattering_type_flag);
 
         if( scattering_type_flag & SE_EVALUATE_BXDF ){
             // evaluate the light
             auto        light_pdf = 0.0f;
-            const auto  light_sample = LightSample(true);
-            const auto  bsdf_sample = BsdfSample(true);
+            const auto  light_sample = LightSample(rc);
+            const auto  bsdf_sample = BsdfSample(rc);
             const auto  light = scene.SampleLight( light_sample.t , &light_pdf );
             if( light_pdf > 0.0f )
                 L += throughput * EvaluateDirect( se , r , scene, light , light_sample , bsdf_sample , material , ms , rc) / light_pdf / pdf_scattering_type;
@@ -167,7 +167,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
         }
 
         // pick another time for the next path
-        pdf_scattering_type = se.SampleScatteringType(scattering_type_flag);
+        pdf_scattering_type = se.SampleScatteringType(rc, scattering_type_flag);
 
         if( pdf_scattering_type == 0.0f )
             break;
@@ -178,8 +178,8 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             float       path_pdf;
             Vector      wi;
             Spectrum f;
-            BsdfSample  _bsdf_sample = BsdfSample(true);
-            f = se.Sample_BSDF( -r.m_Dir , wi , _bsdf_sample , path_pdf);
+            BsdfSample  _bsdf_sample = BsdfSample(rc);
+            f = se.Sample_BSDF( -r.m_Dir , wi , _bsdf_sample , path_pdf, rc);
             if( ( f.IsBlack() || path_pdf == 0.0f ) )
                 break;
 
@@ -229,7 +229,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                     // Counts the light from indirect illumination recursively
                     float pdf = 0.0f;
                     Vector wi;
-                    Spectrum f = se.Sample_BSDF( -r.m_Dir, wi, BsdfSample(true), pdf);
+                    Spectrum f = se.Sample_BSDF( -r.m_Dir, wi, BsdfSample(rc), pdf, rc);
                     if (!f.IsBlack() && pdf > 0.0f && !pInter->weight.IsBlack()) {
                         MediumStack ms_copy = ms;
                         total_bssrdf += li(Ray(intersection.intersect, wi, 0, 0.0001f), PixelSample(), scene, bounces + 1, true, bssrdfBounces + 1, true, ms_copy, rc) * f * pInter->weight / pdf;

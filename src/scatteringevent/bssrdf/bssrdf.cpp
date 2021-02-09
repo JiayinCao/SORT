@@ -32,7 +32,7 @@ SeparableBssrdf::SeparableBssrdf( const Spectrum& R , const SurfaceInteraction* 
 
 void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter, RenderContext& rc ) const {
     Vector vx , vy , vz;
-    const auto r0 = sort_canonical();
+    const auto r0 = sort_rand<float>(rc);
 
     if( r0 <= 0.5f ){
         vx = btn;
@@ -49,7 +49,7 @@ void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Po
     }
 
     const auto ch = Sample_Ch(rc);
-    const auto tmp = sort_canonical();
+    const auto tmp = sort_rand<float>(rc);
     const auto r = Sample_Sr(ch, tmp);
 
     // This is essentially rejection sampling on top of inverse importance sampling, since the rejection region is fairly small, 
@@ -60,7 +60,7 @@ void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Po
     const auto rMax = fmax( 0.0015f , Max_Sr(ch) );
     const auto l = 2.0f * sqrt( SQR(rMax) - SQR(r) );
 
-    const auto phi = TWO_PI * sort_canonical();
+    const auto phi = TWO_PI * sort_rand<float>(rc);
     const auto source = po + r * ( vx * cos(phi) + vz * sin(phi) ) + l * vy * 0.5f;
     
     const Ray ray( source , -vy , 0 , 0.0001f , l );

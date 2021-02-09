@@ -508,7 +508,7 @@ namespace {
          void Process(const ClosureParamPtr param, const float3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh, RenderContext& rc) const override {
              if (SE_ENTERING == flag) {
                  const auto& params = *(const ClosureTypeAbsorption*)param;
-                 ms.AddMedium(SORT_MALLOC(rc.m_memory_arena, AbsorptionMedium)(params, material));
+                 ms.AddMedium(SORT_MALLOC(rc.m_memory_arena, AbsorptionMedium)(rc, params, material));
              } else if (SE_LEAVING == flag) {
                  ms.RemoveMedium(material->GetUniqueID());
              }
@@ -521,7 +521,7 @@ namespace {
          void Process(const ClosureParamPtr param, const float3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh, RenderContext& rc) const override {
              if (SE_ENTERING == flag) {
                  const auto& params = *(const ClosureTypeHomogeneous*)param;
-                 ms.AddMedium(SORT_MALLOC(rc.m_memory_arena, HomogeneousMedium)(params, material));
+                 ms.AddMedium(SORT_MALLOC(rc.m_memory_arena, HomogeneousMedium)(rc, params, material));
              } else if (SE_LEAVING == flag) {
                  ms.RemoveMedium(material->GetUniqueID());
              }
@@ -533,7 +533,7 @@ namespace {
 
          void Process(const ClosureParamPtr param, const float3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh, RenderContext& rc) const override {
              if (SE_ENTERING == flag)
-                 ms.AddMedium(SORT_MALLOC(rc.m_memory_arena, HeterogenousMedium)(material, mesh));
+                 ms.AddMedium(SORT_MALLOC(rc.m_memory_arena, HeterogenousMedium)(rc, material, mesh));
              else if (SE_LEAVING == flag)
                  ms.RemoveMedium(material->GetUniqueID());
          }

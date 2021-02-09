@@ -30,7 +30,7 @@ IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, Tsl_float, scattering)
 IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, Tsl_float, anisotropy)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeHeterogenous)
 
-Spectrum HeterogenousMedium::Tr(const Ray& ray, const float max_t) const {
+Spectrum HeterogenousMedium::Tr(const Ray& ray, const float max_t, RenderContext& rc) const {
     // get the step size and count
     auto        step_size = m_material->GetVolumeStep();
     const auto  step_cnt = m_material->GetVolumeStepCnt();
@@ -41,7 +41,7 @@ Spectrum HeterogenousMedium::Tr(const Ray& ray, const float max_t) const {
     // ray marching
     for (auto i = 0u; i < step_cnt; ++i) {
         const auto dt = t + step_size <= max_t ? step_size : max_t - t;
-        const auto new_t = t + dt * sort_canonical();
+        const auto new_t = t + dt * sort_rand<float>(rc);
 
         // take a sample in the medium
         MediumSample ms;
@@ -73,18 +73,18 @@ Spectrum HeterogenousMedium::Sample(const Ray& ray, const float max_t, MediumInt
     auto t = 0.0f;
 
     // a random value
-    auto r = sort_canonical();
+    auto r = sort_rand<float>(rc);
 
     // accumulative transmittance
     auto accum_transmittance = Spectrum(1.0f);
 
     // maybe a better sampling algorithm for channel picking later
-    const auto ch = clamp((int)(sort_canonical() * RGBSPECTRUM_SAMPLE), 0, RGBSPECTRUM_SAMPLE - 1);
+    const auto ch = clamp((int)(sort_rand<float>(rc) * RGBSPECTRUM_SAMPLE), 0, RGBSPECTRUM_SAMPLE - 1);
 
     // ray marching
     for (auto i = 0u; i < step_cnt; ++i) {
         const auto dt = t + step_size <= max_t ? step_size : max_t - t;
-        const auto new_t = t + dt * sort_canonical();
+        const auto new_t = t + dt * sort_rand<float>(rc);
 
         // take a sample in the medium
         MediumSample ms;

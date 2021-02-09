@@ -33,10 +33,10 @@ public:
     // generate sample in one dimension
     // para 'sample' : the memory to save the sampled data
     // para 'num'    : the number of samples to be generated
-    virtual void Generate1D( float* sample , unsigned num , bool accept_uniform = false ) const;
+    virtual void Generate1D( float* sample , unsigned num , RenderContext& rc,  bool accept_uniform = false ) const;
 
     // generate sample in two dimension
     // para 'sample' : the memory to save the sampled data
     // para 'num'    : the number of samples to be generated
-    virtual void Generate2D( float* sample , unsigned num , bool accept_uniform = false ) const;
+    virtual void Generate2D( float* sample , unsigned num , RenderContext& rc, bool accept_uniform = false ) const;
 };

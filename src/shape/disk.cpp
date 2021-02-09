@@ -39,13 +39,13 @@ Point Disk::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vect
     return lp;
 }
 
-void Disk::Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const{
+void Disk::Sample_l( RenderContext& rc, const LightSample& ls , Ray& r , Vector& n , float* pdf ) const{
     float u , v;
     UniformSampleDisk( ls.u , ls.v , u , v );
     r.m_fMin = 0.0f;
     r.m_fMax = FLT_MAX;
     r.m_Ori = m_transform.TransformPoint(Point( u * radius , 0.0f , v * radius ));
-    Vector wi = UniformSampleHemisphere(sort_canonical() , sort_canonical());
+    Vector wi = UniformSampleHemisphere(sort_rand<float>(rc) , sort_rand<float>(rc));
     r.m_Dir = m_transform.TransformVector(wi);
     n = m_transform.TransformNormal( DIR_UP );
 

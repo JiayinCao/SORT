@@ -52,10 +52,10 @@ Spectrum AreaLight::sample_l(const Point& ip, const LightSample* ls , Vector& di
     return intensity;
 }
 
-Spectrum AreaLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const{
+Spectrum AreaLight::sample_l( RenderContext& rc, const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const{
     sAssert(IS_PTR_VALID(m_shape), LIGHT );
     Vector n;
-    m_shape->Sample_l( ls , r , n , pdfW );
+    m_shape->Sample_l( rc, ls , r , n , pdfW );
 
     if( pdfA )
         *pdfA = 1.0f / m_shape->SurfaceArea();

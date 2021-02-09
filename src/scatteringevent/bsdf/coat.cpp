@@ -71,7 +71,7 @@ Spectrum Coat::Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , 
     const auto specProp = I1 / ( I1 + I2 );
 
     Spectrum ret;
-    auto nbs = BsdfSample(true);
+    auto nbs = BsdfSample(rc);
     if( bs.u < specProp || specProp == 1.0f ){
         // Importance sampling based on the top layer, Microfacet model
         ret = coat.sample_f( swo , swi, nbs, pPdf );
@@ -94,7 +94,7 @@ Spectrum Coat::Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , 
         // Importance sampling using the underlying layer
         Vector r_wi;
         auto bsdf_pdf = 0.0f;
-        ret = bottom->Sample_BSDF( -r_wo , r_wi, nbs, bsdf_pdf );
+        ret = bottom->Sample_BSDF( -r_wo , r_wi, nbs, bsdf_pdf , rc );
 
         swi = refract(-r_wi, DIR_UP, ior, 1.0f, tir_i);
         wi = bxdfToBsdf(swi);

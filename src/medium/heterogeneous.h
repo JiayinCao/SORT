@@ -39,15 +39,15 @@ public:
     //!
     //! @param param		Parameter to build the volume.
     //! @param material		Material that spawns the medium.
-    HeterogenousMedium(const ClosureTypeHeterogenous& param, const MaterialBase* material) :
-        Medium(param.base_color, param.emission, param.absorption, param.scattering, param.anisotropy, material) {}
+    HeterogenousMedium(RenderContext& rc, const ClosureTypeHeterogenous& param, const MaterialBase* material) :
+        Medium(rc, param.base_color, param.emission, param.absorption, param.scattering, param.anisotropy, material) {}
 
     //! @brief  Constructor.
     //!
     //! @param material		Material that spawns the medium.
     //! @param mesh         Mesh that wraps the medium
-    HeterogenousMedium(const MaterialBase* material, const Mesh* mesh) :
-        Medium(WHITE_SPECTRUM, 0.0f, 0.0f, 0.0f, 0.0f, material), m_mesh(mesh){}
+    HeterogenousMedium(RenderContext& rc, const MaterialBase* material, const Mesh* mesh) :
+        Medium(rc, WHITE_SPECTRUM, 0.0f, 0.0f, 0.0f, 0.0f, material), m_mesh(mesh){}
 
     //! @brief  Evaluation of beam transmittance.
     //!
@@ -57,7 +57,7 @@ public:
     //! @param  ray         The ray, which it uses to evaluate beam transmittance.
     //! @param  max_t       The maximum distance to be considered, usually this is the distance the ray travels before it hits a surface.
     //! @return             The attenuation of each spectrum channel.
-    Spectrum Tr(const Ray& ray, const float max_t) const override;
+    Spectrum Tr(const Ray& ray, const float max_t, RenderContext& rc) const override;
 
     //! @brief  Importance sampling a point along the ray in the medium.
     //!

@@ -26,6 +26,7 @@
 class PixelSample;
 class Visibility;
 struct SurfaceInteraction;
+struct RenderContext;
 
 //! @brief Abstract camera
 /**
@@ -65,7 +66,7 @@ public:
     //! @param visibility       The structure holding visibility information.
     //! @return                 The coordinate on the image sensor. Its values range from 0 to width/height - 1.
     virtual Vector2i GetScreenCoord(const SurfaceInteraction& inter, float* pdfw, float* pdfa, float& cosAtCamera , Spectrum* we ,
-                                    Point* eyeP , Visibility* visibility) const = 0;
+                                    Point* eyeP , Visibility* visibility, RenderContext& rc) const = 0;
 
 protected:
     Point           m_eye;                      /**< Viewing point of the camera. */

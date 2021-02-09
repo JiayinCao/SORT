@@ -50,7 +50,7 @@ public:
     //! @param  pdfA            The pdf w.r.t area of picking such a light out-going ray. It is simply one for delta light.
     //! @param  cosAtLight      The cos of the angle between the light out-going direction, the opposite of 'dirToLight'.
     //! @return                 The radiance goes from the light source to the intersected point.
-    Spectrum sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const override;
+    Spectrum sample_l( RenderContext& rc, const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const override;
 
     //! @brief  Approximation of total power of the light.
     //!

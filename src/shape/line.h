@@ -81,7 +81,7 @@ public:
     //!                 the direction of the ray will point outward depending on the normal.
     //! @param n        The normal at the surface where the ray shoots from.
     //! @param pdf      The pdf w.r.t solid angle of picking the ray.
-    void            Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const override{
+    void            Sample_l( RenderContext& rc, const LightSample& ls , Ray& r , Vector& n , float* pdf ) const override{
         sAssertMsg( false , LIGHT , "Using line as a area light source shape.");
     }
 

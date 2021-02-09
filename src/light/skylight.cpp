@@ -65,7 +65,7 @@ Spectrum SkyLight::Le( const SurfaceInteraction& intersect , const Vector& wo , 
     return sky.Evaluate( m_light2world.GetInversed().TransformVector(-wo) ) * intensity;
 }
 
-Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const{
+Spectrum SkyLight::sample_l( RenderContext& rc, const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const{
     r.m_fMin = 0.0f;
     r.m_fMax = FLT_MAX;
     float _pdfw;
@@ -80,8 +80,8 @@ Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , floa
     Vector v1 , v2;
     coordinateSystem( -r.m_Dir , v1 , v2 );
     float d1 , d2;
-    const float t0 = sort_canonical();
-    const float t1 = sort_canonical();
+    const float t0 = sort_rand<float>(rc);
+    const float t1 = sort_rand<float>(rc);
     UniformSampleDisk( t0 , t1 , d1 , d2 );
     r.m_Ori = center + world_radius * ( v1 * d1 + v2 * d2 ) - r.m_Dir * 2.0f * world_radius;
 

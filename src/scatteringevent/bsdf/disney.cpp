@@ -326,13 +326,13 @@ Spectrum DisneyBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
     const GGX ggx(roughness / aspect, roughness * aspect);
     const auto r = sort_rand<float>(rc);
     if (r <= cc_w) {
-        BsdfSample sample(true);
+        BsdfSample sample(rc);
         Vector wh;
         const ClearcoatGGX cggx(sqrt(slerp(0.1f, 0.001f, clearcoatGloss)));
         wh = cggx.sample_f(sample);
         wi = 2 * dot(wo, wh) * wh - wo;
     }else if (r <= sr_w) {
-        BsdfSample sample(true);
+        BsdfSample sample(rc);
         Vector wh;
         wh = ggx.sample_f(sample);
         wi = 2 * dot(wo, wh) * wh - wo;

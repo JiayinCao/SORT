@@ -29,7 +29,7 @@ IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHomogeneous, Tsl_float, scattering)
 IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHomogeneous, Tsl_float, anisotropy)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeHomogeneous)
 
-Spectrum HomogeneousMedium::Tr( const Ray& ray , const float max_t ) const{
+Spectrum HomogeneousMedium::Tr( const Ray& ray , const float max_t, RenderContext& rc) const{
     const auto e = m_globalMediumSample.basecolor * m_globalMediumSample.extinction * (-fmin(max_t, FLT_MAX ));
     return e.Exp();
 }
@@ -39,8 +39,8 @@ Spectrum HomogeneousMedium::Sample( const Ray& ray , const float max_t , MediumI
     const auto scattering = m_globalMediumSample.basecolor * m_globalMediumSample.scattering;
     const auto absorption = m_globalMediumSample.basecolor * m_globalMediumSample.absorption;
 
-    const auto ch = clamp( (int)(sort_canonical() * RGBSPECTRUM_SAMPLE) , 0 , RGBSPECTRUM_SAMPLE - 1 );
-    const auto d = fmin( -log( sort_canonical() ) / extinction[ch] , max_t );
+    const auto ch = clamp( (int)(sort_rand<float>(rc) * RGBSPECTRUM_SAMPLE) , 0 , RGBSPECTRUM_SAMPLE - 1 );
+    const auto d = fmin( -log( sort_rand<float>(rc) ) / extinction[ch] , max_t );
 
     const auto sample_medium = d < max_t;
     if (sample_medium) {

@@ -47,8 +47,8 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
     auto    light_pdfa = 0.0f;
     Ray     light_ray;
     auto    cosAtLight = 1.0f;
-    LightSample light_sample(true);
-    const auto le = light->sample_l( light_sample , light_ray , &light_emission_pdf , &light_pdfa , &cosAtLight );
+    LightSample light_sample(rc);
+    const auto le = light->sample_l( rc, light_sample , light_ray , &light_emission_pdf , &light_pdfa , &cosAtLight );
 
     //-----------------------------------------------------------------------------------------------------
     // Trace light path from light source
@@ -100,7 +100,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
             break;
 
         float bsdf_pdf;
-        const auto bsdf_value = vert.se->Sample_BSDF( vert.wi , vert.wo , BsdfSample(true) , bsdf_pdf );
+        const auto bsdf_value = vert.se->Sample_BSDF( vert.wi , vert.wo , BsdfSample(rc) , bsdf_pdf, rc );
         bsdf_pdf *= rr;
 
         if( 0.0f == bsdf_pdf )
@@ -205,7 +205,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
             break;
 
         float bsdf_pdf;
-        const auto bsdf_value = vert.se->Sample_BSDF( vert.wi , vert.wo , BsdfSample(true) , bsdf_pdf );
+        const auto bsdf_value = vert.se->Sample_BSDF( vert.wi , vert.wo , BsdfSample(rc) , bsdf_pdf, rc );
 
         if( 0.0f == bsdf_pdf )
             break;
@@ -282,7 +282,7 @@ Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const L
         return 0.0f;
 
     // drop the light vertex, take a new sample here
-    const LightSample sample(true);
+    const LightSample sample(rc);
     Vector wi;
     Visibility visibility(scene);
     float directPdfW;
@@ -335,7 +335,7 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
     float cosAtCamera;
     Spectrum we;
     Point eye_point;
-    const auto coord = camera->GetScreenCoord(light_vertex.inter, &camera_pdfW, &camera_pdfA , cosAtCamera , &we , &eye_point , &visibility );
+    const auto coord = camera->GetScreenCoord(light_vertex.inter, &camera_pdfW, &camera_pdfA , cosAtCamera , &we , &eye_point , &visibility, rc );
 
     const auto delta = light_vertex.inter.intersect - eye_point;
     const auto invSqrLen = 1.0f / delta.SquaredLength();

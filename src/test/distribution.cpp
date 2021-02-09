@@ -27,7 +27,8 @@
 // Check PDF evaluation
 void checkDist( const MicroFacetDistribution* dist ){
     double final_total = ParrallReduction<double, 8>( [&](){
-            auto h = dist->sample_f(BsdfSample(true));
+            auto& rc = GetRenderContext();
+            auto h = dist->sample_f(BsdfSample(rc));
             auto pdf = dist->Pdf(h);
             return pdf != 0.0f ? 1.0f / pdf : 0.0f;
         } );
@@ -36,10 +37,8 @@ void checkDist( const MicroFacetDistribution* dist ){
 
 // Check Pdf
 void checkPdf( const MicroFacetDistribution* dist ){
-    RenderContext rc;
-    rc.Init();
-
     double final_total = ParrallReduction<double, 8>( [&](){
+            auto& rc = GetRenderContext();
             const Vector h = UniformSampleHemisphere(sort_rand<float>(rc), sort_rand<float>(rc));
             const float pdf = UniformHemispherePdf();
             return pdf > 0.0f ? dist->Pdf(h) / pdf : 0.0f;

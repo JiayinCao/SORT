@@ -21,16 +21,16 @@
 #include <math.h>
 
 // generate sample in one dimension
-void StratifiedSampler::Generate1D( float* sample , unsigned num , bool accept_uniform ) const
+void StratifiedSampler::Generate1D( float* sample , unsigned num , RenderContext& rc,  bool accept_uniform ) const
 {
     sAssert( sample != 0 , SAMPLING );
 
     for( unsigned i = 0 ; i < num ; ++i )
-        sample[i] = ( (float)i + sort_canonical() ) / (float)num ;
+        sample[i] = ( (float)i + sort_rand<float>(rc) ) / (float)num ;
 }
 
 // generate sample in two dimension
-void StratifiedSampler::Generate2D( float* sample , unsigned num , bool accept_uniform ) const
+void StratifiedSampler::Generate2D( float* sample , unsigned num ,RenderContext& rc, bool accept_uniform ) const
 {
     sAssert( sample != 0 , SAMPLING );
 
@@ -43,8 +43,8 @@ void StratifiedSampler::Generate2D( float* sample , unsigned num , bool accept_u
         unsigned offset = dn * i;
         for( unsigned j = 0 ; j < dn ; j+=2 )
         {
-            sample[offset+j] = ( (float)j/2 + sort_canonical() ) / (float)n ;
-            sample[offset+j+1] = ( (float)i + sort_canonical() ) / (float)n ;
+            sample[offset+j] = ( (float)j/2 + sort_rand<float>(rc) ) / (float)n ;
+            sample[offset+j+1] = ( (float)i + sort_rand<float>(rc) ) / (float)n ;
         }
     }
 }

@@ -108,7 +108,7 @@ Ray PerspectiveCamera::GenerateRay( float x , float y , const PixelSample& ps ) 
 
 // get camera coordinate according to a view direction in world space
 Vector2i PerspectiveCamera::GetScreenCoord( const SurfaceInteraction& inter, float* pdfw, float* pdfa, float& cosAtCamera , Spectrum* we ,
-                                            Point* eyeP , Visibility* visibility) const{
+                                            Point* eyeP , Visibility* visibility, RenderContext& rc) const{
     const auto delta = 0.001f;
     Vector dir = inter.intersect - m_eye;
     const auto len = dir.Length();
@@ -122,7 +122,7 @@ Vector2i PerspectiveCamera::GetScreenCoord( const SurfaceInteraction& inter, flo
         Point view_target = m_worldToCamera.TransformPoint( inter.intersect );
 
         float s , t;
-        UniformSampleDisk( sort_canonical() , sort_canonical() , s , t );
+        UniformSampleDisk( sort_rand<float>(rc) , sort_rand<float>(rc) , s , t );
 
         Ray shadow_ray;
         shadow_ray.m_Ori = Point( s , t , 0.0f ) * m_lensRadius;

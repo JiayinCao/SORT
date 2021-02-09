@@ -20,23 +20,23 @@
 #include "core/rand.h"
 
 // generate sample in one dimension
-void RandomSampler::Generate1D( float* sample , unsigned num , bool accept_uniform ) const
+void RandomSampler::Generate1D( float* sample , unsigned num , RenderContext& rc,  bool accept_uniform ) const
 {
     sAssert( sample != 0 , SAMPLING );
 
     for( unsigned i = 0 ; i < num ; ++i )
-        sample[i] = sort_canonical();
+        sample[i] = sort_rand<float>(rc);
 }
 
 // generate sample in two dimension
-void RandomSampler::Generate2D( float* sample , unsigned num , bool accept_uniform ) const
+void RandomSampler::Generate2D( float* sample , unsigned num , RenderContext& rc,bool accept_uniform ) const
 {
     sAssert( sample != 0 , SAMPLING );
 
     int count = 2 * num;
     for( int i = 0 ; i < count ; i += 2 )
     {
-        sample[i] = sort_canonical();
-        sample[i+1] = sort_canonical();
+        sample[i] = sort_rand<float>(rc);
+        sample[i+1] = sort_rand<float>(rc);
     }
 }

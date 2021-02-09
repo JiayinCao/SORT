@@ -24,12 +24,12 @@ IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeAbsorption, Tsl_float3, base_color)
 IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeAbsorption, Tsl_float, absorption)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeAbsorption)
 
-Spectrum AbsorptionMedium::Tr( const Ray& ray , const float max_t ) const{
+Spectrum AbsorptionMedium::Tr( const Ray& ray , const float max_t , RenderContext& rc) const{
     const auto e = m_globalMediumSample.basecolor * (m_globalMediumSample.absorption * -fmin(max_t, FLT_MAX ));
     return e.Exp();
 }
 
 // Since there is no scattering, medium interaction is never sampled in this type of medium.
 Spectrum AbsorptionMedium::Sample( const Ray& ray, const float max_t, MediumInteraction*& mi , Spectrum& emission , RenderContext& rc) const{
-    return Tr( ray , max_t );
+    return Tr( ray , max_t , rc);
 }

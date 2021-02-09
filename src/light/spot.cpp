@@ -64,7 +64,7 @@ Spectrum SpotLight::sample_l(const Point& ip, const LightSample* ls , Vector& di
 }
 
 // sample a ray from light
-Spectrum SpotLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const{
+Spectrum SpotLight::sample_l( RenderContext& rc, const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const{
     const auto light_dir = Vector3f( m_light2world.matrix.m[1] , m_light2world.matrix.m[5] , m_light2world.matrix.m[9] );
     const auto light_pos = Point( m_light2world.matrix.m[3] , m_light2world.matrix.m[7] , m_light2world.matrix.m[11] );
 

@@ -142,7 +142,7 @@ void Render_Task::Execute(){
     for( int i = m_coord.y ; i < rb.y ; i++ ){
         for( int j = m_coord.x ; j < rb.x ; j++ ){
             // generate samples to be used later
-            g_integrator->GenerateSample( m_sampler.get() , m_pixelSamples.get(), g_samplePerPixel, m_scene );
+            g_integrator->GenerateSample( m_sampler.get() , m_pixelSamples.get(), g_samplePerPixel, m_scene , g_render_context);
 
             // the radiance
             Spectrum radiance;

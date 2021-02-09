@@ -35,19 +35,16 @@ public:
     float       reserved;   // for memory alignment
 
     // default constructor
-    LightSample(bool auto_generate=false)
-    {
-        if( auto_generate )
-        {
-            t = sort_canonical();
-            u = sort_canonical();
-            v = sort_canonical();
-        }else
-        {
-            t = 0.0f;
-            v = 0.0f;
-            u = 0.0f;
-        }
+    LightSample(){
+        t = 0.0f;
+        v = 0.0f;
+        u = 0.0f;
+    }
+
+    LightSample(RenderContext& rc){
+        t = sort_rand<float>(rc);
+        u = sort_rand<float>(rc);
+        v = sort_rand<float>(rc);
     }
 };
 
@@ -60,16 +57,16 @@ public:
     float   preserved;  // a preserved data for memory alignment
 
     // default constructor
-    BsdfSample(bool auto_generate=false){
-        if( auto_generate ){
-            t = sort_canonical();
-            u = sort_canonical();
-            v = sort_canonical();
-        }else{
-            t = 0.0f;
-            v = 0.0f;
-            u = 0.0f;
-        }
+    BsdfSample(){
+        t = 0.0f;
+        v = 0.0f;
+        u = 0.0f;
+    }
+
+    BsdfSample(RenderContext& rc){
+        t = sort_rand<float>(rc);
+        u = sort_rand<float>(rc);
+        v = sort_rand<float>(rc);
     }
 };
 

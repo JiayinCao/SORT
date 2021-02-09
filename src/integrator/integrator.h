@@ -86,9 +86,9 @@ public:
     }
 
     //! @brief  This interface is not well supported in SORT for now.
-    virtual void GenerateSample(const Sampler* sampler, PixelSample* samples, unsigned ps, const Scene& scene) const {
+    virtual void GenerateSample(const Sampler* sampler, PixelSample* samples, unsigned ps, const Scene& scene, RenderContext& rc) const {
         auto data = std::make_unique<float[]>(2 * ps);
-        sampler->Generate2D(data.get(), ps, true);
+        sampler->Generate2D(data.get(), ps, rc, true);
         for (unsigned i = 0; i < ps; ++i)
         {
             samples[i].img_u = data[2 * i];
@@ -100,7 +100,7 @@ public:
             shuffle[i] = i;
         std::shuffle(shuffle.get(), shuffle.get() + ps, std::default_random_engine(sort_rand()));
 
-        sampler->Generate2D(data.get(), ps);
+        sampler->Generate2D(data.get(), ps, rc);
         for (unsigned i = 0; i < ps; ++i)
         {
             unsigned sid = 2 * shuffle[i];

@@ -54,7 +54,7 @@ Spectrum AshikhmanShirley::sample_f( const Vector& wo , Vector& wi , const BsdfS
         wi = CosSampleHemisphere( 2.0f * bs.u , bs.v );
         if( !SameHemiSphere(wo, wi) ) wi *= -1.0f;
     }else{
-        BsdfSample sample(true);
+        BsdfSample sample(rc);
         Vector wh = distribution.sample_f(sample);
         wi = 2 * dot( wo , wh ) * wh - wo;
     }

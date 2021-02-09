@@ -54,7 +54,7 @@ Spectrum PointLight::sample_l(const Point& ip, const LightSample* ls , Vector& d
 }
 
 // sample a ray from light
-Spectrum PointLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const{
+Spectrum PointLight::sample_l( RenderContext& rc, const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const{
     auto light_pos = Point( m_light2world.matrix.m[3] , m_light2world.matrix.m[7] , m_light2world.matrix.m[11] );
 
     // sample a new ray

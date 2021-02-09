@@ -42,7 +42,7 @@ Point Quad::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vect
     return lp;
 }
 
-void Quad::Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const{
+void Quad::Sample_l( RenderContext& rc, const LightSample& ls , Ray& r , Vector& n , float* pdf ) const{
     const auto halfx = sizeX * 0.5f;
     const auto halfy = sizeY * 0.5f;
 
@@ -51,7 +51,7 @@ void Quad::Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) c
     r.m_fMin = 0.0f;
     r.m_fMax = FLT_MAX;
     r.m_Ori = m_transform.TransformPoint( Point( halfx * u , 0.0f , halfy * v ) );
-    r.m_Dir = m_transform.TransformVector( UniformSampleHemisphere( sort_canonical() , sort_canonical() ) );
+    r.m_Dir = m_transform.TransformVector( UniformSampleHemisphere( sort_rand<float>(rc) , sort_rand<float>(rc) ) );
     n = m_transform.TransformNormal( DIR_UP );
 
     if( pdf )

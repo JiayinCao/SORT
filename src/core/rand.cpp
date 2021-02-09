@@ -122,15 +122,6 @@ unsigned sort_rand()
 #endif
 }
 
-// generate a canonical random number
-float sort_canonical(){
-#ifndef HIDE_OLD_RANDDOM_GENERATOR
-    return (sort_rand() & 0xffffff) / float(1 << 24);
-#else
-    return dist_float(re);
-#endif
-}
-
 
 RandomNumberGenerator::RandomNumberGenerator(){
     unsigned _seed = (unsigned)time(0);

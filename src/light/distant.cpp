@@ -51,7 +51,7 @@ Spectrum DistantLight::sample_l(const Point& ip, const LightSample* ls , Vector&
 }
 
 // sample a ray from light
-Spectrum DistantLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const{
+Spectrum DistantLight::sample_l( RenderContext& rc, const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const{
     const Vector light_dir = Vector3f( m_light2world.matrix.m[1] , m_light2world.matrix.m[5] , m_light2world.matrix.m[9] );
 
     r.m_fMin = 0.0f;

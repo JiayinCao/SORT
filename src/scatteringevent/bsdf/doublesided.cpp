@@ -39,9 +39,9 @@ Spectrum DoubleSided::sample_f(const Vector& wo, Vector& wi, const BsdfSample& b
 
     Spectrum ret;
     auto dummy_pdf = 0.0f;
-    if (!back0) ret = m_se0 ? m_se0->Sample_BSDF(wo, wi, bs, dummy_pdf) : 0.0f;
+    if (!back0) ret = m_se0 ? m_se0->Sample_BSDF(wo, wi, bs, dummy_pdf, rc) : 0.0f;
     if (back0){
-        ret = m_se1 ? m_se1->Sample_BSDF(-wo, wi, bs, dummy_pdf) : 0.0f;
+        ret = m_se1 ? m_se1->Sample_BSDF(-wo, wi, bs, dummy_pdf, rc) : 0.0f;
         wi = -wi;
     }
     if (pPdf) *pPdf = pdf(wo, wi);

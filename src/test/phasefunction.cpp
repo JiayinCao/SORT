@@ -33,20 +33,26 @@ TEST(PHASE_FUNCTION, DISABLED_HenyeyGreenstein_PDF_Sample_Accuracy) {
 	
     // Check whether the pdf actually matches the way rays are sampled
     const auto total0 = ParrallReduction<double, 8, 8 * 1024 * 1024>( [&](){
+        RenderContext rc;
+        rc.Init();
+
         Vector wi;
         float pdf = 0.0f;
         const HenyeyGreenstein hg( sort_rand<float>(rc) );
-        hg.Sample( wo , wi , pdf );
+        hg.Sample( rc, wo , wi , pdf );
         return pdf != 0.0f ? 1.0f / pdf : 0.0f;
     } );
     EXPECT_NEAR( total0 , FOUR_PI , 0.04f );
 
     // corner cases when asymmetry parameter in HG phase function is zero
     const auto total1 = ParrallReduction<double, 8, 1024 * 1024>( [&](){
+        RenderContext rc;
+        rc.Init();
+
         Vector wi;
         float pdf = 0.0f;
         const HenyeyGreenstein hg( 0.0f );
-        hg.Sample( wo , wi , pdf );
+        hg.Sample( rc, wo , wi , pdf );
         return pdf != 0.0f ? 1.0f / pdf : 0.0f;
     } );
     EXPECT_NEAR( total1 , FOUR_PI , 0.04f );
@@ -62,10 +68,13 @@ TEST(PHASE_FUNCTION, HenyeyGreenstein_PDF_Sample) {
 	
     // since HenyeyGreenstein has a precise pdf sampling policy, its pdf should be exactly the same with its value.
     ParrallRun<8, 1024 * 1024>( [&](){
+        RenderContext rc;
+        rc.Init();
+
         Vector wi;
         auto pdf = 0.0f;
         const HenyeyGreenstein hg( sort_rand<float>(rc) );
-        hg.Sample( wo , wi , pdf );
+        hg.Sample( rc, wo , wi , pdf );
 
         const auto hg_value = hg.P( wo , wi );
         EXPECT_NEAR( pdf , hg_value , 0.001f );
@@ -73,10 +82,13 @@ TEST(PHASE_FUNCTION, HenyeyGreenstein_PDF_Sample) {
 
     // corner cases when asymmetry parameter in HG phase function is zero
     ParrallRun<8, 1024 * 1024>( [&](){
+        RenderContext rc;
+        rc.Init();
+
         Vector wi;
         float pdf = 0.0f;
         const HenyeyGreenstein hg( 0.0f );
-        hg.Sample( wo , wi , pdf );
+        hg.Sample( rc, wo , wi , pdf );
 
         const auto hg_value = hg.P( wo , wi );
         EXPECT_NEAR( pdf , hg_value , 0.001f );

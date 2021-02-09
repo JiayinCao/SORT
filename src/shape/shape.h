@@ -25,6 +25,7 @@
 #include "math/interaction.h"
 
 class LightSample;
+struct RenderContext;
 
 enum SHAPE_TYPE{
     SHAPE_TRIANGLE  = 0,
@@ -69,7 +70,7 @@ public:
     //!                 the direction of the ray will point outward depending on the normal.
     //! @param n        The normal at the surface where the ray shoots from.
     //! @param pdf      The pdf w.r.t solid angle of picking the ray.
-    virtual void    Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const = 0;
+    virtual void    Sample_l( RenderContext& rc, const LightSample& ls , Ray& r , Vector& n , float* pdf ) const = 0;
 
     //! @brief  Get the pdf w.r.t solid angle of picking a point on the surface where the ray intersects.
     //!

@@ -57,20 +57,20 @@ bool MediumStack::RemoveMedium(const StringID medium_id) {
     return false;
 }
 
-Spectrum MediumStack::Tr(const Ray& r, const float max_t) const {
+Spectrum MediumStack::Tr(const Ray& r, const float max_t, RenderContext& rc) const {
     if (0 == m_mediumCnt)
         return 1.0f;
 
-    const auto k = clamp((int)(sort_canonical() * m_mediumCnt), 0, m_mediumCnt - 1);
+    const auto k = clamp((int)(sort_rand<float>(rc) * m_mediumCnt), 0, m_mediumCnt - 1);
     const Medium* medium = m_mediums[k];
-    return medium->Tr(r, max_t) * m_mediumCnt;
+    return medium->Tr(r, max_t, rc) * m_mediumCnt;
 }
 
 Spectrum MediumStack::Sample(const Ray& r, const float max_t , MediumInteraction*& mi, Spectrum& emission, RenderContext& rc) const {
     if (0 == m_mediumCnt)
         return 1.0f;
 
-    const auto k = clamp((int)(sort_canonical() * m_mediumCnt), 0, m_mediumCnt - 1);
+    const auto k = clamp((int)(sort_rand<float>(rc) * m_mediumCnt), 0, m_mediumCnt - 1);
     const Medium* medium = m_mediums[k];
     return medium->Sample(r, max_t, mi, emission, rc) * m_mediumCnt;
 }

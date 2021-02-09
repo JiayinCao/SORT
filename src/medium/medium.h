@@ -74,8 +74,8 @@ public:
     //! @param  scattering  Scattering of the volume.
     //! @param  anisotropy  Anisotropy of the phase function.
 	//! @param	material	Material that spawns the medium.
-	Medium( const Spectrum& baseColor , const float emission, const float absorption , const float scattering , const float anisotropy , const MaterialBase* material ) : 
-        m_material( material ) , m_globalMediumSample(baseColor, emission, absorption, scattering, anisotropy) {}
+	Medium( RenderContext& rc, const Spectrum& baseColor , const float emission, const float absorption , const float scattering , const float anisotropy , const MaterialBase* material ) : 
+        rc(rc), m_material( material ) , m_globalMediumSample(baseColor, emission, absorption, scattering, anisotropy) {}
 
     //! @brief  Evaluation of beam transmittance.
     //!
@@ -85,7 +85,7 @@ public:
     //! @param  ray         The ray, which it uses to evaluate beam transmittance.
     //! @param  max_t       The maximum distance to be considered, usually this is the distance the ray travels before it hits a surface.
     //! @return             The attenuation of each spectrum channel.
-    virtual Spectrum Tr(const Ray& ray, const float max_t) const = 0;
+    virtual Spectrum Tr(const Ray& ray, const float max_t, RenderContext& rc) const = 0;
 
     //! @brief  Importance sampling a point along the ray in the medium.
     //!
@@ -109,6 +109,9 @@ protected:
     
     /**< A generic medium sample keeps consistant data for homogeneous volume and absorption volume. */
     MediumSample        m_globalMediumSample;
+
+    /**< the render context that construct the medium. */
+    RenderContext&      rc;
 };
 
 // There is only support up to 8 medium overlap each other, exceeding this limit will cause problems in rendering.
@@ -148,7 +151,7 @@ public:
     //! @param  r           The ray along which the bema transmittance will be evaluated.
     //! @param  max_t       The maximum distance to be considered.
     //! @return             The beam transmittance along the ray direction that taking all mediums in the stack into consideration.
-    Spectrum    Tr(const Ray& r, const float max_t) const;
+    Spectrum    Tr(const Ray& r, const float max_t, RenderContext& rc) const;
 
     //! @brief  Sample a point in the mediums.
     //!

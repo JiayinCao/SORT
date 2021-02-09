@@ -47,7 +47,7 @@ public:
     //! @param wi       Incoming direction.
     //! @param pdf      Pdf of sampling the incoming direction.
     //! @return         The evaluate of the phase function of the sampled direction.
-    virtual float    Sample( const Vector& wo , Vector& wi , float& pdf ) const = 0;
+    virtual float    Sample( RenderContext& rc, const Vector& wo , Vector& wi , float& pdf ) const = 0;
 };
 
 //! @brief  Simplest phase function.
@@ -74,9 +74,9 @@ public:
     //! @param wo       Out-going direction.
     //! @param wi       Incoming direction.
     //! @param pdf      Pdf of sampling the incoming direction.
-    float    Sample( const Vector& wo , Vector& wi , float& pdf ) const override{
-        const auto u = sort_canonical();
-        const auto v = sort_canonical();
+    float    Sample( RenderContext& rc, const Vector& wo , Vector& wi , float& pdf ) const override{
+        const auto u = sort_rand<float>(rc);
+        const auto v = sort_rand<float>(rc);
         wi = UniformSampleSphere(u, v);
         pdf = UniformSpherePdf();
 
@@ -119,14 +119,14 @@ public:
     //! @param wo       Out-going direction.
     //! @param wi       Incoming direction.
     //! @param pdf      Pdf of sampling the incoming direction.
-    float Sample( const Vector& wo , Vector& wi , float& pdf ) const override{
+    float Sample( RenderContext& rc, const Vector& wo , Vector& wi , float& pdf ) const override{
         if( fabs(g) > threshold ){
             // p(cos_theta) = ( 1 + g^2 - ( ( 1 - g^2 ) / ( 1 + g - 2 * g * t ) )^2 ) / ( 2 * g )
-            const auto r = sort_canonical();
+            const auto r = sort_rand<float>(rc);
             const auto cos_theta = ( 1.0f + sqrG - SQR( ( 1.0f - sqrG ) / ( 1 + g - twoG * r ) ) ) / ( -twoG );
             const auto sin_theta = ssqrt( 1.0f - SQR( cos_theta ) );
 
-            const auto phi = TWO_PI * sort_canonical();
+            const auto phi = TWO_PI * sort_rand<float>(rc);
             const auto tmp = sphericalVec( sin_theta , cos_theta , phi );
 
             Vector t0, t1;
@@ -140,8 +140,8 @@ public:
             pdf = evaluate( wo , wi );
         }else{
             // there is no need to transform the incoming vector like the other branch since it is totally isotropic.
-            const auto u = sort_canonical();
-            const auto v = sort_canonical();
+            const auto u = sort_rand<float>(rc);
+            const auto v = sort_rand<float>(rc);
             wi = UniformSampleSphere(u, v);
             pdf = UniformSpherePdf();
         }

@@ -45,7 +45,7 @@ Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps , const Scene& sc
     auto light_num = scene.LightNum();
     for( auto i = 0u ; i < light_num ; ++i ){
         const auto light = scene.GetLight(i);
-        li += EvaluateDirect( r , scene , light , ip , LightSample(true) , BsdfSample(true) , rc, true );
+        li += EvaluateDirect( r , scene , light , ip , LightSample(rc) , BsdfSample(rc) , rc, true );
     }
 
     return li;

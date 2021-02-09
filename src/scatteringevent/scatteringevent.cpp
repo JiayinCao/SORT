@@ -22,11 +22,11 @@
 #include "scatteringevent/bsdf/bxdf_utils.h"
 
 template< class T  >
-SORT_STATIC_FORCEINLINE const T* pickScattering( const T* const scattering[] , unsigned int cnt , float totalWeight , float& pdf ){
+SORT_STATIC_FORCEINLINE const T* pickScattering( RenderContext& rc, const T* const scattering[] , unsigned int cnt , float totalWeight , float& pdf ){
     sAssert( totalWeight > 0.0f , MATERIAL );
 
     const T* picked = nullptr;
-    auto r = sort_canonical() * totalWeight;
+    auto r = sort_rand<float>(rc) * totalWeight;
     for( auto i = 0u ; i < cnt ; ++i ){
         const auto weight = scattering[i]->GetSampleWeight();
         if( r <= weight || i == cnt - 1 ){
@@ -58,7 +58,7 @@ Vector ScatteringEvent::localToWorld( const Vector& v ) const{
                     v.x * m_t.z + v.y * m_n.z + v.z * m_bt.z );
 }
 
-float ScatteringEvent::SampleScatteringType( SE_Flag& flag ) const{
+float ScatteringEvent::SampleScatteringType( RenderContext& rc, SE_Flag& flag ) const{
     if (UNLIKELY(m_bxdfTotalSampleWeight == 0.0f && m_bssrdfTotalSampleWeight == 0.0f)) {
         flag = SE_Flag::SE_NONE;
         return 0.0f;
@@ -74,7 +74,7 @@ float ScatteringEvent::SampleScatteringType( SE_Flag& flag ) const{
     }
 
     const auto pdf_bxdf = m_bxdfTotalSampleWeight / ( m_bxdfTotalSampleWeight + m_bssrdfTotalSampleWeight );
-    const auto r = sort_canonical();
+    const auto r = sort_rand<float>(rc);
     flag = ( r < pdf_bxdf ) ? SE_EVALUATE_BXDF : SE_EVALUATE_BSSRDF;
     return flag == SE_EVALUATE_BXDF ? pdf_bxdf : 1.0f - pdf_bxdf;
 }
@@ -89,7 +89,7 @@ Spectrum ScatteringEvent::Evaluate_BSDF( const Vector& wo , const Vector& wi ) c
     return r;
 }
 
-Spectrum ScatteringEvent::Sample_BSDF( const Vector& wo , Vector& wi , const class BsdfSample& bs , float& pdf ) const{
+Spectrum ScatteringEvent::Sample_BSDF( const Vector& wo , Vector& wi , const class BsdfSample& bs , float& pdf, RenderContext& rc ) const{
     pdf = 0.0f;
 
     Spectrum ret;
@@ -99,7 +99,7 @@ Spectrum ScatteringEvent::Sample_BSDF( const Vector& wo , Vector& wi , const cla
     // randomly pick a bxdf
     float bxdf_pdf = 0.0f;
     sAssert( m_bxdfTotalSampleWeight > 0.0f , MATERIAL );
-    const Bxdf* bxdf = pickScattering<Bxdf>( m_bxdfs , m_bxdfCnt , m_bxdfTotalSampleWeight , bxdf_pdf );
+    const Bxdf* bxdf = pickScattering<Bxdf>( rc, m_bxdfs , m_bxdfCnt , m_bxdfTotalSampleWeight , bxdf_pdf );
 
     // transform the 'wo' from world space to shading coordinate
     auto swo = worldToLocal( wo );
@@ -141,7 +141,7 @@ float ScatteringEvent::Pdf_BSDF( const Vector& wo , const Vector& wi ) const{
 void ScatteringEvent::Sample_BSSRDF( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter , float& pdf , RenderContext& rc) const{
     // Randomly pick a bssrdf
     sAssert( m_bssrdfTotalSampleWeight > 0.0f , MATERIAL );
-    const Bssrdf* bssrdf = pickScattering<Bssrdf>( m_bssrdfs , m_bssrdfCnt , m_bssrdfTotalSampleWeight , pdf );
+    const Bssrdf* bssrdf = pickScattering<Bssrdf>( rc, m_bssrdfs , m_bssrdfCnt , m_bssrdfTotalSampleWeight , pdf );
 
     // importance sampling the bssrdf
     bssrdf->Sample_S( scene , wo , po , inter , rc );

@@ -106,7 +106,7 @@ public:
     //!
     //! @param  flag        Which catagory it picks, it could be SE_EVALUATE_BXDF/SE_EVALUATE_BSSRDF.
     //! @return             The properbility of picking the bxdf/bssrdf.
-    float       SampleScatteringType( SE_Flag& flag ) const;
+    float       SampleScatteringType( RenderContext& rc, SE_Flag& flag ) const;
 
     //! @brief Evaluate the value of BSDF based on the incident and outgoing directions.
     //!
@@ -124,7 +124,7 @@ public:
     //! @param pdf          Probability density of the selected direction.
     //! @param inter_flag   Interaction flag, this is for updating mediums.
     //! @return             The Evaluated BRDF value.
-    Spectrum    Sample_BSDF( const Vector& wo , Vector& wi , const class BsdfSample& bs , float& pdf ) const;
+    Spectrum    Sample_BSDF( const Vector& wo , Vector& wi , const class BsdfSample& bs , float& pdf , RenderContext& rc) const;
 
     //! @brief Evaluate the pdf of an existance direction given the Incident direction.
     //!
