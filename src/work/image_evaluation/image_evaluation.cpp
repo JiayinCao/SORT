@@ -343,7 +343,7 @@ int ImageEvaluation::WaitForWorkToBeDone() {
 
 void ImageEvaluation::parseCommandArgs(int argc, char** argv){
     // Parse command line arguments.
-    const auto& args = parse_args(argc, argv);
+    const auto& args = parse_args(argc, argv, true);
 
     for (auto& arg : args) {
         const std::string& key_str = arg.first;
@@ -381,10 +381,6 @@ void ImageEvaluation::loadConfig(IStreamBase& stream) {
 
     const std::string s = logTimeString();
     m_image_title = dummy_str + s;
-
-    // this doesn't need to come from input at all
-    unsigned dummy_tile_size;
-    stream >> dummy_tile_size;
 
     stream >> m_thread_cnt;
     stream >> m_sample_per_pixel;

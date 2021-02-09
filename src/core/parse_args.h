@@ -23,7 +23,7 @@
 #include "core/profile.h"
 #include "core/log.h"
 
-inline std::vector<std::pair<std::string, std::string>> parse_args(int argc, char** argv) {
+inline std::vector<std::pair<std::string, std::string>> parse_args(int argc, char** argv, bool avoid_print_args = false) {
     SORT_PROFILE("Parse Commandline");
 
     std::string commandline = "Command line arguments: \t";
@@ -31,7 +31,8 @@ inline std::vector<std::pair<std::string, std::string>> parse_args(int argc, cha
         commandline += std::string(argv[i]);
         commandline += " ";
     }
-    slog(INFO, GENERAL, "%s", commandline.c_str());
+    if(!avoid_print_args)
+        slog(INFO, GENERAL, "%s", commandline.c_str());
 
     std::vector < std::pair<std::string, std::string>> ret;
 
