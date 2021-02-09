@@ -116,10 +116,13 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
         accel_structure_done.wait();
 
         // get a render context
-        auto& rc = pullRenderContext();
+        auto pRc = pullRenderContext();
 
         // preprocessing for integrators
-        m_integrator->PreProcess(m_scene, rc);
+        m_integrator->PreProcess(m_scene, *pRc);
+
+        // recycle the render context
+        recycleRenderContext(pRc);
     });
 
     // make sure preprocessing is done
@@ -147,7 +150,8 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
             ++m_tile_cnt;
             marl::schedule([&](const Vector2i& ori, const Vector2i& size) {
                 // get a render context
-                auto& rc = pullRenderContext();
+                auto pRc = pullRenderContext();
+                auto& rc = *pRc;
 
                 // get camera
                 auto camera = m_scene.GetCamera();
@@ -302,6 +306,9 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
 
                 // we are done with this tile
                 --m_tile_cnt;
+
+                // we are done with the render context, recycle it
+                recycleRenderContext(pRc);
             }, tl, size);
         }
 
