@@ -68,20 +68,14 @@ int RunSORT(int argc, char** argv) {
         slog(INFO, GENERAL, "Profiling system is %s.", SORT_PROFILE_ISENABLED ? "enabled" : "disabled");
     }
 
-    std::unique_ptr<Work> work;
-
     // Run in unit test mode if required.
-    int ret = 0;
-    if (unit_test_mode) {
+    std::unique_ptr<Work> work;
+    if (unit_test_mode)
         work = std::make_unique<UnitTests>();
-        work->StartRunning(argc, argv);
-        ret = work->WaitForWorkToBeDone();
-    } else {
-        // we only support one other work for now
+    else
         work = std::make_unique<ImageEvaluation>();
-        work->StartRunning(argc, argv);
-        ret = work->WaitForWorkToBeDone();
-    }
+    work->StartRunning(argc, argv);
+    auto ret = work->WaitForWorkToBeDone();
 
     // Flush main thread data
     SortStatsFlushData(true);
