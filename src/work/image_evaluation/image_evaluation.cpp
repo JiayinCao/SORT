@@ -28,10 +28,12 @@
 #include "sampler/random.h"
 #include "core/parse_args.h"
 
+SORT_STATS_DEFINE_COUNTER(sPreprocessingTimeMS)
 SORT_STATS_DEFINE_COUNTER(sRenderingTimeMS)
 SORT_STATS_DEFINE_COUNTER(sSamplePerPixel)
 SORT_STATS_DEFINE_COUNTER(sThreadCnt)
 
+SORT_STATS_TIME("Performance", "Acceleration Structure Construction", sPreprocessingTimeMS);
 SORT_STATS_TIME("Performance", "Rendering Time", sRenderingTimeMS);
 SORT_STATS_AVG_RAY_SECOND("Performance", "Number of rays per second", sRayCount, sRenderingTimeMS);
 SORT_STATS_COUNTER("Statistics", "Sample per Pixel", sSamplePerPixel);
@@ -98,7 +100,6 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
         DisplayManager::GetSingleton().QueueDisplayItem(image_info);
     }
 
-    SORT_STATS(TIMING_EVENT_STAT("", sRenderingTimeMS));
     SORT_STATS(sSamplePerPixel = m_sample_per_pixel);
     SORT_STATS(sThreadCnt = m_thread_cnt);
 
@@ -110,6 +111,9 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
     marl::schedule([&]() {
         // Decrement the WaitGroup counter when the task has finished.
         defer(accel_structure_done.done());
+
+        // update preprocessing time
+        SORT_STATS(TIMING_EVENT_STAT("", sPreprocessingTimeMS));
 
         // Build acceleration structures, commonly QBVH
         m_scene.BuildAccelerationStructure();
@@ -151,6 +155,8 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
     // make sure all materials are built already
     build_mat_wait_group.wait();
 #endif
+
+    m_timer.Reset();
 
     // at this point, we are starting to render stuff
     while (true) {
@@ -395,6 +401,8 @@ int ImageEvaluation::WaitForWorkToBeDone() {
 
     m_scheduler->unbind();
     m_scheduler = nullptr;
+
+    SORT_STATS(sRenderingTimeMS = m_timer.GetElapsedTime());
     return 0;
 }
 

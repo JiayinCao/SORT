@@ -19,7 +19,8 @@
 
 #include <atomic>
 #include <marl/scheduler.h>
-#include "../work.h"
+#include "work/work.h"
+#include "core/timer.h"
 #include "integrator/integrator.h"
 #include "texture/rendertarget.h"
 
@@ -67,13 +68,11 @@ private:
     unsigned        m_image_height = 0;         // height of the image to be generated
     float           m_clampping = 0.0f;         // radiance can't go higher than this, this is the cheapest way to do firefly reduction.
 
-    std::unique_ptr<Integrator>     m_integrator;       // the algorithm used for ray tracing
-
-    std::atomic<int>                m_tile_cnt;         // number of total tiles
-
-    std::unique_ptr<RenderTarget>   m_render_target;    // a temporary buffer for saving out the result
-
-    std::unique_ptr<marl::Scheduler>    m_scheduler;    // job system scheduler
+    std::unique_ptr<Integrator>         m_integrator;       // the algorithm used for ray tracing
+    std::atomic<int>                    m_tile_cnt;         // number of total tiles
+    std::unique_ptr<RenderTarget>       m_render_target;    // a temporary buffer for saving out the result
+    std::unique_ptr<marl::Scheduler>    m_scheduler;        // job system scheduler
+    Timer                               m_timer;            // timer to evaluate the rendering time.
 
     void    parseCommandArgs(int argc, char** argv);
 
