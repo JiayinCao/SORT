@@ -37,14 +37,15 @@ IMPLEMENT_TSLGLOBAL_VAR(Tsl_float3, normal)       // this is world space normal
 IMPLEMENT_TSLGLOBAL_VAR(Tsl_float3, gnormal)      // this is world space geometric normal
 IMPLEMENT_TSLGLOBAL_VAR(Tsl_float3, I)            // this is world space input direction
 IMPLEMENT_TSLGLOBAL_VAR(Tsl_float, density)       // volume density
+IMPLEMENT_TSLGLOBAL_VAR(Tsl_resource, custom)     // render context pointer
 IMPLEMENT_TSLGLOBAL_END()
 
 class TSL_ShadingSystemInterface : public ShadingSystemInterface {
 public:
-    void*   allocate(unsigned int size) const override {
-        // this clearly leaks memory now, I need to modify TSL to fix this.
-        return new char[size];
-        //return SORT_MALLOC_ARRAY_OLD(char, size);
+    void*   allocate(unsigned int size, void* ptr) const override {
+        TslGlobal* tsl_global = (TslGlobal*)ptr;
+        RenderContext* pRc = (RenderContext*)tsl_global->custom;
+        return SORT_MALLOC_ARRAY(pRc->m_memory_arena, char, size);
     }
 
     void    catch_debug(const TSL_DEBUG_LEVEL level, const char* error) const override {
@@ -80,6 +81,7 @@ void ExecuteSurfaceShader( Tsl_Namespace::ShaderInstance* shader , ScatteringEve
     global.normal = make_float3(intersection.normal.x, intersection.normal.y, intersection.normal.z);
     global.I = make_float3(intersection.view.x, intersection.view.y, intersection.view.z);
     global.position = make_float3(intersection.intersect.x, intersection.intersect.y, intersection.intersect.z);
+    global.custom = &rc;
 
     // shader execution
     ClosureTreeNodeBase* closure = nullptr;
@@ -94,6 +96,7 @@ void ExecuteVolumeShader(Tsl_Namespace::ShaderInstance* shader, const MediumInte
     //const SurfaceInteraction& intersection = se.GetInteraction();
     TslGlobal global;
     //global.normal = make_float3(intersection.normal.x, intersection.normal.y, intersection.normal.z);
+    global.custom = &rc;
 
     // shader execution
     ClosureTreeNodeBase* closure = nullptr;
@@ -103,9 +106,10 @@ void ExecuteVolumeShader(Tsl_Namespace::ShaderInstance* shader, const MediumInte
     ProcessVolumeClosure(closure, Tsl_Namespace::make_float3(1.0f, 1.0f, 1.0f), ms, flag, material, mi.mesh, rc);
 }
 
-void EvaluateVolumeSample(Tsl_Namespace::ShaderInstance* shader, const MediumInteraction& mi, MediumSample& ms) {
+void EvaluateVolumeSample(RenderContext& rc, Tsl_Namespace::ShaderInstance* shader, const MediumInteraction& mi, MediumSample& ms) {
     TslGlobal global;
     global.density = mi.mesh->SampleVolumeDensity(mi.intersect);
+    global.custom = &rc;
 
     ClosureTreeNodeBase* closure = nullptr;
     auto raw_function = (void(*)(ClosureTreeNodeBase**, TslGlobal*))shader->get_function();
@@ -114,13 +118,14 @@ void EvaluateVolumeSample(Tsl_Namespace::ShaderInstance* shader, const MediumInt
     EvaluateVolumeSample(closure, Tsl_Namespace::make_float3(1.0f, 1.0f, 1.0f), ms);
 }
 
-Spectrum EvaluateTransparency(Tsl_Namespace::ShaderInstance* shader , const SurfaceInteraction& intersection ){
+Spectrum EvaluateTransparency(RenderContext& rc, Tsl_Namespace::ShaderInstance* shader , const SurfaceInteraction& intersection ){
     TslGlobal global;
     global.uvw = make_float3(intersection.u, intersection.v, 0.0f);
     global.normal = make_float3(intersection.normal.x, intersection.normal.y, intersection.normal.z);
     global.I = make_float3(intersection.view.x, intersection.view.y, intersection.view.z);
     global.gnormal = make_float3(intersection.gnormal.x, intersection.gnormal.y, intersection.gnormal.z);
     global.position = make_float3(intersection.intersect.x, intersection.intersect.y, intersection.intersect.z);
+    global.custom = &rc;
 
     // shader execution
     ClosureTreeNodeBase* closure = nullptr;

@@ -48,7 +48,7 @@ Spectrum HeterogenousMedium::Tr(const Ray& ray, const float max_t, RenderContext
         MediumInteraction tmp_mi;
         tmp_mi.intersect = ray(new_t);
         tmp_mi.mesh = m_mesh;
-        m_material->EvaluateMediumSample(tmp_mi, ms);
+        m_material->EvaluateMediumSample(rc, tmp_mi, ms);
 
         exponent -= ms.basecolor * ms.extinction * dt;
 
@@ -91,7 +91,7 @@ Spectrum HeterogenousMedium::Sample(const Ray& ray, const float max_t, MediumInt
         MediumInteraction tmp_mi;
         tmp_mi.intersect = ray(new_t);
         tmp_mi.mesh = m_mesh;
-        m_material->EvaluateMediumSample(tmp_mi, ms);
+        m_material->EvaluateMediumSample(rc, tmp_mi, ms);
 
         // beam transmittance along the ray through the short distance
         const auto extinction = ms.basecolor * ms.extinction;
