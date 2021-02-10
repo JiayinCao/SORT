@@ -29,6 +29,7 @@
 #include "core/primitive.h"
 #include "core/samplemethod.h"
 #include "core/render_context.h"
+#include "accel/accelerator.h"
 
 class Light;
 struct BSSRDFIntersections;
@@ -168,6 +169,9 @@ public:
         return m_camera;
     }
 
+    // Build acceleration structure
+    void BuildAccelerationStructure();
+
 private:
     std::vector<std::unique_ptr<Entity>>        m_entities;             /**< Entities in the scene. */
     std::vector<Light*>                         m_lights;               /**< Lights in the scene. */
@@ -175,6 +179,8 @@ private:
     std::vector<const Primitive*>               m_primitives;           /**< A list holding all primitives. */
     std::vector<const Primitive*>               m_volPrimitives;        /**< A list holding all primitives that has volume attached to it. */
 
+    std::unique_ptr<Accelerator>                m_accelerator;          /**< Acceleration structure for the whole scene. */
+    
     Light*                  m_skyLight = nullptr;   /**< Sky light if available. */
     Camera*                 m_camera = nullptr;     /**< Camera of the scene. */
 

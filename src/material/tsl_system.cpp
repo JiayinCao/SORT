@@ -20,12 +20,12 @@
 #include <tsl_system.h>
 #include "core/profile.h"
 #include "core/thread.h"
-#include "core/globalconfig.h"
 #include "math/interaction.h"
 #include "scatteringevent/scatteringevent.h"
 #include "medium/medium.h"
 #include "core/log.h"
 #include "material.h"
+#include "core/mesh.h"
 #include "texture/imagetexture2d.h"
 
 USE_TSL_NAMESPACE
@@ -39,10 +39,16 @@ IMPLEMENT_TSLGLOBAL_VAR(Tsl_float3, I)            // this is world space input d
 IMPLEMENT_TSLGLOBAL_VAR(Tsl_float, density)       // volume density
 IMPLEMENT_TSLGLOBAL_END()
 
+// WARNING, whatever the job system is used, it has to avoid preemption between reset and 
+// shader execution. Ideally, I should pass in the pointer through TSL, but this is a way
+// cheaper solution and since I have plan to work on my own job system. I can always gurantee
+// this by myself. But it also looks like Marl doesn't voilate this assumption too.
+static thread_local MemoryAllocator g_memory_arena;
+
 class TSL_ShadingSystemInterface : public ShadingSystemInterface {
 public:
     void*   allocate(unsigned int size) const override {
-        return SORT_MALLOC_ARRAY_OLD(char, size);
+        return new (g_memory_arena.Allocate<char>(size)) char[size];
     }
 
     void    catch_debug(const TSL_DEBUG_LEVEL level, const char* error) const override {
@@ -66,7 +72,6 @@ public:
 
 // Tsl shading system
 static std::shared_ptr<ShadingContext>    g_contexts;
-
 std::shared_ptr<Tsl_Namespace::ShadingContext> GetShadingContext() {
     return g_contexts;
 }
@@ -82,6 +87,8 @@ void ExecuteSurfaceShader( Tsl_Namespace::ShaderInstance* shader , ScatteringEve
     // shader execution
     ClosureTreeNodeBase* closure = nullptr;
     auto raw_function = (void(*)(ClosureTreeNodeBase**, TslGlobal*))shader->get_function();
+
+    g_memory_arena.Reset();
     raw_function(&closure, &global);
 
     // parse the surface shader
@@ -96,6 +103,8 @@ void ExecuteVolumeShader(Tsl_Namespace::ShaderInstance* shader, const MediumInte
     // shader execution
     ClosureTreeNodeBase* closure = nullptr;
     auto raw_function = (void(*)(ClosureTreeNodeBase**, TslGlobal*))shader->get_function();
+
+    g_memory_arena.Reset();
     raw_function(&closure, &global);
 
     ProcessVolumeClosure(closure, Tsl_Namespace::make_float3(1.0f, 1.0f, 1.0f), ms, flag, material, mi.mesh, rc);
@@ -107,6 +116,8 @@ void EvaluateVolumeSample(Tsl_Namespace::ShaderInstance* shader, const MediumInt
 
     ClosureTreeNodeBase* closure = nullptr;
     auto raw_function = (void(*)(ClosureTreeNodeBase**, TslGlobal*))shader->get_function();
+
+    g_memory_arena.Reset();
     raw_function(&closure, &global);
 
     EvaluateVolumeSample(closure, Tsl_Namespace::make_float3(1.0f, 1.0f, 1.0f), ms);
@@ -123,6 +134,8 @@ Spectrum EvaluateTransparency(Tsl_Namespace::ShaderInstance* shader , const Surf
     // shader execution
     ClosureTreeNodeBase* closure = nullptr;
     auto raw_function = (void(*)(ClosureTreeNodeBase**, TslGlobal*))shader->get_function();
+
+    g_memory_arena.Reset();
     raw_function(&closure, &global);
 
     // parse the surface shader

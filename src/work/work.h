@@ -63,5 +63,8 @@ protected:
     //! @brief  Grab a render context from the render context pool.
     //!
     //! If there is no render context available, create and initialize one.
-    RenderContext&  pullRenderContext();
+    RenderContext*  pullRenderContext();
+
+    //! @brief  Recycle render context
+    void recycleRenderContext(RenderContext* rc);
 };

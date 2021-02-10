@@ -18,6 +18,7 @@
 #include <regex>
 #include <math.h>
 #include "texturebase.h"
+#include "core/path.h"
 #include "core/sassert.h"
 #include "math/interaction.h"
 #include "thirdparty/tiny_exr/tinyexr.h"
@@ -40,10 +41,13 @@ bool Texture2DBase::Output( const std::string& name ){
             data[3 * i + 1] = c.g;
             data[3 * i + 2] = c.b;
         }
-
-        int ret = SaveEXR(data.get(), GetWidth(), GetHeight(), 3, true, name.c_str());
+        
+        const auto full_file_path = GetFilePathInExeFolder(name);
+        int ret = SaveEXR(data.get(), GetWidth(), GetHeight(), 3, true, full_file_path.c_str());
         if (ret < 0)
-            slog(WARNING, MATERIAL, "Fail to save image file %s", name.c_str());
+            slog(WARNING, GENERAL, "Fail to save image file %s", full_file_path.c_str());
+        else
+            slog(INFO, GENERAL, "Image file saved %s", full_file_path.c_str());
         return ret >= 0;
     }
 

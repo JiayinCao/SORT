@@ -22,7 +22,6 @@
 #include "integratormethod.h"
 #include "camera/camera.h"
 #include "core/memory.h"
-#include "core/globalconfig.h"
 
 SORT_STATS_DEFINE_COUNTER(sTotalLengthPathFromEye)
 SORT_STATS_DEFINE_COUNTER(sTotalLengthPathFromLight)
@@ -34,6 +33,8 @@ SORT_STATS_AVG_COUNT("Bi-directional Path Tracing", "Average Path Length Startin
 
 Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& scene, RenderContext& rc) const{
     SORT_STATS(++sPrimaryRayCount);
+
+    const auto& camera = scene.GetCamera();
 
     // pick a light randomly
     float pdf;
@@ -122,7 +123,8 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
     //-----------------------------------------------------------------------------------------------------
     // Trace light path from eye point
     const auto lps = (const unsigned)light_path.size();
-    const auto total_pixel = g_resultResollutionWidth * g_resultResollutionHeight;
+    const auto resolution = camera->GetImageResolution();
+    const auto total_pixel = resolution.x * resolution.y;
     wi = ray;
     throughput = 1.0f;
     auto light_path_len = 0;
@@ -327,7 +329,7 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
     if( light_vertex.depth > max_recursive_depth )
         return;
 
-    auto camera = scene.GetCamera();
+    const auto& camera = scene.GetCamera();
 
     Visibility visibility( scene );
     float camera_pdfA;
@@ -344,9 +346,10 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
     if( dot( delta , camera->GetForward() ) <= 0.0f )
         return;
 
+    const auto resolution = camera->GetImageResolution();
     if (coord.x < 0.0f || coord.y < 0.0f ||
-        coord.x >= (int)g_resultResollutionWidth ||
-        coord.y >= (int)g_resultResollutionHeight ||
+        coord.x >= (int)resolution.x ||
+        coord.y >= (int)resolution.y ||
         camera_pdfW == 0.0f )
         return;
 
@@ -363,7 +366,7 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
         return;
 #endif
 
-    const auto total_pixel = (float)(g_resultResollutionWidth * g_resultResollutionHeight);
+    const auto total_pixel = (float)(resolution.x * resolution.y);
     const auto gterm = cosAtCamera * invSqrLen;    // the other cos in the g-term is hidden in the 'bsdf_value'.
     auto radiance = light_vertex.throughput * bsdf_value * we * gterm / (float)( sample_per_pixel * total_pixel * camera_pdfA );
 
@@ -381,5 +384,6 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
     }
 
     // update image sensor
-    g_imageSensor->UpdatePixel(coord.x , coord.y , radiance);
+    // important to fix!!
+    // g_imageSensor->UpdatePixel(coord.x , coord.y , radiance);
 }

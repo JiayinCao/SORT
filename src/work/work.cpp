@@ -18,7 +18,7 @@
 #include <memory>
 #include "work.h"
 
-RenderContext& Work::pullRenderContext() {
+RenderContext* Work::pullRenderContext() {
     // make sure only one thread is accessing this
     std::lock_guard<std::mutex> lock(m_rc_mutex);
 
@@ -39,5 +39,14 @@ RenderContext& Work::pullRenderContext() {
     m_running_render_context.insert(ret);
 
     // make sure this is a brand new render context before returning it
-    return ret->Reset();
+    return &(ret->Reset());
+}
+
+//! @brief  Recycle render context
+void Work::recycleRenderContext(RenderContext* pRc) {
+    // make sure only one thread is accessing this
+    std::lock_guard<std::mutex> lock(m_rc_mutex);
+
+    m_running_render_context.erase(pRc);
+    m_available_render_context.push_back(pRc);
 }

@@ -22,7 +22,6 @@
 #include "core/sassert.h"
 #include "core/define.h"
 #include "sampler/sample.h"
-#include "core/globalconfig.h"
 
 // generate a ray given a pixel
 Ray EnvironmentCamera::GenerateRay( float x , float y , const PixelSample& ps ) const{
@@ -30,8 +29,8 @@ Ray EnvironmentCamera::GenerateRay( float x , float y , const PixelSample& ps ) 
     y += ps.img_v;
 
     // generate ray
-    float theta = PI * y / (float)g_resultResollutionHeight;
-    float phi = 2 * PI * x / (float)g_resultResollutionWidth;
+    float theta = PI * y / (float)m_image_height;
+    float phi = 2 * PI * x / (float)m_image_width;
     Vector dir( sinf( theta ) * cosf( phi ) , cosf( theta ) , sinf( theta ) * sinf( phi ) );
     Ray r( m_eye , dir );
 

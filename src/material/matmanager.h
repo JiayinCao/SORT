@@ -24,7 +24,6 @@
 #include "core/singleton.h"
 #include "material/material.h"
 #include "core/resource.h"
-#include "old_task/task.h"
 
 //! @brief Material manager.
 /**
@@ -59,7 +58,10 @@ public:
 
     // parse material file and add the materials into the manager
     // result           : the number of materials in the file
-    unsigned    ParseMatFile( class IStreamBase& stream );
+    unsigned    ParseMatFile( class IStreamBase& stream, const bool no_mat);
+
+    //! @brief  Whether the renderer is in no material node
+    bool        IsNoMaterialMode() const;
 
     //! @brief  Get resource data based on index.
     //!
@@ -87,6 +89,8 @@ private:
 
     /**< Shader unit default values. */
     std::vector<ShaderParamDefaultValue>        m_paramDefaultValues;
+
+    bool    m_no_material_mode;
 
     friend class Singleton<MatManager>;
 };

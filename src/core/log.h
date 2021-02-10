@@ -146,3 +146,6 @@ void addLogDispatcher( std::unique_ptr<LogDispatcher> logDispatcher );
 
 //! @brief  Utility function to get current time.
 std::string logTimeString();
+
+//! @brief  Utility function go get current time
+std::string logTimeStringStripped();

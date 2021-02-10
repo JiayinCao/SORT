@@ -15,88 +15,38 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
+#include <thread>
 #include "sort.h"
-#include "core/globalconfig.h"
-#include "thirdparty/gtest/gtest.h"
-#include "old_task/init_tasks.h"
-#include "core/scene.h"
-#include "sampler/random.h"
-#include "core/timer.h"
-#include "stream/fstream.h"
-#include "material/tsl_system.h"
-#include "old_task/display_task.h"
-#include "work/unit_tests/unit_tests.h"
 #include "work/image_evaluation/image_evaluation.h"
+#include "work/unit_tests/unit_tests.h"
+#include "core/parse_args.h"
 
-using namespace old_task;
-
-SORT_STATS_DEFINE_COUNTER(sRenderingTimeMS)
-SORT_STATS_DEFINE_COUNTER(sSamplePerPixel)
-SORT_STATS_DEFINE_COUNTER(sThreadCnt)
-
-SORT_STATS_TIME("Performance", "Rendering Time", sRenderingTimeMS);
-SORT_STATS_AVG_RAY_SECOND("Performance", "Number of rays per second", sRayCount , sRenderingTimeMS);
-SORT_STATS_COUNTER("Statistics", "Sample per Pixel", sSamplePerPixel);
-SORT_STATS_COUNTER("Performance", "Worker thread number", sThreadCnt);
-
-void SchedulTasks( Scene& scene , IStreamBase& stream ){
-    SORT_PROFILE("Schedule Tasks");
-
-    auto loading_task       = SCHEDULE_TASK<Loading_Task>( "Loading" , DEFAULT_TASK_PRIORITY, {} , scene, stream);
-    auto sac_task           = SCHEDULE_TASK<SpatialAccelerationConstruction_Task>( "Spatial Data Structure Construction" , DEFAULT_TASK_PRIORITY, {loading_task} , scene);
-    auto savc_task          = SCHEDULE_TASK<SpatialAccelerationVolConstruction_Task>( "Spatial Data Structure (Volume) Construction" , DEFAULT_TASK_PRIORITY, {loading_task} , scene);
-    auto pre_render_task    = SCHEDULE_TASK<PreRender_Task>( "Pre rendering pass" , DEFAULT_TASK_PRIORITY, {sac_task, savc_task} , scene);
-
-    // Only schedule this task if there is display server connected
-    if(DisplayManager::GetSingleton().IsDisplayServerConnected())
-        auto update_task    = SCHEDULE_TASK<Display_Task>("Display", DEFAULT_TASK_PRIORITY, { loading_task });
-
-    // Push render task into the queue
-    const auto tilesize = (int)g_tileSize;
-    const auto width = (int)g_resultResollution[0];
-    const auto height = (int)g_resultResollution[1];
-
-    // get the number of total task
-    Vector2i tile_num = Vector2i( (int)ceil(width / (float)tilesize) , (int)ceil(height / (float)tilesize) );
-
-    // start tile from center instead of top-left corner
-    Vector2i cur_pos( tile_num / 2 );
-    int cur_dir = 0;
-    int cur_len = 0;
-    int cur_dir_len = 1;
-    const Vector2i dir[4] = { Vector2i( 0 , -1 ) , Vector2i( -1 , 0 ) , Vector2i( 0 , 1 ) , Vector2i( 1 , 0 ) };
-
-    unsigned int priority = DEFAULT_TASK_PRIORITY;
-    while (true){
-        // only process node inside the image region
-        if (cur_pos.x >= 0 && cur_pos.x < tile_num.x && cur_pos.y >= 0 && cur_pos.y < tile_num.y ){
-            Vector2i tl( cur_pos.x * tilesize , cur_pos.y * tilesize );
-            Vector2i size( (tilesize < (width - tl.x)) ? tilesize : (width - tl.x) ,
-                           (tilesize < (height - tl.y)) ? tilesize : (height - tl.y) );
-
-            SCHEDULE_TASK<Render_Task>( "render task" , priority-- , {pre_render_task} , tl , size , scene );
-        }
-
-        // turn to the next direction
-        if (cur_len >= cur_dir_len){
-            cur_dir = (cur_dir + 1) % 4;
-            cur_len = 0;
-            cur_dir_len += 1 - cur_dir % 2;
-        }
-
-        cur_pos += dir[cur_dir];
-        ++cur_len;
-        if( (cur_pos.x < 0 || cur_pos.x >= tile_num.x ) && (cur_pos.y < 0 || cur_pos.y >= tile_num.y ) )
-            break;
-    }
-}
-
-int RunSORT( int argc , char** argv ){
+int RunSORT(int argc, char** argv) {
     // Parse command line arguments.
-    bool valid_args = GlobalConfiguration::GetSingleton().ParseCommandLine( argc , argv );
+    const auto& args = parse_args(argc, argv);
+
+    bool profiling_enabled = false;
+    bool unit_test_mode = false;
+    bool valid_args = false;
+
+    for (auto& arg : args) {
+        const auto& key_str = arg.first;
+        const auto& value_str = arg.second;
+
+        if (key_str == "input") {
+            valid_args = true;
+        }
+        else if (key_str == "unittest") {
+            unit_test_mode = true;
+            valid_args = true;
+        }
+        else if (key_str == "profiling") {
+            profiling_enabled = value_str == "on";
+        }
+    }
 
     // Disable profiling if necessary
-    if( !g_profilingEnabled )
+    if (!profiling_enabled)
         SORT_PROFILE_DISABLE;
 
     if (!valid_args) {
@@ -107,85 +57,34 @@ int RunSORT( int argc , char** argv ){
         slog(INFO, GENERAL, "  --nomaterial         Disable materials in SORT.");
         slog(INFO, GENERAL, "  --profiling:<on|off> Toggling profiling option, false by default.");
         return -1;
-    }else{
+    }
+    else {
         slog(INFO, GENERAL, "Number of CPU cores %d", std::thread::hardware_concurrency());
-        #ifdef SORT_ENABLE_STATS_COLLECTION
-            slog(INFO, GENERAL, "Stats collection is enabled.");
-        #else
-            slog(INFO, GENERAL, "Stats collection is disabled.");
-        #endif
+#ifdef SORT_ENABLE_STATS_COLLECTION
+        slog(INFO, GENERAL, "Stats collection is enabled.");
+#else
+        slog(INFO, GENERAL, "Stats collection is disabled.");
+#endif
         slog(INFO, GENERAL, "Profiling system is %s.", SORT_PROFILE_ISENABLED ? "enabled" : "disabled");
     }
 
-    std::unique_ptr<Work> work;
-
     // Run in unit test mode if required.
-    if( g_unitTestMode ){
+    std::unique_ptr<Work> work;
+    if (unit_test_mode)
         work = std::make_unique<UnitTests>();
-        work->StartRunning(argc, argv);
-        return work->WaitForWorkToBeDone();
-    }
-
-#if 0
-    // we only support one other work for now
-    work = std::make_unique<ImageEvaluation>();
+    else
+        work = std::make_unique<ImageEvaluation>();
     work->StartRunning(argc, argv);
-    return work->WaitForWorkToBeDone();
+    auto ret = work->WaitForWorkToBeDone();
 
-#else
-    // Load the global configuration from stream
-    IFileStream stream( g_inputFilePath );
-    GlobalConfiguration::GetSingleton().Serialize(stream);
+    // Flush main thread data
+    SortStatsFlushData(true);
+    // Output stats data
+    if (ret == 0 && !unit_test_mode)
+        SortStatsPrintData();
 
-    CreateTSLThreadContexts();
+    // this sucks
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
-    Scene scene;
-    // Schedule all tasks.
-    SchedulTasks( scene , stream );
-
-    std::vector< std::unique_ptr<WorkerThread> > threads;
-    for( unsigned i = 0 ; i < g_threadCnt - 1 ; ++i )
-        threads.push_back( std::make_unique<WorkerThread>( i + 1 ) );
-
-    // start all threads
-    for_each( threads.begin() , threads.end() , []( std::unique_ptr<WorkerThread>& thread ) { thread->BeginThread(); } );
-
-    {
-        SORT_STATS( TIMING_EVENT_STAT( "" , sRenderingTimeMS ) );
-        EXECUTING_TASKS();
-
-        // wait for all the threads to be finished
-        for_each( threads.begin() , threads.end() , []( std::unique_ptr<WorkerThread>& thread ) { thread->Join(); } );
-    }
-
-    SORT_STATS(sSamplePerPixel = g_samplePerPixel);
-    SORT_STATS(sThreadCnt = g_threadCnt);
-
-    // Post process for image sensor
-    g_imageSensor->PostProcess();
-
-    const bool display_server_connected = DisplayManager::GetSingleton().IsDisplayServerConnected();
-
-    if (display_server_connected) {
-        // terminator is only needed in blender mode
-        if (g_blenderMode) {
-            std::shared_ptr<TerminateIndicator> terminator = std::make_shared<TerminateIndicator>();
-            DisplayManager::GetSingleton().QueueDisplayItem(terminator);
-        }
-
-        // some integrator might need a final refresh
-        if (UNLIKELY(g_integrator->NeedFinalUpdate())) {
-            std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>();
-            di->title = g_imageTitle;
-            DisplayManager::GetSingleton().QueueDisplayItem(di);
-        }
-
-        // make sure flush all display items before quiting
-        DisplayManager::GetSingleton().ProcessDisplayQueue(-1);
-    }
-
-    DestroyTSLThreadContexts();
-
-    return 0;
-#endif
+    return ret;
 }

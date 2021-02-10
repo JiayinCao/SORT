@@ -68,6 +68,11 @@ public:
     virtual Vector2i GetScreenCoord(const SurfaceInteraction& inter, float* pdfw, float* pdfa, float& cosAtCamera , Spectrum* we ,
                                     Point* eyeP , Visibility* visibility, RenderContext& rc) const = 0;
 
+    //! @brief Get targe image resolution
+    virtual Vector2i GetImageResolution() const {
+        return Vector2i(m_image_width, m_image_height);
+    }
+
 protected:
     Point           m_eye;                      /**< Viewing point of the camera. */
     float           m_sensorW = 0.0f;           /**< Image sensor width. */
@@ -75,4 +80,7 @@ protected:
     float           m_aspectRatioW = 0.0f;      /**< Aspect ratio along x axis. */
     float           m_aspectRatioH = 0.0f;      /**< Aspect ratio along y axis. */
     int             m_aspectFit = 0;            /**< Aspect fit. It equals to 1 if it fits horizontally, otherwise it is 2. */
+
+    unsigned        m_image_width;              /**< Resolution of the final image. */
+    unsigned        m_image_height;             /**< Resolution of the final image. */
 };

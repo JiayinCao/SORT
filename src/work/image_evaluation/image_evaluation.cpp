@@ -27,11 +27,27 @@
 #include "material/matmanager.h"
 #include "core/timer.h"
 #include "sampler/random.h"
+#include "core/parse_args.h"
+
+SORT_STATS_DEFINE_COUNTER(sRenderingTimeMS)
+SORT_STATS_DEFINE_COUNTER(sSamplePerPixel)
+SORT_STATS_DEFINE_COUNTER(sThreadCnt)
+
+SORT_STATS_TIME("Performance", "Rendering Time", sRenderingTimeMS);
+SORT_STATS_AVG_RAY_SECOND("Performance", "Number of rays per second", sRayCount, sRenderingTimeMS);
+SORT_STATS_COUNTER("Statistics", "Sample per Pixel", sSamplePerPixel);
+SORT_STATS_COUNTER("Performance", "Worker thread number", sThreadCnt);
 
 static constexpr unsigned int GLOBAL_CONFIGURATION_VERSION = 0;
 static constexpr unsigned int IMAGE_TILE_SIZE = 64;
 
+void thread_shut_down(int id) {
+    SortStatsFlushData();
+}
+
 void ImageEvaluation::StartRunning(int argc, char** argv) {
+    m_image_title = "sort_" + logTimeString() + ".exr";
+
     // parse command arugments first
     parseCommandArgs(argc, argv);
 
@@ -45,8 +61,11 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
     // load configuration
     loadConfig(stream);
 
+    if (!m_blender_mode)
+        m_render_target = std::make_unique<RenderTarget>(m_image_width, m_image_height);
+
     // Load materials from stream
-    MatManager::GetSingleton().ParseMatFile(stream);
+    MatManager::GetSingleton().ParseMatFile(stream, m_no_material_mode);
 
     // Serialize the scene entities
     m_scene.LoadScene(stream);
@@ -58,19 +77,25 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
         image_info->title = m_image_title;
         image_info->w = m_image_width;
         image_info->h = m_image_height;
+        image_info->is_blender_mode = m_blender_mode;
         DisplayManager::GetSingleton().QueueDisplayItem(image_info);
     }
+
+    SORT_STATS(TIMING_EVENT_STAT("", sRenderingTimeMS));
+    SORT_STATS(sSamplePerPixel = m_sample_per_pixel);
+    SORT_STATS(sThreadCnt = m_thread_cnt);
 
     // setup job system
     marl::Scheduler::Config cfg;
     cfg.setWorkerThreadCount(m_thread_cnt);
+    cfg.setWorkerThreadShutdown(thread_shut_down);
 
     marl::Scheduler scheduler(cfg);
     scheduler.bind();
     defer(scheduler.unbind());  // Automatically unbind before returning.
 
     // Create a WaitGroup with an initial count of numTasks.
-    marl::WaitGroup accel_structure_done(2);
+    marl::WaitGroup accel_structure_done(1);
     marl::WaitGroup pre_processing_done(1);
 
     // build acceleration structure
@@ -78,17 +103,8 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
         // Decrement the WaitGroup counter when the task has finished.
         defer(accel_structure_done.done());
 
-        sAssert(m_accelerator, SPATIAL_ACCELERATOR);
-        m_accelerator->Build(m_scene.GetPrimitives(), m_scene.GetBBox());
-    });
-
-    // bulid acceleration structure for volumes
-    marl::schedule([&]() {
-        // Decrement the WaitGroup counter when the task has finished.
-        defer(accel_structure_done.done());
-
-        sAssert(m_accelerator_vol, SPATIAL_ACCELERATOR);
-        m_accelerator_vol->Build(m_scene.GetPrimitivesVol(), m_scene.GetBBoxVol());
+        // Build acceleration structures, commonly QBVH
+        m_scene.BuildAccelerationStructure();
     });
 
     // pre-processing for integrators, like instant radiosity
@@ -100,10 +116,13 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
         accel_structure_done.wait();
 
         // get a render context
-        auto& rc = pullRenderContext();
+        auto pRc = pullRenderContext();
 
-        sAssert(m_accelerator_vol, SPATIAL_ACCELERATOR);
-        m_integrator->PreProcess(m_scene, rc);
+        // preprocessing for integrators
+        m_integrator->PreProcess(m_scene, *pRc);
+
+        // recycle the render context
+        recycleRenderContext(pRc);
     });
 
     // make sure preprocessing is done
@@ -120,7 +139,6 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
     int cur_dir_len = 1;
     const Vector2i dir[4] = { Vector2i(0 , -1) , Vector2i(-1 , 0) , Vector2i(0 , 1) , Vector2i(1 , 0) };
 
-    unsigned int priority = DEFAULT_TASK_PRIORITY;
     while (true) {
         // only process node inside the image region
         if (cur_pos.x >= 0 && cur_pos.x < tile_num.x && cur_pos.y >= 0 && cur_pos.y < tile_num.y) {
@@ -132,7 +150,8 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
             ++m_tile_cnt;
             marl::schedule([&](const Vector2i& ori, const Vector2i& size) {
                 // get a render context
-                auto& rc = pullRenderContext();
+                auto pRc = pullRenderContext();
+                auto& rc = *pRc;
 
                 // get camera
                 auto camera = m_scene.GetCamera();
@@ -155,7 +174,8 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
                     indicate_tile->y = ori.y;
                     indicate_tile->w = size.x;
                     indicate_tile->h = size.y;
-                    indicate_tile->title = tilesize;
+                    indicate_tile->is_blender_mode = m_blender_mode;
+                    indicate_tile->title = m_image_title;
 
                     const auto indication_intensity = 0.3f;
                     if (m_blender_mode) {
@@ -215,7 +235,8 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
                     display_tile->y = ori.y;
                     display_tile->w = size.x;
                     display_tile->h = size.y;
-                    display_tile->title = tilesize;
+                    display_tile->title = m_image_title;
+                    display_tile->is_blender_mode = m_blender_mode;
 
                     if (m_blender_mode) {
                         display_tile->m_data[0] = std::make_unique<float[]>(total_pixel * 4);
@@ -228,6 +249,10 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
                 Vector2i rb = ori + size;
                 for (int i = ori.y; i < rb.y; i++) {
                     for (int j = ori.x; j < rb.x; j++) {
+                        // reset the memory allocator so that the last sample could reuse memory
+                        // otherwise, memory usage is linear to spp.
+                        rc.Reset();
+
                         // generate samples to be used later
                         m_integrator->GenerateSample(sampler.get(), pixelSamples.get(), m_sample_per_pixel, m_scene, rc);
 
@@ -255,6 +280,9 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
                         if (valid_pixel_cnt > 0)
                             radiance /= (float)valid_pixel_cnt;
 
+                        if (!m_blender_mode)
+                            m_render_target->SetColor(j, i, radiance);
+
                         // update the value if display server is connected
                         if (display_server_connected && need_refresh_tile) {
                             auto local_i = i - ori.y;
@@ -276,8 +304,15 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
                     }
                 }
 
+                // update display server if needed
+                if (display_server_connected && need_refresh_tile)
+                    DisplayManager::GetSingleton().QueueDisplayItem(display_tile);
+
                 // we are done with this tile
                 --m_tile_cnt;
+
+                // we are done with the render context, recycle it
+                recycleRenderContext(pRc);
             }, tl, size);
         }
 
@@ -290,54 +325,72 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
 
         cur_pos += dir[cur_dir];
         ++cur_len;
+
         if ((cur_pos.x < 0 || cur_pos.x >= tile_num.x) && (cur_pos.y < 0 || cur_pos.y >= tile_num.y))
             break;
     }
-}
 
-int ImageEvaluation::WaitForWorkToBeDone() {
-    static Timer timer;
-
+    Timer timer;
     while (m_tile_cnt > 0) {
         if (UNLIKELY(m_integrator->NeedFullTargetRealtimeUpdate())) {
             // only update it every 1 second
             if (timer.GetElapsedTime() > 1000) {
                 std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>();
                 di->title = m_image_title;
+                di->w = m_image_width;
+                di->h = m_image_height;
+                di->is_blender_mode = m_blender_mode;
                 DisplayManager::GetSingleton().QueueDisplayItem(di);
                 timer.Reset();
             }
         }
 
-        DisplayManager::GetSingleton().ProcessDisplayQueue();
+        DisplayManager::GetSingleton().ProcessDisplayQueue(6);
         std::this_thread::yield();
     }
 
+    DisplayManager::GetSingleton().ProcessDisplayQueue(-1);
+
+    if(!m_blender_mode)
+        m_render_target->Output("sort_" + logTimeStringStripped() + ".exr");
+}
+
+int ImageEvaluation::WaitForWorkToBeDone() {
+    const bool display_server_connected = DisplayManager::GetSingleton().IsDisplayServerConnected();
+    if (display_server_connected) {
+        // some integrator might need a final refresh
+        if (UNLIKELY(m_integrator->NeedFinalUpdate())) {
+            std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>();
+            di->title = m_image_title;
+            di->is_blender_mode = m_blender_mode;
+            DisplayManager::GetSingleton().QueueDisplayItem(di);
+        }
+
+        // terminator is only needed in blender mode
+        if (m_blender_mode) {
+            std::shared_ptr<TerminateIndicator> terminator = std::make_shared<TerminateIndicator>();
+            terminator->is_blender_mode = m_blender_mode;
+            DisplayManager::GetSingleton().QueueDisplayItem(terminator);
+        }
+
+        // make sure flush all display items before quiting
+        DisplayManager::GetSingleton().ProcessDisplayQueue(-1);
+    }
+
+    DestroyTSLThreadContexts();
     return 0;
 }
 
 void ImageEvaluation::parseCommandArgs(int argc, char** argv){
-    std::string commandline = "Command line arguments: \t";
-    for (int i = 0; i < argc; ++i) {
-        commandline += std::string(argv[i]);
-        commandline += " ";
-    }
-    slog( INFO , GENERAL , "%s" , commandline.c_str() );
+    // Parse command line arguments.
+    const auto& args = parse_args(argc, argv, true);
 
-    bool com_arg_valid = false;
-    std::regex word_regex("--(\\w+)(?:\\s*:\\s*([^ \\n]+)\\s*)?");
-    auto words_begin = std::sregex_iterator(commandline.begin(), commandline.end(), word_regex);
-    for (std::sregex_iterator it = words_begin; it != std::sregex_iterator(); ++it) {
-        const auto m = *it;
-        std::string key_str = m[1];
-        std::string value_str = m.size() >= 3 ? std::string(m[2]) : "";
-
-        // not case sensitive for key, but it is for value.
-        std::transform(key_str.begin(), key_str.end(), key_str.begin(), ::tolower);
+    for (auto& arg : args) {
+        const std::string& key_str = arg.first;
+        const std::string& value_str = arg.second;
 
         if (key_str == "input") {
             m_input_file = value_str;
-            com_arg_valid = true;
         }else if (key_str == "blendermode"){
             m_blender_mode = true;
         }else if (key_str == "profiling"){
@@ -363,28 +416,12 @@ void ImageEvaluation::loadConfig(IStreamBase& stream) {
     sAssertMsg(GLOBAL_CONFIGURATION_VERSION == version, GENERAL, "Incompatible resource file with this version SORT.");
 
     stream >> m_resource_path;
-    std::string dummy_str;
-    stream >> dummy_str;
-
-    const std::string s = logTimeString();
-    m_image_title = dummy_str + s;
-
-    // this doesn't need to come from input at all
-    unsigned dummy_tile_size;
-    stream >> dummy_tile_size;
-
     stream >> m_thread_cnt;
     stream >> m_sample_per_pixel;
     stream >> m_image_width >> m_image_height;
     stream >> m_clampping;
 
-    StringID accelType, integratorType;
-    stream >> accelType;
-    m_accelerator = MakeUniqueInstance<Accelerator>(accelType);
-    if (m_accelerator)
-        m_accelerator->Serialize(stream);
-    m_accelerator_vol = std::move(m_accelerator->Clone());
-
+    StringID integratorType;
     stream >> integratorType;
     m_integrator = MakeUniqueInstance<Integrator>(integratorType);
     if (IS_PTR_VALID(m_integrator))

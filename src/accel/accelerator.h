@@ -24,12 +24,13 @@
 #include "core/stats.h"
 #include "core/profile.h"
 #include "stream/stream.h"
-#include "core/scene.h"
 #include "core/render_context.h"
+#include "math/interaction.h"
+#include "scatteringevent/bssrdf/bssrdf.h"
+#include "medium/medium.h"
+#include "core/primitive.h"
 
 class Ray;
-struct SurfaceInteraction;
-struct BSSRDFIntersections;
 
 #ifdef ENABLE_TRANSPARENT_SHADOW
 SORT_FORCEINLINE bool isShadowRay( const SurfaceInteraction* intersection ){

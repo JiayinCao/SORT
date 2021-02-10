@@ -25,7 +25,6 @@
 #include "core/sassert.h"
 #include "core/sassert.h"
 #include "core/stats.h"
-#include "core/globalconfig.h"
 #include "core/strid.h"
 #include "core/primitive.h"
 #include "entity/visual_entity.h"
@@ -67,17 +66,24 @@ bool Scene::LoadScene( IStreamBase& stream ){
     SORT_STATS(sScenePrimitiveCount=(StatsInt)m_primitives.size());
     SORT_STATS(sSceneLightCount=(StatsInt)m_lights.size());
 
+    // parse the acceleration structure configuration
+    StringID accelType;
+    stream >> accelType;
+    m_accelerator = MakeUniqueInstance<Accelerator>(accelType);
+    if (m_accelerator)
+        m_accelerator->Serialize(stream);
+
     return true;
 }
 
 bool Scene::GetIntersect( RenderContext& rc, const Ray& r , SurfaceInteraction& intersect ) const{
     intersect.t = FLT_MAX;
-    return g_accelerator->GetIntersect( rc, r , intersect );
+    return m_accelerator->GetIntersect( rc, r , intersect );
 }
 
 #ifndef ENABLE_TRANSPARENT_SHADOW
 bool Scene::IsOccluded(const Ray& r) const{
-    return g_accelerator->IsOccluded(r);
+    return m_accelerator->IsOccluded(r);
 }
 #else
 Spectrum Scene::GetAttenuation( const Ray& const_ray , RenderContext& rc , MediumStack* ms ) const{
@@ -86,7 +92,7 @@ Spectrum Scene::GetAttenuation( const Ray& const_ray , RenderContext& rc , Mediu
     Spectrum attenuation( 1.0f );
     while( !attenuation.IsBlack() ){
         Spectrum att;
-        if( !g_accelerator->GetAttenuation(ray, att, rc, ms) )
+        if( !m_accelerator->GetAttenuation(ray, att, rc, ms) )
             break;
 
         if( att.IsBlack() )
@@ -100,20 +106,19 @@ Spectrum Scene::GetAttenuation( const Ray& const_ray , RenderContext& rc , Mediu
 #endif
 
 void Scene::RestoreMediumStack( const Point& p , RenderContext& rc, MediumStack& ms ) const{
-	// check if there is volume in the scene, early return if there isn't.
-	if (!g_acceleratorVol->GetIsValid())
-		return;
+    if (IS_PTR_INVALID(m_accelerator))
+        return;
 
 	Ray ray;
 	ray.m_Ori = p;
 	ray.m_Dir = Vector( 0.0f , 1.0f , 0.0f );		// shoot the ray through a random direction.
-	while (g_accelerator->UpdateMediumStack(ray, ms, rc, true)) {}
+	while (m_accelerator->UpdateMediumStack(ray, ms, rc, true)) {}
 }
 
 void Scene::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , RenderContext& rc, const StringID matID ) const{
     // no brute force support in BSSRDF
-    if(IS_PTR_VALID(g_accelerator))
-        g_accelerator->GetIntersect( r , intersect , rc , matID );
+    if(IS_PTR_VALID(m_accelerator))
+        m_accelerator->GetIntersect( r , intersect , rc , matID );
 }
 
 void Scene::generatePriBuf(){
@@ -191,4 +196,8 @@ void Scene::AddLight( Light* light ){
         m_lights.push_back( light );
         light->SetupScene( this );
     }
+}
+
+void Scene::BuildAccelerationStructure() {
+    m_accelerator->Build(GetPrimitives(), GetBBox());
 }

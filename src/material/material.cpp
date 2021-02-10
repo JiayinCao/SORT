@@ -20,12 +20,12 @@
 #include "material.h"
 #include "matmanager.h"
 #include "core/log.h"
-#include "core/globalconfig.h"
 #include "core/strid.h"
 #include "scatteringevent/scatteringevent.h"
 #include "scatteringevent/bsdf/lambert.h"
 #include "scatteringevent/bsdf/transparent.h"
 #include "texture/imagetexture2d.h"
+#include "core/profile.h"
 
 USE_TSL_NAMESPACE
 
@@ -242,7 +242,7 @@ void Material::Serialize(IStreamBase& stream){
 
 void Material::UpdateScatteringEvent( ScatteringEvent& se, RenderContext& rc ) const {
     // all lambert surfaces if the render is in no material mode.
-    if (UNLIKELY(g_noMaterial || ( !m_surface_shader_valid && !m_special_transparent ))) {
+    if (UNLIKELY(MatManager::GetSingleton().IsNoMaterialMode() || ( !m_surface_shader_valid && !m_special_transparent ))) {
         se.AddBxdf(SORT_MALLOC(rc.m_memory_arena, Lambert)(rc, WHITE_SPECTRUM, FULL_WEIGHT, DIR_UP));
         return;
     }

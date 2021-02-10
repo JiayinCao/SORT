@@ -16,23 +16,3 @@
  */
 
 #include "thread.h"
-
-#include <iostream>
-#include <string>
-#include "core/memory.h"
-#include "core/stats.h"
-#include "core/profile.h"
-#include "old_task/task.h"
-#include "core/profile.h"
-#include "core/define.h"
-
-void WorkerThread::BeginThread(){
-    m_thread = std::thread([&]() {
-        RunThread();
-    });
-}
-
-void WorkerThread::RunThread(){
-    old_task::EXECUTING_TASKS();
-    SortStatsFlushData();
-}

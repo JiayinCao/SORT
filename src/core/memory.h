@@ -88,20 +88,8 @@ private:
     std::list<std::unique_ptr<MemoryBlock>>  m_usedBlocks;
 };
 
-//! @brief Get static allocator.
-//!
-//! @return Thread based memory allocator.
-SORT_FORCEINLINE ::MemoryAllocator& GetStaticAllocator() {
-    // Each thread has their own memory allocator.
-    static thread_local ::MemoryAllocator memoryAllocator;
-    return memoryAllocator;
-}
-
-#define SORT_MALLOC_ARRAY_OLD(T,cnt)    new (GetStaticAllocator().Allocate<T>(cnt)) T
-#define SORT_CLEAR_MEMPOOL()        GetStaticAllocator().Reset()
-
-#define SORT_MALLOC(A, T)     new (A->Allocate<T>()) T
-#define SORT_MALLOC_ARRAY(A, T,cnt) new (A->Allocate<T>(cnt)) T 
+#define SORT_MALLOC(A, T)               new (A->Allocate<T>()) T
+#define SORT_MALLOC_ARRAY(A, T,cnt)     new (A->Allocate<T>(cnt)) T 
 
 //! @brief  A helper utility function that allocate memory with alignment.
 //!

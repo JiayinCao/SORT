@@ -40,12 +40,6 @@ int main(int argc, char* argv[])
 
     const auto ret = RunSORT(argc, argv);
 
-    // Flush main thread data
-    SortStatsFlushData(true);
-    // Output stats data
-    if(ret == 0 && !g_unitTestMode)
-        SortStatsPrintData();
-
     SORT_PROFILE_END; // Main Thread
 
     // dump profile data
@@ -55,15 +49,6 @@ int main(int argc, char* argv[])
         slog(INFO, GENERAL, "Profiling file: \"%s\"", GetFilePathInExeFolder(filename).c_str());
     }
     slog(INFO, GENERAL, "Log file: \"%s\"", GetFilePathInExeFolder("log.txt").c_str());
-
-    // This, unfortunately, is a fairly ugly hack to 'make sure' all socket packages are received.
-    // I need to investigate how TEV doesn't require this
-    if(g_blenderMode)
-    #ifdef SORT_IN_WINDOWS
-        Sleep(1);
-    #else
-        sleep(1);
-    #endif
 
     SocketManager::GetSingleton().Shutdown();
 

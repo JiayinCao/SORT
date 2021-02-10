@@ -68,6 +68,23 @@ std::string logTimeString(){
     return std::string(s);
 }
 
+std::string logTimeStringStripped() {
+    if (!g_logTime)
+        return "";
+
+    std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    char s[128] = { 0 };
+
+#ifdef SORT_IN_WINDOWS
+    struct tm t;
+    ::localtime_s(&t, &now);
+    std::strftime(s, 128, "%Y_%m_%d_%H_%M_%S", &t);
+#else
+    std::strftime(s, 128, "%Y_%m_%d_%H_%M_%S", std::localtime(&now));
+#endif
+    return std::string(s);
+}
+
 const std::string levelToString( LOG_LEVEL level ){
     return !g_logLevel ? "" :
     ( LOG_LEVEL::LOG_DEBUG == level )    ? "[Debug]"   :

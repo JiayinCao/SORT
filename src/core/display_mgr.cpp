@@ -16,7 +16,6 @@
  */
 
 #include "display_mgr.h"
-#include "core/globalconfig.h"
 #include "core/socket_mgr.h"
 #include "core/sassert.h"
 
@@ -87,7 +86,7 @@ void DisplayManager::QueueDisplayItem(std::shared_ptr<DisplayItemBase> item) {
 void DisplayTile::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
     OSocketStream& stream = *ptr_stream;
 
-    if (g_blenderMode){
+    if (is_blender_mode){
         // [0] Length of the package, it doesn't count itself
         // [1] Width of the tile
         // [2] Height of the tile
@@ -127,11 +126,11 @@ void DisplayTile::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
 
 void DisplayImageInfo::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
     // Blender doesn't care about creating a new image, only TEV does.
-    if (!g_blenderMode) {
+    if (!is_blender_mode) {
         OSocketStream& stream = *ptr_stream;
 
-        const int image_width = g_resultResollutionWidth;
-        const int image_height = g_resultResollutionHeight;
+        const int image_width = w;
+        const int image_height = h;
         stream << int(0);            // reserved for length
         stream << char(CreateImage); // indicate to update some of the images
         stream << char(1);           // indicate to grab the current image
@@ -154,7 +153,7 @@ void DisplayImageInfo::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
 
 void TerminateIndicator::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
     // Tev won't response this well
-    if (g_blenderMode) {
+    if (is_blender_mode) {
         // Blender doesn't care about creating a new image, only TEV does.
         OSocketStream& stream = *ptr_stream;
         stream << int(0);   // 0 as length indicating that we are done, no more package will be received.
@@ -169,10 +168,8 @@ void FullTargetUpdate::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
     // WARNING, this thread might result in some unknown results because of unguarded data racing. However, it is not a big
     // deal to reveal slightly inconsistent data as long as the final result is fine.
 
+#if 0
     OSocketStream& stream = *ptr_stream;
-
-    auto w = g_imageSensor->GetWidth();
-    auto h = g_imageSensor->GetHeight();
 
     if (g_blenderMode) {
         // [0] Length of the package, it doesn't count itself
@@ -234,4 +231,5 @@ void FullTargetUpdate::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
             stream.Flush();
         }
     }
+#endif
 }
