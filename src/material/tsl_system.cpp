@@ -47,7 +47,7 @@ static thread_local MemoryAllocator g_memory_arena;
 
 class TSL_ShadingSystemInterface : public ShadingSystemInterface {
 public:
-    void*   allocate(unsigned int size, void* ptr) const override {
+    void*   allocate(unsigned int size) const override {
         return new (g_memory_arena.Allocate<char>(size)) char[size];
     }
 
