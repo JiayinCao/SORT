@@ -29,6 +29,10 @@ public:
     void SetColor( int x , int y , const Spectrum& c );
     Spectrum GetColor( int x , int y ) const;
 
+    const Spectrum* GetData() const {
+        return m_pData.get();
+    }
+
 private:
     std::unique_ptr<Spectrum[]> m_pData;
 
