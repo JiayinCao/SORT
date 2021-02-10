@@ -88,15 +88,6 @@ private:
     std::list<std::unique_ptr<MemoryBlock>>  m_usedBlocks;
 };
 
-//! @brief Get static allocator.
-//!
-//! @return Thread based memory allocator.
-SORT_FORCEINLINE ::MemoryAllocator& GetStaticAllocator() {
-    // Each thread has their own memory allocator.
-    static thread_local ::MemoryAllocator memoryAllocator;
-    return memoryAllocator;
-}
-
 #define SORT_MALLOC(A, T)               new (A->Allocate<T>()) T
 #define SORT_MALLOC_ARRAY(A, T,cnt)     new (A->Allocate<T>(cnt)) T 
 
