@@ -39,11 +39,16 @@ IMPLEMENT_TSLGLOBAL_VAR(Tsl_float3, I)            // this is world space input d
 IMPLEMENT_TSLGLOBAL_VAR(Tsl_float, density)       // volume density
 IMPLEMENT_TSLGLOBAL_END()
 
+// WARNING, whatever the job system is used, it has to avoid preemption between reset and 
+// shader execution. Ideally, I should pass in the pointer through TSL, but this is a way
+// cheaper solution and since I have plan to work on my own job system. I can always gurantee
+// this by myself. But it also looks like Marl doesn't voilate this assumption too.
+static thread_local MemoryAllocator g_memory_arena;
+
 class TSL_ShadingSystemInterface : public ShadingSystemInterface {
 public:
     void*   allocate(unsigned int size, void* ptr) const override {
-        // this clearly leaks memory now, I need to modify TSL to fix this.
-        return malloc(size);
+        return new (g_memory_arena.Allocate<char>(size)) char[size];
     }
 
     void    catch_debug(const TSL_DEBUG_LEVEL level, const char* error) const override {
@@ -65,31 +70,8 @@ public:
     }
 };
 
-// Sadly, this is the only place in SORT that still uses new/delete.
-// This started happening after I integrated Marl and jobify everying in my renderer.
-// Somehow, render context memory allocator doesn't work.
-// delete the closure memory
-void delete_closure(ClosureTreeNodeBase* closure) {
-    if (closure) {
-        if (closure->m_id == CLOSURE_ADD) {
-            ClosureTreeNodeAdd* closure_add = (ClosureTreeNodeAdd*)closure;
-            delete_closure(closure_add->m_closure0);
-            delete_closure(closure_add->m_closure1);
-        }
-        else if (closure->m_id == CLOSURE_MUL) {
-            ClosureTreeNodeMul* closure_mul = (ClosureTreeNodeMul*)closure;
-            delete_closure(closure_mul->m_closure);
-        }
-        else {
-            void* closure_node = (void*)closure->m_params;
-            free(closure_node);
-        }
-    }
-}
-
 // Tsl shading system
 static std::shared_ptr<ShadingContext>    g_contexts;
-
 std::shared_ptr<Tsl_Namespace::ShadingContext> GetShadingContext() {
     return g_contexts;
 }
@@ -105,12 +87,12 @@ void ExecuteSurfaceShader( Tsl_Namespace::ShaderInstance* shader , ScatteringEve
     // shader execution
     ClosureTreeNodeBase* closure = nullptr;
     auto raw_function = (void(*)(ClosureTreeNodeBase**, TslGlobal*))shader->get_function();
+
+    g_memory_arena.Reset();
     raw_function(&closure, &global);
 
     // parse the surface shader
     ProcessSurfaceClosure(closure, Tsl_Namespace::make_float3(1.0f, 1.0f, 1.0f) , se , rc);
-
-    delete_closure(closure);
 }
 
 void ExecuteVolumeShader(Tsl_Namespace::ShaderInstance* shader, const MediumInteraction& mi, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material , RenderContext& rc) {
@@ -121,11 +103,11 @@ void ExecuteVolumeShader(Tsl_Namespace::ShaderInstance* shader, const MediumInte
     // shader execution
     ClosureTreeNodeBase* closure = nullptr;
     auto raw_function = (void(*)(ClosureTreeNodeBase**, TslGlobal*))shader->get_function();
+
+    g_memory_arena.Reset();
     raw_function(&closure, &global);
 
     ProcessVolumeClosure(closure, Tsl_Namespace::make_float3(1.0f, 1.0f, 1.0f), ms, flag, material, mi.mesh, rc);
-
-    delete_closure(closure);
 }
 
 void EvaluateVolumeSample(Tsl_Namespace::ShaderInstance* shader, const MediumInteraction& mi, MediumSample& ms) {
@@ -134,11 +116,11 @@ void EvaluateVolumeSample(Tsl_Namespace::ShaderInstance* shader, const MediumInt
 
     ClosureTreeNodeBase* closure = nullptr;
     auto raw_function = (void(*)(ClosureTreeNodeBase**, TslGlobal*))shader->get_function();
+
+    g_memory_arena.Reset();
     raw_function(&closure, &global);
 
     EvaluateVolumeSample(closure, Tsl_Namespace::make_float3(1.0f, 1.0f, 1.0f), ms);
-
-    delete_closure(closure);
 }
 
 Spectrum EvaluateTransparency(Tsl_Namespace::ShaderInstance* shader , const SurfaceInteraction& intersection ){
@@ -152,13 +134,13 @@ Spectrum EvaluateTransparency(Tsl_Namespace::ShaderInstance* shader , const Surf
     // shader execution
     ClosureTreeNodeBase* closure = nullptr;
     auto raw_function = (void(*)(ClosureTreeNodeBase**, TslGlobal*))shader->get_function();
+
+    g_memory_arena.Reset();
     raw_function(&closure, &global);
 
     // parse the surface shader
     const auto opacity = ProcessOpacity(closure, Tsl_Namespace::make_float3(1.0f, 1.0f, 1.0f));
     return Spectrum(1.0f - opacity).Clamp(0.0f, 1.0f);
-
-    delete_closure(closure);
 }
 
 void CreateTSLThreadContexts(){
