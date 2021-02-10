@@ -70,7 +70,8 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
     m_scheduler = std::make_unique<marl::Scheduler>(cfg);
     m_scheduler->bind();
 
-    if (!m_blender_mode)
+    const bool need_render_target = !m_blender_mode || m_integrator->NeedFinalUpdate();
+    if (need_render_target)
         m_render_target = std::make_unique<RenderTarget>(m_image_width, m_image_height);
 
     // Load materials from stream
@@ -300,7 +301,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
                         if (valid_pixel_cnt > 0)
                             radiance /= (float)valid_pixel_cnt;
 
-                        if (!m_blender_mode)
+                        if (need_render_target)
                             m_render_target->SetColor(j, i, radiance);
 
                         // update the value if display server is connected
@@ -362,6 +363,7 @@ int ImageEvaluation::WaitForWorkToBeDone() {
                 di->w = m_image_width;
                 di->h = m_image_height;
                 di->is_blender_mode = m_blender_mode;
+                di->m_rt = m_render_target.get();
                 DisplayManager::GetSingleton().QueueDisplayItem(di);
                 timer.Reset();
             }
@@ -371,18 +373,16 @@ int ImageEvaluation::WaitForWorkToBeDone() {
         std::this_thread::yield();
     }
 
-    DisplayManager::GetSingleton().ProcessDisplayQueue(-1);
-
-    if (!m_blender_mode)
-        m_render_target->Output("sort_" + logTimeStringStripped() + ".exr");
-
     const bool display_server_connected = DisplayManager::GetSingleton().IsDisplayServerConnected();
     if (display_server_connected) {
         // some integrator might need a final refresh
         if (UNLIKELY(m_integrator->NeedFinalUpdate())) {
             std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>();
             di->title = m_image_title;
+            di->w = m_image_width;
+            di->h = m_image_height;
             di->is_blender_mode = m_blender_mode;
+            di->m_rt = m_render_target.get();
             DisplayManager::GetSingleton().QueueDisplayItem(di);
         }
 
@@ -392,10 +392,13 @@ int ImageEvaluation::WaitForWorkToBeDone() {
             terminator->is_blender_mode = m_blender_mode;
             DisplayManager::GetSingleton().QueueDisplayItem(terminator);
         }
-
-        // make sure flush all display items before quiting
-        DisplayManager::GetSingleton().ProcessDisplayQueue(-1);
     }
+
+    if (!m_blender_mode)
+        m_render_target->Output("sort_" + logTimeStringStripped() + ".exr");
+
+    // make sure flush all display items before quiting
+    DisplayManager::GetSingleton().ProcessDisplayQueue(-1);
 
     DestroyTSLThreadContexts();
 
@@ -403,6 +406,7 @@ int ImageEvaluation::WaitForWorkToBeDone() {
     m_scheduler = nullptr;
 
     SORT_STATS(sRenderingTimeMS = m_timer.GetElapsedTime());
+
     return 0;
 }
 

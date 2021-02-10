@@ -18,6 +18,7 @@
 #include "display_mgr.h"
 #include "core/socket_mgr.h"
 #include "core/sassert.h"
+#include "texture/rendertarget.h"
 
 #ifdef SORT_IN_WINDOWS
 #else
@@ -168,68 +169,59 @@ void FullTargetUpdate::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
     // WARNING, this thread might result in some unknown results because of unguarded data racing. However, it is not a big
     // deal to reveal slightly inconsistent data as long as the final result is fine.
 
-#if 0
-    OSocketStream& stream = *ptr_stream;
+    constexpr unsigned int big_tile_size = 128;
 
-    if (g_blenderMode) {
-        // [0] Length of the package, it doesn't count itself
-        // [1] Width of the tile
-        // [2] Height of the tile
-        // [3] x position of the tile
-        // [4] y position of the tile
-        // [....] the pixel data
-        const int pixel_memory_size = w * h * sizeof(float) * 4;
-        const int total_size = pixel_memory_size + sizeof(int) * 4;
-        stream << int(total_size);
-        stream << w << h << int(0) << int(0);
+    const unsigned int chunk_w = (w + big_tile_size - 1) / big_tile_size;
+    const unsigned int chunk_h = (h + big_tile_size - 1) / big_tile_size;
 
-        std::unique_ptr<float[]> data = std::make_unique<float[]>(w * h * 4);
-        for (auto i = 0; i < h; ++i) {
-            for (auto j = 0; j < w; ++j) {
-                const auto index = 4 * ((h - i - 1) * w + j);
-                const auto src_index = i * w + j;
-                data[index]     = g_imageSensor->m_rendertarget.m_pData[src_index][0];
-                data[index+1]   = g_imageSensor->m_rendertarget.m_pData[src_index][1];
-                data[index+2]   = g_imageSensor->m_rendertarget.m_pData[src_index][2];
-                data[index+3]   = 1.0f;
+    for (auto i = 0u; i < chunk_h; ++i) {
+        for (auto j = 0u; j < chunk_w; ++j) {
+            const auto ori_x = big_tile_size * j;
+            const auto ori_y = big_tile_size * i;
+            const auto size_x = std::min(w - ori_x, big_tile_size);
+            const auto size_y = std::min(h - ori_y, big_tile_size);
+            const auto total_pixel = size_x * size_y;
+
+            auto display_tile = std::make_shared<DisplayTile>();
+            display_tile->x = ori_x;
+            display_tile->y = ori_y;
+            display_tile->w = size_x;
+            display_tile->h = size_y;
+            display_tile->title = title;
+            display_tile->is_blender_mode = is_blender_mode;
+
+            if (is_blender_mode) {
+                display_tile->m_data[0] = std::make_unique<float[]>(total_pixel * 4);
             }
-        }
-        stream.Write((char*)data.get(), pixel_memory_size);
-        stream.Flush();
-    }
-    else {
-        std::unique_ptr<float[]> data;
-        data = std::make_unique<float[]>(w * h);
+            else {
+                for (auto i = 0u; i < 3; ++i)
+                    display_tile->m_data[i] = std::make_unique<float[]>(total_pixel);
+            }
 
-        // This is for TEV
-        // https://github.com/Tom94/tev
-        for (auto c = 0u; c < nChannels; ++c) {
-            stream << int(0);            // reserved for length
-            stream << char(UpdateImage); // indicate to update some of the images
-            stream << char(0);           // indicate to grab the current image
-            stream << title;             // indicate the title of the image
-            stream << channelNames[c];   // the channel name
+            // update the value if display server is connected
+            for( auto local_i = 0 ; local_i < size_y; ++local_i){
+                for (auto local_j = 0; local_j < size_x; ++local_j) {
+                    const auto global_j = ori_x + local_j;
+                    const auto global_i = ori_y + local_i;
 
-            stream << int(0) << int(0) << w << h;
-
-            for (auto i = 0; i < h; ++i) {
-                for (auto j = 0; j < w; ++j) {
-                    const auto index = i * w + j;
-                    data[index] = g_imageSensor->m_rendertarget.m_pData[index][c];
+                    auto& color = m_rt->GetColor(global_j, global_i);
+                    if (is_blender_mode) {
+                        auto local_index = local_j + (size_y - 1 - local_i) * size_x;
+                        display_tile->m_data[0][4 * local_index] = color[0];
+                        display_tile->m_data[0][4 * local_index + 1] = color[1];
+                        display_tile->m_data[0][4 * local_index + 2] = color[2];
+                        display_tile->m_data[0][4 * local_index + 3] = 1.0f;
+                    }
+                    else {
+                        for (auto i = 0u; i < RGBSPECTRUM_SAMPLE; ++i) {
+                            const auto local_index = local_i * size_x + local_j;
+                            display_tile->m_data[i][local_index] = i == 2 ? 1.0f : color[i];
+                        }
+                    }
                 }
             }
 
-            stream.Write((char*)data.get(), w * h * sizeof(float));
-           
-            // set the length data
-            const auto pos = stream.GetPos();
-            stream.Seek(0);
-            stream << int(pos);
-            stream.Seek(pos);
-
-            // distribute data to all display servers
-            stream.Flush();
+            display_tile->Process(ptr_stream);
         }
     }
-#endif
 }

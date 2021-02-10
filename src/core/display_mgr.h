@@ -22,6 +22,8 @@
 #include "core/singleton.h"
 #include "stream/sstream.h"
 
+class RenderTarget;
+
 //! @brief  Display item
 struct DisplayItemBase {
 public:
@@ -57,6 +59,8 @@ struct TerminateIndicator : public DisplayItemBase {
 //! @brief  Full target update
 struct FullTargetUpdate : public DisplayItemBase {
     void Process(std::unique_ptr<OSocketStream>& stream) override;
+
+    const RenderTarget* m_rt = nullptr;
 };
 
 enum SocketStatus {
