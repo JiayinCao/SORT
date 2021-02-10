@@ -249,6 +249,10 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
                 Vector2i rb = ori + size;
                 for (int i = ori.y; i < rb.y; i++) {
                     for (int j = ori.x; j < rb.x; j++) {
+                        // reset the memory allocator so that the last sample could reuse memory
+                        // otherwise, memory usage is linear to spp.
+                        rc.Reset();
+
                         // generate samples to be used later
                         m_integrator->GenerateSample(sampler.get(), pixelSamples.get(), m_sample_per_pixel, m_scene, rc);
 
