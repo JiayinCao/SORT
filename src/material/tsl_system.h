@@ -49,8 +49,7 @@ DECLARE_TSLGLOBAL_VAR(Tsl_float3, position)     // this is world space position
 DECLARE_TSLGLOBAL_VAR(Tsl_float3, normal)       // this is world space normal
 DECLARE_TSLGLOBAL_VAR(Tsl_float3, gnormal)      // this is world space geometric normal
 DECLARE_TSLGLOBAL_VAR(Tsl_float3, I)            // this is world space input direction
-DECLARE_TSLGLOBAL_VAR(Tsl_float,  density)      // volume density
-DECLARE_TSLGLOBAL_VAR(Tsl_resource, custom)     // render context pointer, this is for memory allocation
+DECLARE_TSLGLOBAL_VAR(Tsl_float, density)       // volume density
 DECLARE_TSLGLOBAL_END()
 
 //! @brief  Get Shading context.
@@ -73,13 +72,13 @@ void ExecuteVolumeShader(Tsl_Namespace::ShaderInstance* shader, const MediumInte
 //! @param  shader      The tsl shader to be executed.
 //! @param  mi          The interaction inside the volume.
 //! @param  ms          The medium sample to be returned.
-void EvaluateVolumeSample(RenderContext& rc, Tsl_Namespace::ShaderInstance* shader, const MediumInteraction& mi, MediumSample& ms);
+void EvaluateVolumeSample(Tsl_Namespace::ShaderInstance* shader, const MediumInteraction& mi, MediumSample& ms);
 
 //! @brief  Evaluate the transparency of the intersection.
 //!
 //! @param  shader          The tsl shader to be evaluated.
 //! @param  intersection    The intersection of interest.
-Spectrum EvaluateTransparency(RenderContext& rc, Tsl_Namespace::ShaderInstance* shader, const SurfaceInteraction& intersection);
+Spectrum EvaluateTransparency(Tsl_Namespace::ShaderInstance* shader, const SurfaceInteraction& intersection);
 
 //! @brief  Create thread contexts
 void CreateTSLThreadContexts();

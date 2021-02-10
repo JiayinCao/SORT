@@ -80,13 +80,13 @@ public:
     //!
     //! @param      mi              Interaction with the medium.
     //! @param      ms              Medium sample taken.
-    virtual void       EvaluateMediumSample(RenderContext& rc, const MediumInteraction& mi, MediumSample& ms) const = 0;
+    virtual void       EvaluateMediumSample(const MediumInteraction& mi, MediumSample& ms) const = 0;
 
     //! @brief      Evaluate translucency.
     //!
     //! @param      intersection    The intersection.
     //! @return                     The transparency at the intersection.
-    virtual Spectrum   EvaluateTransparency(RenderContext& rc, const SurfaceInteraction& intersection) const = 0;
+    virtual Spectrum   EvaluateTransparency(const SurfaceInteraction& intersection) const = 0;
 
     //! @brief  Build shader in tsl.
     //!
@@ -165,18 +165,18 @@ public:
     //!
     //! @param      mi              Interaction with the medium.
     //! @param      ms              Medium sample taken.
-    void        EvaluateMediumSample(RenderContext& rc, const MediumInteraction& mi, MediumSample& ms) const override;
+    void        EvaluateMediumSample(const MediumInteraction& mi, MediumSample& ms) const override;
 
     //! @brief      Evaluate translucency.
     //!
     //! @param      intersection    The intersection.
     //! @return                     The transparency at the intersection.
-    Spectrum    EvaluateTransparency(RenderContext& rc, const SurfaceInteraction& intersection ) const override{
+    Spectrum    EvaluateTransparency( const SurfaceInteraction& intersection ) const override{
         // this should happen most of the time in the absence of transparent node.
         if (!m_hasTransparentNode)
             return 0.0f;
         
-        return m_special_transparent ? 1.0f : (::EvaluateTransparency(rc, m_surface_shader.get(), intersection));
+        return m_special_transparent ? 1.0f : (::EvaluateTransparency(m_surface_shader.get(), intersection));
     }
 
     //! @brief  Serialization interface. Loading data from stream.
@@ -299,7 +299,7 @@ public:
     //!
     //! @param      mi              Interaction with the medium.
     //! @param      ms              Medium sample taken.
-    void        EvaluateMediumSample(RenderContext& rc, const MediumInteraction& mi, MediumSample& ms) const override;
+    void        EvaluateMediumSample(const MediumInteraction& mi, MediumSample& ms) const override;
 
     //! @brief  Just an empty interface, there is no serialization support for this type of material.
     //!
@@ -310,7 +310,7 @@ public:
     //!
     //! @param      intersection    The intersection.
     //! @return                     The transparency at the intersection.
-    Spectrum   EvaluateTransparency(RenderContext& rc, const SurfaceInteraction& intersection) const override;
+    Spectrum   EvaluateTransparency(const SurfaceInteraction& intersection) const override;
 
     //! @brief  This should be an empty method that does nothing
     //!

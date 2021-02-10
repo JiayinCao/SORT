@@ -258,9 +258,9 @@ void Material::UpdateMediumStack( const MediumInteraction& mi , const SE_Interac
         ExecuteVolumeShader(m_volume_shader.get(), mi, ms, flag, this, rc);
 }
 
-void Material::EvaluateMediumSample(RenderContext& rc, const MediumInteraction& mi, MediumSample& ms) const {
+void Material::EvaluateMediumSample(const MediumInteraction& mi, MediumSample& ms) const {
     if (m_volume_shader_valid)
-        EvaluateVolumeSample(rc, m_volume_shader.get(), mi, ms);
+        EvaluateVolumeSample(m_volume_shader.get(), mi, ms);
 }
 
 void MaterialProxy::UpdateScatteringEvent(ScatteringEvent& se, RenderContext& rc) const {
@@ -271,8 +271,8 @@ void MaterialProxy::UpdateMediumStack(const MediumInteraction& mi, const SE_Inte
     return m_material.UpdateMediumStack(mi, flag, ms, rc);
 }
 
-void MaterialProxy::EvaluateMediumSample(RenderContext& rc, const MediumInteraction& mi, MediumSample& ms) const {
-    return m_material.EvaluateMediumSample(rc, mi, ms);
+void MaterialProxy::EvaluateMediumSample(const MediumInteraction& mi, MediumSample& ms) const {
+    return m_material.EvaluateMediumSample(mi, ms);
 }
 
 StringID  MaterialProxy::GetUniqueID() const {
@@ -281,8 +281,8 @@ StringID  MaterialProxy::GetUniqueID() const {
     return (StringID)(ret);
 }
 
-Spectrum MaterialProxy::EvaluateTransparency(RenderContext& rc, const SurfaceInteraction& intersection) const {
-    return m_material.EvaluateTransparency(rc, intersection);
+Spectrum MaterialProxy::EvaluateTransparency(const SurfaceInteraction& intersection) const {
+    return m_material.EvaluateTransparency(intersection);
 }
 
 bool MaterialProxy::HasTransparency() const {

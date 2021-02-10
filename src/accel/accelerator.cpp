@@ -43,7 +43,7 @@ bool Accelerator::GetAttenuation( Ray& ray , Spectrum& attenuation , RenderConte
     sAssert( IS_PTR_VALID( material ) , SPATIAL_ACCELERATOR );
 
     // evaluate the transparency first in case it is fully opaque.
-    attenuation = material->EvaluateTransparency(rc, intersection);
+    attenuation = material->EvaluateTransparency(intersection);
 
     // consider beam transmittance during ray traversal if medium is presented.
     if (ms && !attenuation.IsBlack() ) {
