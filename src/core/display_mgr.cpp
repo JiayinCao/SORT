@@ -204,7 +204,7 @@ void FullTargetUpdate::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
                     const auto global_j = ori_x + local_j;
                     const auto global_i = ori_y + local_i;
 
-                    auto& color = m_rt->GetColor(global_j, global_i);
+                    const auto& color = m_rt->GetColor(global_j, global_i);
                     if (is_blender_mode) {
                         auto local_index = local_j + (size_y - 1 - local_i) * size_x;
                         display_tile->m_data[0][4 * local_index] = color[0];
@@ -215,7 +215,7 @@ void FullTargetUpdate::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
                     else {
                         for (auto i = 0u; i < RGBSPECTRUM_SAMPLE; ++i) {
                             const auto local_index = local_i * size_x + local_j;
-                            display_tile->m_data[i][local_index] = i == 2 ? 1.0f : color[i];
+                            display_tile->m_data[i][local_index] = color[i];
                         }
                     }
                 }
