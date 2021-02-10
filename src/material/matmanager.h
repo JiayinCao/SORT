@@ -58,7 +58,7 @@ public:
 
     // parse material file and add the materials into the manager
     // result           : the number of materials in the file
-    unsigned    ParseMatFile( class IStreamBase& stream, const bool no_mat);
+    std::vector<std::unique_ptr<MaterialBase>>&    ParseMatFile( class IStreamBase& stream, const bool no_mat);
 
     //! @brief  Whether the renderer is in no material node
     bool        IsNoMaterialMode() const;
@@ -74,11 +74,6 @@ public:
     //! @param  name_id     The name of the template.
     //! @return             The shader unit template returned, nullptr if it doesn't exist.
     std::shared_ptr<Tsl_Namespace::ShaderUnitTemplate> GetShaderUnitTemplate(const std::string& name) const;
-
-#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
-    //! @brief  Wait for all materials to be built before moving forward
-    void WaitForMaterialBuilding() const;
-#endif
 
 private:
     std::vector<std::unique_ptr<MaterialBase>>       m_matPool;         /**< Material pool holding all materials. */

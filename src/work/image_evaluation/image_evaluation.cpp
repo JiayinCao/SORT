@@ -60,11 +60,29 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
     // load configuration
     loadConfig(stream);
 
+    // setup job system
+    marl::Scheduler::Config cfg;
+    cfg.setWorkerThreadCount(m_thread_cnt);
+    cfg.setWorkerThreadShutdown(thread_shut_down);
+
+    m_scheduler = std::make_unique<marl::Scheduler>(cfg);
+    m_scheduler->bind();
+
     if (!m_blender_mode)
         m_render_target = std::make_unique<RenderTarget>(m_image_width, m_image_height);
 
     // Load materials from stream
-    MatManager::GetSingleton().ParseMatFile(stream, m_no_material_mode);
+    auto& mat_pool = MatManager::GetSingleton().ParseMatFile(stream, m_no_material_mode);
+
+#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
+    marl::WaitGroup build_mat_wait_group(mat_pool.size());
+    for (auto& mat : mat_pool) {
+        marl::schedule([&](MaterialBase* mat) {
+            defer(build_mat_wait_group.done());
+            mat->BuildMaterial();
+        }, mat.get());
+    }
+#endif
 
     // Serialize the scene entities
     m_scene.LoadScene(stream);
@@ -83,14 +101,6 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
     SORT_STATS(TIMING_EVENT_STAT("", sRenderingTimeMS));
     SORT_STATS(sSamplePerPixel = m_sample_per_pixel);
     SORT_STATS(sThreadCnt = m_thread_cnt);
-
-    // setup job system
-    marl::Scheduler::Config cfg;
-    cfg.setWorkerThreadCount(m_thread_cnt);
-    cfg.setWorkerThreadShutdown(thread_shut_down);
-
-    m_scheduler = std::make_unique<marl::Scheduler>(cfg);
-    m_scheduler->bind();
 
     // Create a WaitGroup with an initial count of numTasks.
     marl::WaitGroup accel_structure_done(1);
@@ -123,9 +133,6 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
         recycleRenderContext(pRc);
     });
 
-    // make sure preprocessing is done
-    pre_processing_done.wait();
-
     // get the number of total task
     const auto tilesize = IMAGE_TILE_SIZE;
     Vector2i tile_num = Vector2i((int)ceil(m_image_width / (float)tilesize), (int)ceil(m_image_height / (float)tilesize));
@@ -137,6 +144,15 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
     int cur_dir_len = 1;
     const Vector2i dir[4] = { Vector2i(0 , -1) , Vector2i(-1 , 0) , Vector2i(0 , 1) , Vector2i(1 , 0) };
 
+    // make sure preprocessing is done
+    pre_processing_done.wait();
+
+#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
+    // make sure all materials are built already
+    build_mat_wait_group.wait();
+#endif
+
+    // at this point, we are starting to render stuff
     while (true) {
         // only process node inside the image region
         if (cur_pos.x >= 0 && cur_pos.x < tile_num.x && cur_pos.y >= 0 && cur_pos.y < tile_num.y) {

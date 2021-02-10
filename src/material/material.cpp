@@ -29,13 +29,6 @@
 
 USE_TSL_NAMESPACE
 
-#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
-bool MaterialBase::IsMaterialBuilt() const{
-    // std::memory_order_acquire is needed to make sure compiler doesn't do crazy out-of-order execution thing.
-    return m_is_built.load(std::memory_order_acquire);
-}
-#endif
-
 void Material::BuildMaterial() {
     const auto message = "Build Material '" + m_name + "'";
     SORT_PROFILE(message);
@@ -156,11 +149,6 @@ void Material::BuildMaterial() {
     // fake transparent mode if necessary
     if (m_special_transparent)
         m_hasTransparentNode = true;
-
-#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
-    // indicate the material has been built
-    m_is_built.store(true, std::memory_order_release);
-#endif
 }
 
 void Material::Serialize(IStreamBase& stream){

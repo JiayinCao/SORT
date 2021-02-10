@@ -101,14 +101,6 @@
 // leading to worse performance with multi-thread shader compilation enabled.
 // #define ENABLE_MULTI_THREAD_SHADER_COMPILATION
 
-// This macro offers a cheap way to mult-thread shader compilation without the task system. However, there is no sign
-// indicating there is significant gain in performance. Probably because the overhead of thread switching, allocating
-// new thread context and also the mutex inside TSL lib.
-// Eventually this will be replaced with a proper job system. However, given that I have very limited time and there is
-// so much things to do, this may be lower priority before I get a chance to work on it.
-// This is disabled since it is significantly slower on my 2015 Macbook.
-// #define ENABLE_MULTI_THREAD_SHADER_COMPILATION_CHEAP
-
 // This is a temporary quick solution to enable multi-thread texture loading. It is by no means a very good idea to 
 // parallel a bunch of IO bound threads. However, my newly planned job system is far from being ready yet, I'll live 
 // with it for now. This async loading eventually will be less useful since I'm planning to implement a texture cache

@@ -24,10 +24,6 @@
 #include "stream/stream.h"
 #include "tsl_system.h"
 
-#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
-#include <atomic>
-#endif
-
 struct SurfaceInteraction;
 struct MediumInteraction;
 class ScatteringEvent;
@@ -122,17 +118,6 @@ public:
     //!
     //! @return     Maximum steps to march during ray marching.
     virtual unsigned int GetVolumeStepCnt() const = 0;
-
-#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
-    //! @brief  Whether the material has been built.
-    //!
-    //! @return     True if the material has been built, even if it fails.
-    bool IsMaterialBuilt() const;
-
-protected:
-    /**< Whether the material has been built, even if it fails building, it is still considered built. */
-    std::atomic<bool>   m_is_built = false;
-#endif
 };
 
 //! @brief  A thin layer of material definition.

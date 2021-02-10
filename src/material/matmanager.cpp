@@ -42,18 +42,12 @@ static bool async_load_resource(Resource* resource, std::string filename) {
 }
 #endif
 
-#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION_CHEAP
-static void async_build_material(MaterialBase* material) {
-    material->BuildMaterial();
-}
-#endif
-
 bool MatManager::IsNoMaterialMode() const {
     return m_no_material_mode;
 }
 
 // parse material file and add the materials into the manager
-unsigned MatManager::ParseMatFile( IStreamBase& stream , const bool no_mat){
+std::vector<std::unique_ptr<MaterialBase>>& MatManager::ParseMatFile( IStreamBase& stream , const bool no_mat){
     SORT_PROFILE("Parsing Materials");
 
     auto resource_cnt = 0u;
@@ -61,10 +55,6 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream , const bool no_mat){
 
 #ifdef ENABLE_ASYNC_TEXTURE_LOADING
     std::vector<std::future<bool>>      async_resource_reading;
-#endif
-
-#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION_CHEAP
-    std::vector<std::future<void>>      async_material_building;
 #endif
 
     for (auto i = 0u; i < resource_cnt; ++i) {
@@ -282,12 +272,7 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream , const bool no_mat){
             mat->Serialize(stream);
 
             if (LIKELY(!m_no_material_mode)) {
-         
-#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION_CHEAP
-                async_material_building.push_back(std::async(std::launch::async, async_build_material, mat.get()));
-#elif defined(ENABLE_MULTI_THREAD_SHADER_COMPILATION)
-                // build the material asynchronously
-#else
+#ifndef ENABLE_MULTI_THREAD_SHADER_COMPILATION
                 // build the material
                 mat->BuildMaterial();
 #endif
@@ -305,17 +290,7 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream , const bool no_mat){
     std::for_each(async_resource_reading.begin(), async_resource_reading.end(), [](std::future<bool>& promise) { promise.wait(); });
 #endif
 
-#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION_CHEAP
-    std::for_each(async_material_building.begin(), async_material_building.end(), [](std::future<void>& promise) { promise.wait(); });
-#endif
-
-#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
-    // this is only a temporary solution before I have job system that is more robust and flexible to support spawning jobs inside other jobs.
-    // wait for all materials to be built before moving forward
-    MatManager::GetSingleton().WaitForMaterialBuilding();
-#endif
-
-    return (unsigned int)m_matPool.size();
+    return m_matPool;
 }
 
 const Resource* MatManager::GetResource(const std::string& name) const {
@@ -336,13 +311,3 @@ std::shared_ptr<Tsl_Namespace::ShaderUnitTemplate> MatManager::GetShaderUnitTemp
         return nullptr;
     return it->second;
 }
-
-#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
-void MatManager::WaitForMaterialBuilding() const {
-    std::for_each(m_matPool.begin(), m_matPool.end(), [](const std::unique_ptr<MaterialBase>& mat) {
-        while (!mat->IsMaterialBuilt()) {
-            _mm_pause();
-        }
-    });
-}
-#endif
