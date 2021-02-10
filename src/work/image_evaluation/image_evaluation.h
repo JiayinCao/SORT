@@ -18,6 +18,7 @@
 #pragma once
 
 #include <atomic>
+#include <marl/scheduler.h>
 #include "../work.h"
 #include "integrator/integrator.h"
 #include "texture/rendertarget.h"
@@ -71,6 +72,8 @@ private:
     std::atomic<int>                m_tile_cnt;         // number of total tiles
 
     std::unique_ptr<RenderTarget>   m_render_target;    // a temporary buffer for saving out the result
+
+    std::unique_ptr<marl::Scheduler>    m_scheduler;    // job system scheduler
 
     void    parseCommandArgs(int argc, char** argv);
 

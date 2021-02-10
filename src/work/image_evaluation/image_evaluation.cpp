@@ -18,7 +18,6 @@
 #include <regex>
 #include <marl/defer.h>
 #include <marl/event.h>
-#include <marl/scheduler.h>
 #include <marl/waitgroup.h>
 #include "image_evaluation.h"
 #include "core/display_mgr.h"
@@ -90,9 +89,8 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
     cfg.setWorkerThreadCount(m_thread_cnt);
     cfg.setWorkerThreadShutdown(thread_shut_down);
 
-    marl::Scheduler scheduler(cfg);
-    scheduler.bind();
-    defer(scheduler.unbind());  // Automatically unbind before returning.
+    m_scheduler = std::make_unique<marl::Scheduler>(cfg);
+    m_scheduler->bind();
 
     // Create a WaitGroup with an initial count of numTasks.
     marl::WaitGroup accel_structure_done(1);
@@ -329,7 +327,9 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
         if ((cur_pos.x < 0 || cur_pos.x >= tile_num.x) && (cur_pos.y < 0 || cur_pos.y >= tile_num.y))
             break;
     }
+}
 
+int ImageEvaluation::WaitForWorkToBeDone() {
     Timer timer;
     while (m_tile_cnt > 0) {
         if (UNLIKELY(m_integrator->NeedFullTargetRealtimeUpdate())) {
@@ -351,11 +351,9 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
 
     DisplayManager::GetSingleton().ProcessDisplayQueue(-1);
 
-    if(!m_blender_mode)
+    if (!m_blender_mode)
         m_render_target->Output("sort_" + logTimeStringStripped() + ".exr");
-}
 
-int ImageEvaluation::WaitForWorkToBeDone() {
     const bool display_server_connected = DisplayManager::GetSingleton().IsDisplayServerConnected();
     if (display_server_connected) {
         // some integrator might need a final refresh
@@ -378,6 +376,9 @@ int ImageEvaluation::WaitForWorkToBeDone() {
     }
 
     DestroyTSLThreadContexts();
+
+    m_scheduler->unbind();
+    m_scheduler = nullptr;
     return 0;
 }
 
