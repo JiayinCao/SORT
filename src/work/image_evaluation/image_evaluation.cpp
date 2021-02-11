@@ -75,7 +75,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
         m_render_target = std::make_unique<RenderTarget>(m_image_width, m_image_height);
 
     // Load materials from stream
-    auto sc = pullContext<ShaderCompilingContext>(m_sc_holder);
+    auto sc = pullContext(m_sc_holder);
     auto& mat_pool = MatManager::GetSingleton().ParseMatFile(stream, m_no_material_mode, sc->context.get());
     recycleContext(m_sc_holder, sc);
 
@@ -85,7 +85,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
         marl::schedule([&](MaterialBase* mat) {
             defer(build_mat_wait_group.done());
 
-            auto sc = pullContext<ShaderCompilingContext>(m_sc_holder);
+            auto sc = pullContext(m_sc_holder);
             mat->BuildMaterial(sc->context.get());
             recycleContext(m_sc_holder, sc);
         }, mat.get());
@@ -134,7 +134,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
         accel_structure_done.wait();
 
         // get a render context
-        auto pRc = pullContext<RenderContext>(m_rc_holder);
+        auto pRc = pullContext(m_rc_holder);
 
         // preprocessing for integrators
         m_integrator->PreProcess(m_scene, *pRc);
@@ -176,7 +176,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
             ++m_tile_cnt;
             marl::schedule([this](const Vector2i& ori, const Vector2i& size) {
                 // get a render context
-                auto pRc = pullContext<RenderContext>(m_rc_holder);
+                auto pRc = pullContext(m_rc_holder);
                 auto& rc = *pRc;
 
                 // get camera
