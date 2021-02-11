@@ -89,6 +89,11 @@ public:
         return true;
     }
 
+    //! @brief  Whether the image update needs a lock
+    bool NeedImageLock() const override{
+        return true;
+    }
+
 protected:
     bool    light_tracing_only = false;     // only do light tracing
     int     sample_per_pixel = 1;           // light sample per pixel

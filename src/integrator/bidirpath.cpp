@@ -22,6 +22,7 @@
 #include "integratormethod.h"
 #include "camera/camera.h"
 #include "core/memory.h"
+#include "work/image_evaluation/image_evaluation.h"
 
 SORT_STATS_DEFINE_COUNTER(sTotalLengthPathFromEye)
 SORT_STATS_DEFINE_COUNTER(sTotalLengthPathFromLight)
@@ -384,6 +385,6 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
     }
 
     // update image sensor
-    // important to fix!!
-    // g_imageSensor->UpdatePixel(coord.x , coord.y , radiance);
+    if(evaluation)
+        evaluation->UpdateImage(coord , radiance);
 }

@@ -49,6 +49,11 @@ public:
     //! done.
     int     WaitForWorkToBeDone() override;
 
+    //! @bried  Update image
+    //!
+    //! This is only for bidirectional path tracing and light tracing.
+    void    UpdateImage(const Vector2i& coord, const Spectrum& value);
+
 private:
     // Input file name
     std::string     m_input_file;
@@ -72,9 +77,9 @@ private:
     std::atomic<int>                    m_tile_cnt;         // number of total tiles
     std::unique_ptr<RenderTarget>       m_render_target;    // a temporary buffer for saving out the result
     std::unique_ptr<marl::Scheduler>    m_scheduler;        // job system scheduler
+    std::mutex                          m_image_lock;       // image lock, ideally we should have a lock for each pixel
     Timer                               m_timer;            // timer to evaluate the rendering time.
 
     void    parseCommandArgs(int argc, char** argv);
-
     void    loadConfig(IStreamBase& stream);
 };

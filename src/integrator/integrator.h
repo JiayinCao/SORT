@@ -30,6 +30,7 @@
 #include "core/render_context.h"
 
 class   Ray;
+class   ImageEvaluation;
 
 //! @brief  Integrator is for esitimating radiance in rendering equation.
 /**
@@ -112,8 +113,20 @@ public:
     //! @brief  This is not well supported in SORT for now.
     virtual void RequestSample(Sampler* sampler, PixelSample* ps, unsigned ps_num) {}
 
+    //! @brief  Setup image evaluation
+    void SetImageEvaluation(ImageEvaluation* ptr) {
+        evaluation = ptr;
+    }
+
+    //! @brief  Whether the image update needs a lock
+    virtual bool NeedImageLock() const {
+        return false;
+    }
+
 protected:
     int           max_recursive_depth = 6;      /*< maxium recursive depth. */
     PixelSample   pixel_sample;                 /*< the pixel sample. */
     unsigned      sample_per_pixel;             /*< light sample per pixel sample per light. */
+
+    ImageEvaluation* evaluation;
 };

@@ -302,7 +302,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
                             radiance /= (float)valid_pixel_cnt;
 
                         if (need_render_target)
-                            m_render_target->SetColor(j, i, radiance);
+                            UpdateImage(Vector2i(j,i), radiance);
 
                         // update the value if display server is connected
                         if (display_server_connected && need_refresh_tile) {
@@ -453,6 +453,18 @@ void ImageEvaluation::loadConfig(IStreamBase& stream) {
     StringID integratorType;
     stream >> integratorType;
     m_integrator = MakeUniqueInstance<Integrator>(integratorType);
-    if (IS_PTR_VALID(m_integrator))
+    if (IS_PTR_VALID(m_integrator)) {
         m_integrator->Serialize(stream);
+        m_integrator->SetImageEvaluation(this);
+    }
+}
+
+void ImageEvaluation::UpdateImage(const Vector2i& coord, const Spectrum& value) {
+    if (m_integrator->NeedImageLock()) {
+        std::lock_guard<std::mutex> guard(m_image_lock);
+        const auto total = value + m_render_target->GetColor(coord.x, coord.y);
+        m_render_target->SetColor(coord.x, coord.y, total);
+    } else {
+        m_render_target->SetColor(coord.x, coord.y, value);
+    }
 }
