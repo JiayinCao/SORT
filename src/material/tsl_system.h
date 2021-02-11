@@ -52,8 +52,15 @@ DECLARE_TSLGLOBAL_VAR(Tsl_float3, I)            // this is world space input dir
 DECLARE_TSLGLOBAL_VAR(Tsl_float, density)       // volume density
 DECLARE_TSLGLOBAL_END()
 
-//! @brief  Get Shading context.
-std::shared_ptr<Tsl_Namespace::ShadingContext> GetShadingContext();
+struct ShaderCompilingContext {
+    std::shared_ptr<Tsl_Namespace::ShadingContext> context;
+
+    void Init() {
+        auto& shading_system = Tsl_Namespace::ShadingSystem::get_instance();
+        context = shading_system.make_shading_context();
+    }
+    ShaderCompilingContext& Reset() { /*nothing to do*/ return *this; }
+};
 
 //! @brief  Execute Jited shader code.
 void ExecuteSurfaceShader(Tsl_Namespace::ShaderInstance* shader, ScatteringEvent& se, RenderContext& rc);

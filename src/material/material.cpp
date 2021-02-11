@@ -29,7 +29,7 @@
 
 USE_TSL_NAMESPACE
 
-void Material::BuildMaterial() {
+void Material::BuildMaterial(Tsl_Namespace::ShadingContext* context) {
     const auto message = "Build Material '" + m_name + "'";
     SORT_PROFILE(message);
 
@@ -59,7 +59,6 @@ void Material::BuildMaterial() {
                 shader_units[shader.name] = MatManager::GetSingleton().GetShaderUnitTemplate(shader.type);
     
             // build the root shader
-            auto context = GetShadingContext();
             const auto root_shader_name = prefix + output_node_name;
             if(auto shader_unit_template = context->begin_shader_unit_template(root_shader_name)){
                 // register tsl global

@@ -70,12 +70,6 @@ public:
     }
 };
 
-// Tsl shading system
-static std::shared_ptr<ShadingContext>    g_contexts;
-std::shared_ptr<Tsl_Namespace::ShadingContext> GetShadingContext() {
-    return g_contexts;
-}
-
 void ExecuteSurfaceShader( Tsl_Namespace::ShaderInstance* shader , ScatteringEvent& se , RenderContext& rc){
     const SurfaceInteraction& intersection = se.GetInteraction();
     TslGlobal global;
@@ -149,9 +143,6 @@ void CreateTSLThreadContexts(){
 
     // register all closures
     RegisterClosures();
-
-    // allocate shading context for each thread
-    g_contexts = shading_system.make_shading_context();
 }
 
  void DestroyTSLThreadContexts(){

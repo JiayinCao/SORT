@@ -99,7 +99,7 @@
 // doesn't have.
 // This will be disabled since the efficiency of the current task system will be the main performance bottleneck,
 // leading to worse performance with multi-thread shader compilation enabled.
-// #define ENABLE_MULTI_THREAD_SHADER_COMPILATION
+#define ENABLE_MULTI_THREAD_SHADER_COMPILATION
 
 // This is a temporary quick solution to enable multi-thread texture loading. It is by no means a very good idea to 
 // parallel a bunch of IO bound threads. However, my newly planned job system is far from being ready yet, I'll live 

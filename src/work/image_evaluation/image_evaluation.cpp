@@ -70,19 +70,24 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
     m_scheduler = std::make_unique<marl::Scheduler>(cfg);
     m_scheduler->bind();
 
-    const bool need_render_target = !m_blender_mode || m_integrator->NeedFinalUpdate();
-    if (need_render_target)
+    m_need_render_target = !m_blender_mode || m_integrator->NeedFinalUpdate();
+    if (m_need_render_target)
         m_render_target = std::make_unique<RenderTarget>(m_image_width, m_image_height);
 
     // Load materials from stream
-    auto& mat_pool = MatManager::GetSingleton().ParseMatFile(stream, m_no_material_mode);
+    auto sc = pullContext<ShaderCompilingContext>(m_sc_holder);
+    auto& mat_pool = MatManager::GetSingleton().ParseMatFile(stream, m_no_material_mode, sc->context.get());
+    recycleContext(m_sc_holder, sc);
 
 #ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
     marl::WaitGroup build_mat_wait_group(mat_pool.size());
     for (auto& mat : mat_pool) {
         marl::schedule([&](MaterialBase* mat) {
             defer(build_mat_wait_group.done());
-            mat->BuildMaterial();
+
+            auto sc = pullContext<ShaderCompilingContext>(m_sc_holder);
+            mat->BuildMaterial(sc->context.get());
+            recycleContext(m_sc_holder, sc);
         }, mat.get());
     }
 #endif
@@ -129,13 +134,13 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
         accel_structure_done.wait();
 
         // get a render context
-        auto pRc = pullRenderContext();
+        auto pRc = pullContext<RenderContext>(m_rc_holder);
 
         // preprocessing for integrators
         m_integrator->PreProcess(m_scene, *pRc);
 
         // recycle the render context
-        recycleRenderContext(pRc);
+        recycleContext(m_rc_holder, pRc);
     });
 
     // get the number of total task
@@ -169,9 +174,9 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
 
             // pre-processing for integrators, like instant radiosity
             ++m_tile_cnt;
-            marl::schedule([&](const Vector2i& ori, const Vector2i& size) {
+            marl::schedule([this](const Vector2i& ori, const Vector2i& size) {
                 // get a render context
-                auto pRc = pullRenderContext();
+                auto pRc = pullContext<RenderContext>(m_rc_holder);
                 auto& rc = *pRc;
 
                 // get camera
@@ -301,7 +306,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
                         if (valid_pixel_cnt > 0)
                             radiance /= (float)valid_pixel_cnt;
 
-                        if (need_render_target)
+                        if (m_need_render_target)
                             UpdateImage(Vector2i(j,i), radiance);
 
                         // update the value if display server is connected
@@ -333,7 +338,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
                 --m_tile_cnt;
 
                 // we are done with the render context, recycle it
-                recycleRenderContext(pRc);
+                recycleContext(m_rc_holder, pRc);
             }, tl, size);
         }
 

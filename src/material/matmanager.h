@@ -58,7 +58,7 @@ public:
 
     // parse material file and add the materials into the manager
     // result           : the number of materials in the file
-    std::vector<std::unique_ptr<MaterialBase>>&    ParseMatFile( class IStreamBase& stream, const bool no_mat);
+    std::vector<std::unique_ptr<MaterialBase>>&    ParseMatFile( class IStreamBase& stream, const bool no_mat, Tsl_Namespace::ShadingContext* shading_context);
 
     //! @brief  Whether the renderer is in no material node
     bool        IsNoMaterialMode() const;

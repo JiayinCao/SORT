@@ -65,6 +65,8 @@ private:
     bool            m_enable_profiling = false;
     // No material mode
     bool            m_no_material_mode = false;
+    // whether we need a render target
+    bool            m_need_render_target = false;
 
     std::string     m_resource_path;            // resource path
     unsigned        m_thread_cnt = 6;           // thread cnt

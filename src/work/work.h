@@ -19,7 +19,16 @@
 
 #include "core/rtti.h"
 #include "core/scene.h"
+#include "material/tsl_system.h"
 #include "stream/stream.h"
+
+template<class Context>
+struct ContextHolder {
+    std::mutex                            m_rc_mutex;                     // a mutex to make sure pool is not accessed by two threads at the same time.
+    std::vector<std::unique_ptr<Context>> m_context_pool;                 // this only controls the life time of the contexts
+    std::list<Context*>                   m_available_context;            // the render context that are available
+    std::unordered_set<Context*>          m_running_context;              // the render context that are being ran
+};
 
 //! @brief  Work to be evaluated.
 /**
@@ -55,16 +64,40 @@ public:
 protected:
     Scene   m_scene;
 
-    std::mutex                                  m_rc_mutex;                     // a mutex to make sure pool is not accessed by two threads at the same time.
-    std::vector<std::unique_ptr<RenderContext>> m_render_context_pool;          // this only controls the life time of the render contexts
-    std::list<RenderContext*>                   m_available_render_context;     // the render context that are available
-    std::unordered_set<RenderContext*>          m_running_render_context;       // the render context that are being ran
+    ContextHolder<RenderContext>            m_rc_holder;
+    ContextHolder<ShaderCompilingContext>   m_sc_holder;
 
-    //! @brief  Grab a render context from the render context pool.
-    //!
-    //! If there is no render context available, create and initialize one.
-    RenderContext*  pullRenderContext();
+    template<class Context>
+    Context* pullContext(ContextHolder<Context>& context_holder) {
+        // make sure only one thread is accessing this
+        std::lock_guard<std::mutex> lock(context_holder.m_rc_mutex);
 
-    //! @brief  Recycle render context
-    void recycleRenderContext(RenderContext* rc);
+        // if we are running out of render context, just create one
+        if (context_holder.m_available_context.empty()) {
+            // make sure it is initialized after it is born
+            std::unique_ptr<Context> context = std::make_unique<Context>();
+            context->Init();
+
+            Context* pContext = context.get();
+            context_holder.m_context_pool.push_back(std::move(context));
+            context_holder.m_available_context.push_back(pContext);
+        }
+
+        auto ret = context_holder.m_available_context.back();
+        context_holder.m_available_context.pop_back();
+
+        context_holder.m_running_context.insert(ret);
+
+        // make sure this is a brand new render context before returning it
+        return &(ret->Reset());
+    }
+
+    template<class Context>
+    void recycleContext(ContextHolder<Context>& context_holder, Context* pContext) {
+        // make sure only one thread is accessing this
+        std::lock_guard<std::mutex> lock(context_holder.m_rc_mutex);
+
+        context_holder.m_running_context.erase(pContext);
+        context_holder.m_available_context.push_back(pContext);
+    }
 };

@@ -47,7 +47,7 @@ bool MatManager::IsNoMaterialMode() const {
 }
 
 // parse material file and add the materials into the manager
-std::vector<std::unique_ptr<MaterialBase>>& MatManager::ParseMatFile( IStreamBase& stream , const bool no_mat){
+std::vector<std::unique_ptr<MaterialBase>>& MatManager::ParseMatFile( IStreamBase& stream , const bool no_mat, Tsl_Namespace::ShadingContext* shading_context){
     SORT_PROFILE("Parsing Materials");
 
     auto resource_cnt = 0u;
@@ -118,9 +118,6 @@ std::vector<std::unique_ptr<MaterialBase>>& MatManager::ParseMatFile( IStreamBas
                 stream >> srb.resource_handle_name >> srb.shader_resource_name;
                 m_shader_resources_binding.push_back(srb);
             }
-
-            // compile the shader unit template
-            auto shading_context = GetShadingContext();
 
             // allocate the shader unit template
             const auto shader_unit_template = shading_context->begin_shader_unit_template(shader_node_type);
@@ -204,10 +201,8 @@ std::vector<std::unique_ptr<MaterialBase>>& MatManager::ParseMatFile( IStreamBas
             for (const auto& shader : shader_data.m_sources)
                 shader_units[shader.name] = MatManager::GetSingleton().GetShaderUnitTemplate(shader.type);
 
-            auto context = GetShadingContext();
-
             // begin compiling shader group
-            auto shader_group = context->begin_shader_group_template(shader_template_type);
+            auto shader_group = shading_context->begin_shader_group_template(shader_template_type);
             if (!shader_group)
                 continue;
 
@@ -258,7 +253,7 @@ std::vector<std::unique_ptr<MaterialBase>>& MatManager::ParseMatFile( IStreamBas
                 shader_group->init_shader_input(dv.shader_unit_name, dv.shader_unit_param_name, dv.default_value);
 
             // end building the shader group
-            auto ret = context->end_shader_group_template(shader_group.get());
+            auto ret = shading_context->end_shader_group_template(shader_group.get());
 
             // push it if it compiles the shader successful
             if (Tsl_Namespace::TSL_Resolving_Status::TSL_Resolving_Succeed == ret)
@@ -274,7 +269,7 @@ std::vector<std::unique_ptr<MaterialBase>>& MatManager::ParseMatFile( IStreamBas
             if (LIKELY(!m_no_material_mode)) {
 #ifndef ENABLE_MULTI_THREAD_SHADER_COMPILATION
                 // build the material
-                mat->BuildMaterial();
+                mat->BuildMaterial(shading_context);
 #endif
 
                 // push the compiled material in the pool

@@ -86,8 +86,8 @@ public:
 
     //! @brief  Build shader in tsl.
     //!
-    //! @param  shadingSys      Open-Shading-Language shading system.
-    virtual void       BuildMaterial() = 0;
+    //! @param  context     Tsl context.
+    virtual void       BuildMaterial(Tsl_Namespace::ShadingContext* context) = 0;
 
     //! @brief  Get material ID.
     //!
@@ -173,8 +173,8 @@ public:
 
     //! @brief  Build shader in tsl.
     //!
-    //! @param  shadingSys      Open-Shading-Language shading system.
-    void        BuildMaterial() override;
+    //! @param  context     Tsl context.
+    void        BuildMaterial(Tsl_Namespace::ShadingContext* context) override;
 
     //! @brief  Get material ID.
     //!
@@ -299,8 +299,8 @@ public:
 
     //! @brief  This should be an empty method that does nothing
     //!
-    //! @param  shadingSys      Open-Shading-Language shading system.
-    void       BuildMaterial() override {}
+    //! @param  context     Tsl context.
+    void       BuildMaterial(Tsl_Namespace::ShadingContext* context) override {  }
 
     //! @brief  Get material ID.
     //!
