@@ -27,6 +27,7 @@
 #include "core/timer.h"
 #include "sampler/random.h"
 #include "core/parse_args.h"
+#include "core/log.h"
 
 SORT_STATS_DEFINE_COUNTER(sPreprocessingTimeMS)
 SORT_STATS_DEFINE_COUNTER(sRenderingTimeMS)
@@ -451,6 +452,9 @@ void ImageEvaluation::loadConfig(IStreamBase& stream) {
 
     stream >> m_resource_path;
     stream >> m_thread_cnt;
+    if (!m_thread_cnt)
+        m_thread_cnt = std::thread::hardware_concurrency();
+
     stream >> m_sample_per_pixel;
     stream >> m_image_width >> m_image_height;
     stream >> m_clampping;
@@ -462,6 +466,8 @@ void ImageEvaluation::loadConfig(IStreamBase& stream) {
         m_integrator->Serialize(stream);
         m_integrator->SetImageEvaluation(this);
     }
+
+    slog(INFO, GENERAL, "There will be %d threads rendering at the same time.", m_thread_cnt);
 }
 
 void ImageEvaluation::UpdateImage(const Vector2i& coord, const Spectrum& value) {

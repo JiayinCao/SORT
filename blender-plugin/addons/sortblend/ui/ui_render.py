@@ -96,16 +96,12 @@ class SORTRenderData(bpy.types.PropertyGroup):
     sampler_count_prop : bpy.props.IntProperty(name='Count',default=1, min=1)
 
     #------------------------------------------------------------------------------------#
-    #                                 Threading Settings                                 #
-    #------------------------------------------------------------------------------------#
-    thread_num_prop : bpy.props.IntProperty(name='Thread Num', default=8, min=1, max=32)
-
-    #------------------------------------------------------------------------------------#
     #                                 Debugging Settings                                 #
     #------------------------------------------------------------------------------------#
     detailedLog : bpy.props.BoolProperty( name='Output Detailed Output', default=False, description='Whether outputing detail log information in blender plugin.' )
     profilingEnabled : bpy.props.BoolProperty(name='Enable Profiling',default=False,description='Enabling profiling will have a big impact on performance, only use it for simple scene')
     allUseDefaultMaterial : bpy.props.BoolProperty(name='No Material',default=False,description='Disable all materials in SORT, use the default one.')
+    thread_num_prop : bpy.props.IntProperty(name='Thread Num', default=0, min=0, max=128,description='Force specific number of threads, 0 means the number of threads will match number of physical cores.')
 
     @classmethod
     def register(cls):
@@ -192,12 +188,6 @@ class RENDER_PT_ClamppingPanel(SORTRenderPanel,bpy.types.Panel):
         self.layout.prop(data,"clampping")
 
 @base.register_class
-class RENDER_PT_MultiThreadPanel(SORTRenderPanel, bpy.types.Panel):
-    bl_label = 'MultiThread'
-    def draw(self, context):
-        self.layout.prop(context.scene.sort_data,"thread_num_prop")
-
-@base.register_class
 class RENDER_PT_SamplerPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = 'Sample'
     def draw(self, context):
@@ -244,4 +234,4 @@ class RENDER_PT_DebugPanel(SORTRenderPanel, bpy.types.Panel):
         self.layout.prop(data, "detailedLog")
         self.layout.prop(data, "profilingEnabled")
         self.layout.prop(data, "allUseDefaultMaterial")
-
+        self.layout.prop(context.scene.sort_data,"thread_num_prop")
