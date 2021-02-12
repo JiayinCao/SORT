@@ -15,6 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
+#include <cstring>
 #include <memory>
 #include "socket.h"
 #include "core/log.h"
