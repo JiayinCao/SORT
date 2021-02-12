@@ -47,19 +47,19 @@ def dipslay_update(sock, render_engine):
         try:
             header_bytes = connection.recv(4)
             if header_bytes == b'':
-                print('[header_bytes] socket error.')
+                log('[header_bytes] socket error.')
                 return
             
             pkg_length = int.from_bytes(header_bytes, "little")
 
             # we are done if the length is zero, this will be the last socket package sent from SORT
             if pkg_length == 0:
-                return
+                break
             
             header = connection.recv(16)
             if header == b'':
-                print('[header] socket error.')
-                return
+                log('[header] socket error.')
+                break
 
             # update a proportion of the image
             tile_width  = int.from_bytes(header[0:3], "little")
@@ -71,8 +71,8 @@ def dipslay_update(sock, render_engine):
             length_to_read = pkg_length - 16
             pixels = connection.recv(length_to_read, socket.MSG_WAITALL)
             if len(pixels) != length_to_read:
-                print('[pixel data] socket error.')
-                return
+                log('[pixel data] socket error.')
+                break
 
             # convert binary to two dimensional array
             tile_data = numpy.fromstring(pixels, dtype=numpy.float32)
@@ -89,8 +89,8 @@ def dipslay_update(sock, render_engine):
                 render_engine.end_result(result)
 
         except socket.error as e:
-            print('socket error\t ')
-            print(e)
+            log('socket error\t ')
+            log(e)
             break
     
     connection.close()

@@ -313,6 +313,10 @@ int ImageEvaluation::WaitForWorkToBeDone() {
 
     SORT_STATS(sRenderingTimeMS = m_timer.GetElapsedTime());
 
+    // We have to wait after the disconnection of display server to move forward so that we are sure
+    // all data has been passed through before SORT terminates itself.
+    DisplayManager::GetSingleton().WaitForDisconnection(m_blender_mode);
+
     return 0;
 }
 

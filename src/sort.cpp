@@ -82,9 +82,6 @@ int RunSORT(int argc, char** argv) {
     // Output stats data
     if (ret == 0 && !unit_test_mode)
         SortStatsPrintData();
-
-    // this sucks
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
+    
     return ret;
 }
