@@ -93,13 +93,6 @@ struct DisplayImageInfo : public DisplayItemBase {
     void Process(std::unique_ptr<OSocketStream>& stream) override;
 };
 
-//! @brief  Indicate that we are done
-struct TerminateIndicator : public DisplayItemBase {
-    TerminateIndicator(const bool blender_mode)
-        :DisplayItemBase("", 0, 0, blender_mode) {}
-    void Process(std::unique_ptr<OSocketStream>& stream) override;
-};
-
 //! @brief  Full target update
 struct FullTargetUpdate : public DisplayItemBase {
     FullTargetUpdate(const std::string& title, const RenderTarget* rt, const bool blender_mode)
@@ -153,7 +146,7 @@ public:
     //! @brief  Wait for display server to be disconnected
     //!
     //! This will be a blocking call to make sure display server is properly disconnected
-    void WaitForDisconnection(const bool blender_mode);
+    void DisconnectDisplayServer();
 
 private:
     /**< This data structure keeps track of all streams of servers. */

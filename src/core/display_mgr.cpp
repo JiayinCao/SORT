@@ -84,13 +84,14 @@ void DisplayManager::QueueDisplayItem(std::shared_ptr<DisplayItemBase> item) {
     m_queue.push(item);
 }
 
-void DisplayManager::WaitForDisconnection(const bool blender_mode) {
-    if (blender_mode) {
-        fd_set rfds;
-        FD_ZERO(&rfds);
-        FD_SET(m_socket, &rfds);
-        select(m_socket + 1, &rfds, nullptr, nullptr, nullptr);
-    }
+void DisplayManager::DisconnectDisplayServer() {
+    if (m_status != CONNECTION_SUCCEED)
+        return;
+#ifdef SORT_IN_WINDOWS
+    closesocket(m_socket);
+#else
+    close(m_socket);
+#endif
 }
 
 void DisplayTile::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
@@ -212,16 +213,6 @@ void IndicationTile::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
     }
 
     DisplayTile::Process(ptr_stream);
-}
-
-void TerminateIndicator::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
-    // Blender doesn't care about creating a new image, only TEV does.
-    OSocketStream& stream = *ptr_stream;
-
-    if (is_blender_mode) {
-        stream << int(0);   // 0 as length indicating that we are done, no more package will be received.
-        stream.Flush();
-    }
 }
 
 void FullTargetUpdate::Process(std::unique_ptr<OSocketStream>& ptr_stream) {

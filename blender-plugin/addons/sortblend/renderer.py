@@ -47,15 +47,10 @@ def dipslay_update(sock, render_engine):
         try:
             header_bytes = connection.recv(4)
             if header_bytes == b'':
-                log('[header_bytes] socket error.')
+                log('Socket disconnected from SORT.')
                 return
             
             pkg_length = int.from_bytes(header_bytes, "little")
-
-            # we are done if the length is zero, this will be the last socket package sent from SORT
-            if pkg_length == 0:
-                break
-            
             header = connection.recv(16)
             if header == b'':
                 log('[header] socket error.')

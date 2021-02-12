@@ -288,16 +288,9 @@ int ImageEvaluation::WaitForWorkToBeDone() {
     }
 
     const bool display_server_connected = DisplayManager::GetSingleton().IsDisplayServerConnected();
-    if (display_server_connected) {
-        // some integrator might need a final refresh
-        if (UNLIKELY(m_integrator->NeedFinalUpdate())) {
-            std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>(m_image_title, m_render_target.get(), m_blender_mode);
-            DisplayManager::GetSingleton().QueueDisplayItem(di);
-        }
-
-        // send out the terminator indicator
-        std::shared_ptr<TerminateIndicator> terminator = std::make_shared<TerminateIndicator>(m_blender_mode);
-        DisplayManager::GetSingleton().QueueDisplayItem(terminator);
+    if (display_server_connected && UNLIKELY(m_integrator->NeedFinalUpdate())) {
+        std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>(m_image_title, m_render_target.get(), m_blender_mode);
+        DisplayManager::GetSingleton().QueueDisplayItem(di);
     }
 
     if (!m_blender_mode)
@@ -313,9 +306,8 @@ int ImageEvaluation::WaitForWorkToBeDone() {
 
     SORT_STATS(sRenderingTimeMS = m_timer.GetElapsedTime());
 
-    // We have to wait after the disconnection of display server to move forward so that we are sure
-    // all data has been passed through before SORT terminates itself.
-    DisplayManager::GetSingleton().WaitForDisconnection(m_blender_mode);
+    // Close the display server to make sure TEV/Blender receives all data
+    DisplayManager::GetSingleton().DisconnectDisplayServer();
 
     return 0;
 }
