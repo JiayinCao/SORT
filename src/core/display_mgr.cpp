@@ -20,9 +20,8 @@
 #include "core/sassert.h"
 #include "texture/rendertarget.h"
 
-#ifdef SORT_IN_WINDOWS
-#else
-#define INVALID_SOCKET (-1)
+#ifndef SORT_IN_WINDOWS
+#include <unistd.h>
 #endif
 
 enum Type : char {
