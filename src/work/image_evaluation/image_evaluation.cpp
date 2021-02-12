@@ -99,11 +99,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
     // display the image first
     DisplayManager::GetSingleton().ResolveDisplayServerConnection();
     if (DisplayManager::GetSingleton().IsDisplayServerConnected()) {
-        std::shared_ptr<DisplayImageInfo> image_info = std::make_shared<DisplayImageInfo>();
-        image_info->title = m_image_title;
-        image_info->w = m_image_width;
-        image_info->h = m_image_height;
-        image_info->is_blender_mode = m_blender_mode;
+        std::shared_ptr<DisplayImageInfo> image_info = std::make_shared<DisplayImageInfo>(m_image_title, m_image_width, m_image_height, m_blender_mode);
         DisplayManager::GetSingleton().QueueDisplayItem(image_info);
     }
 
@@ -195,82 +191,11 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
                 const auto total_pixel = size.x * size.y;
                 std::shared_ptr<DisplayTile> display_tile;
                 if (display_server_connected && need_refresh_tile) {
-                    std::shared_ptr<DisplayTile> indicate_tile;
-                    indicate_tile = std::make_shared<DisplayTile>();
-                    indicate_tile->x = ori.x;
-                    indicate_tile->y = ori.y;
-                    indicate_tile->w = size.x;
-                    indicate_tile->h = size.y;
-                    indicate_tile->is_blender_mode = m_blender_mode;
-                    indicate_tile->title = m_image_title;
-
-                    const auto indication_intensity = 0.3f;
-                    if (m_blender_mode) {
-                        indicate_tile->m_data[0] = std::make_unique<float[]>(total_pixel * 4);
-                        auto data = indicate_tile->m_data[0].get();
-                        memset(data, 0, sizeof(float) * total_pixel * 4);
-
-                        for (auto i = 0u; i < indicate_tile->w; ++i) {
-                            if ((i >> 2) % 2 == 0)
-                                continue;
-
-                            for (auto c = 0; c < 3; ++c) {
-                                data[4 * i + c] = indication_intensity;
-                                data[4 * (total_pixel - 1 - i) + c] = indication_intensity;
-                            }
-                            data[4 * i + 3] = 1.0f;
-                            data[4 * (total_pixel - 1 - i) + 3] = 1.0f;
-                        }
-                        for (auto i = 0u; i < indicate_tile->h; ++i) {
-                            if ((i >> 2) % 2 == 0)
-                                continue;
-
-                            for (auto c = 0; c < 3; ++c) {
-                                data[4 * (i * indicate_tile->w) + c] = indication_intensity;
-                                data[4 * (i * indicate_tile->w + indicate_tile->w - 1) + c] = indication_intensity;
-                            }
-                            data[4 * (i * indicate_tile->w) + 3] = 1.0f;
-                            data[4 * (i * indicate_tile->w + indicate_tile->w - 1) + 3] = 1.0f;
-                        }
-                    }
-                    else {
-                        for (auto i = 0u; i < RGBSPECTRUM_SAMPLE; ++i) {
-                            indicate_tile->m_data[i] = std::make_unique<float[]>(total_pixel);
-                            auto data = indicate_tile->m_data[i].get();
-                            memset(data, 0, sizeof(float) * total_pixel);
-
-                            for (auto i = 0u; i < indicate_tile->w; ++i) {
-                                if ((i >> 2) % 2 == 0)
-                                    continue;
-                                data[i] = indication_intensity;
-                                data[total_pixel - 1 - i] = indication_intensity;
-                            }
-                            for (auto i = 0u; i < indicate_tile->h; ++i) {
-                                if ((i >> 2) % 2 == 0)
-                                    continue;
-                                data[i * indicate_tile->w] = indication_intensity;
-                                data[i * indicate_tile->w + indicate_tile->w - 1] = indication_intensity;
-                            }
-                        }
-                    }
-
                     // indicate that we are rendering this tile
+                    std::shared_ptr<IndicationTile> indicate_tile = std::make_shared<IndicationTile>(m_image_title, ori.x, ori.y, size.x, size.y, m_blender_mode);
                     DisplayManager::GetSingleton().QueueDisplayItem(indicate_tile);
 
-                    display_tile = std::make_shared<DisplayTile>();
-                    display_tile->x = ori.x;
-                    display_tile->y = ori.y;
-                    display_tile->w = size.x;
-                    display_tile->h = size.y;
-                    display_tile->title = m_image_title;
-                    display_tile->is_blender_mode = m_blender_mode;
-
-                    if (m_blender_mode) {
-                        display_tile->m_data[0] = std::make_unique<float[]>(total_pixel * 4);
-                    } else {
-                        for (auto i = 0u; i < 3; ++i)
-                            display_tile->m_data[i] = std::make_unique<float[]>(total_pixel);
-                    }
+                    display_tile = std::make_shared<DisplayTile>(m_image_title, ori.x, ori.y, size.x, size.y, m_blender_mode);
                 }
 
                 Vector2i rb = ori + size;
@@ -314,19 +239,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
                         if (display_server_connected && need_refresh_tile) {
                             auto local_i = i - ori.y;
                             auto local_j = j - ori.x;
-
-                            if (m_blender_mode) {
-                                auto local_index = local_j + (size.y - 1 - local_i) * size.x;
-                                display_tile->m_data[0][4 * local_index] = radiance[0];
-                                display_tile->m_data[0][4 * local_index + 1] = radiance[1];
-                                display_tile->m_data[0][4 * local_index + 2] = radiance[2];
-                                display_tile->m_data[0][4 * local_index + 3] = 1.0f;
-                            }
-                            else {
-                                auto local_index = local_j + local_i * size.x;
-                                for (auto i = 0u; i < RGBSPECTRUM_SAMPLE; ++i)
-                                    display_tile->m_data[i][local_index] = radiance[i];
-                            }
+                            display_tile->UpdatePixel(local_j, local_i, radiance);
                         }
                     }
                 }
@@ -364,12 +277,7 @@ int ImageEvaluation::WaitForWorkToBeDone() {
         if (UNLIKELY(m_integrator->NeedFullTargetRealtimeUpdate())) {
             // only update it every 1 second
             if (timer.GetElapsedTime() > 1000) {
-                std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>();
-                di->title = m_image_title;
-                di->w = m_image_width;
-                di->h = m_image_height;
-                di->is_blender_mode = m_blender_mode;
-                di->m_rt = m_render_target.get();
+                std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>(m_image_title, m_render_target.get(), m_blender_mode);
                 DisplayManager::GetSingleton().QueueDisplayItem(di);
                 timer.Reset();
             }
@@ -383,18 +291,12 @@ int ImageEvaluation::WaitForWorkToBeDone() {
     if (display_server_connected) {
         // some integrator might need a final refresh
         if (UNLIKELY(m_integrator->NeedFinalUpdate())) {
-            std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>();
-            di->title = m_image_title;
-            di->w = m_image_width;
-            di->h = m_image_height;
-            di->is_blender_mode = m_blender_mode;
-            di->m_rt = m_render_target.get();
+            std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>(m_image_title, m_render_target.get(), m_blender_mode);
             DisplayManager::GetSingleton().QueueDisplayItem(di);
         }
 
         // send out the terminator indicator
-        std::shared_ptr<TerminateIndicator> terminator = std::make_shared<TerminateIndicator>();
-        terminator->is_blender_mode = m_blender_mode;
+        std::shared_ptr<TerminateIndicator> terminator = std::make_shared<TerminateIndicator>(m_blender_mode);
         DisplayManager::GetSingleton().QueueDisplayItem(terminator);
     }
 

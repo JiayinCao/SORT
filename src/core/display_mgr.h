@@ -21,46 +21,92 @@
 #include "core/thread.h"
 #include "core/singleton.h"
 #include "stream/sstream.h"
+#include "texture/rendertarget.h"
 
 class RenderTarget;
 
 //! @brief  Display item
 struct DisplayItemBase {
 public:
+    DisplayItemBase(const std::string& title, const int w, const int h, const bool blender_mode)
+        :title(title), w(w), h(h), is_blender_mode(blender_mode){}
     ~DisplayItemBase() {}
 
     virtual void Process(std::unique_ptr<OSocketStream>& streams) = 0;
 
-    std::string     title;
-    int             w, h;   // the size of the tile
-    bool            is_blender_mode;
+protected:
+    const std::string     title;
+    const int             w, h;   // the size of the tile
+    const bool            is_blender_mode;
 };
 
 //! @brief  A tile for displaying
 struct DisplayTile : public DisplayItemBase {
-    int x, y;   // the position of the tile
-    
+    DisplayTile(const std::string& title, const int x, const int y, 
+                const int w, const int h, const bool blender_mode)
+        :DisplayItemBase(title, w, h, blender_mode), x(x), y(y){
+        const auto total_pixel = w * h;
+        if (is_blender_mode)
+            m_data[0] = std::make_unique<float[]>(total_pixel * 4);
+        else {
+            for (auto i = 0u; i < 3; ++i)
+                m_data[i] = std::make_unique<float[]>(total_pixel);
+        }
+    }
+
+    inline void UpdatePixel(int coord_x, int coord_y, const Spectrum& r) {
+        if (is_blender_mode) {
+            auto local_index = coord_x + (h - 1 - coord_y) * w;
+            m_data[0][4 * local_index] = r[0];
+            m_data[0][4 * local_index + 1] = r[1];
+            m_data[0][4 * local_index + 2] = r[2];
+            m_data[0][4 * local_index + 3] = 1.0f;
+        }
+        else {
+            auto local_index = coord_x + coord_y * w;
+            for (auto i = 0u; i < RGBSPECTRUM_SAMPLE; ++i)
+                m_data[i][local_index] = r[i];
+        }
+    }
+
+    void Process(std::unique_ptr<OSocketStream>& stream) override;
+
+protected:
     // data of the tile per channel, we have R/G/B
     std::unique_ptr<float[]>     m_data[SPECTRUM_SAMPLE];
+    // the position of the tile
+    const int x, y;
+};
 
+//! @brief  Indication tile
+struct IndicationTile : public DisplayTile {
+    IndicationTile(const std::string& title, const int x, const int y,
+        const int w, const int h, const bool blender_mode)
+        :DisplayTile(title, x, y, w, h, blender_mode) {}
     void Process(std::unique_ptr<OSocketStream>& stream) override;
 };
 
 //! @brief  New image to display
 struct DisplayImageInfo : public DisplayItemBase {
+    DisplayImageInfo(const std::string& title, const int w, const int h, const bool blender_mode)
+        :DisplayItemBase(title, w, h, blender_mode){}
     void Process(std::unique_ptr<OSocketStream>& stream) override;
 };
 
 //! @brief  Indicate that we are done
 struct TerminateIndicator : public DisplayItemBase {
+    TerminateIndicator(const bool blender_mode)
+        :DisplayItemBase("", 0, 0, false) {}
     void Process(std::unique_ptr<OSocketStream>& stream) override;
 };
 
 //! @brief  Full target update
 struct FullTargetUpdate : public DisplayItemBase {
+    FullTargetUpdate(const std::string& title, const RenderTarget* rt, const bool blender_mode)
+        :DisplayItemBase(title, rt->GetWidth(), rt->GetHeight(), blender_mode), m_rt(rt) {}
     void Process(std::unique_ptr<OSocketStream>& stream) override;
-
-    const RenderTarget* m_rt = nullptr;
+private:
+    const RenderTarget* const m_rt = nullptr;
 };
 
 enum SocketStatus {

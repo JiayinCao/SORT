@@ -152,6 +152,59 @@ void DisplayImageInfo::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
     }
 }
 
+void IndicationTile::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
+    const auto indication_intensity = 0.3f;
+    const auto total_pixel = w * h;
+    if (is_blender_mode) {
+        auto data = m_data[0].get();
+        memset(data, 0, sizeof(float) * total_pixel * 4);
+
+        for (auto i = 0u; i < w; ++i) {
+            if ((i >> 2) % 2 == 0)
+                continue;
+
+            for (auto c = 0; c < 3; ++c) {
+                data[4 * i + c] = indication_intensity;
+                data[4 * (total_pixel - 1 - i) + c] = indication_intensity;
+            }
+            data[4 * i + 3] = 1.0f;
+            data[4 * (total_pixel - 1 - i) + 3] = 1.0f;
+        }
+        for (auto i = 0u; i < h; ++i) {
+            if ((i >> 2) % 2 == 0)
+                continue;
+
+            for (auto c = 0; c < 3; ++c) {
+                data[4 * (i * w) + c] = indication_intensity;
+                data[4 * (i * w + w - 1) + c] = indication_intensity;
+            }
+            data[4 * (i * w) + 3] = 1.0f;
+            data[4 * (i * w + w - 1) + 3] = 1.0f;
+        }
+    }
+    else {
+        for (auto i = 0u; i < RGBSPECTRUM_SAMPLE; ++i) {
+            auto data = m_data[i].get();
+            memset(data, 0, sizeof(float) * total_pixel);
+
+            for (auto i = 0u; i < w; ++i) {
+                if ((i >> 2) % 2 == 0)
+                    continue;
+                data[i] = indication_intensity;
+                data[total_pixel - 1 - i] = indication_intensity;
+            }
+            for (auto i = 0u; i < h; ++i) {
+                if ((i >> 2) % 2 == 0)
+                    continue;
+                data[i * w] = indication_intensity;
+                data[i * w + w - 1] = indication_intensity;
+            }
+        }
+    }
+
+    DisplayTile::Process(ptr_stream);
+}
+
 void TerminateIndicator::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
     // Tev won't response this well
     if (is_blender_mode) {
@@ -171,22 +224,11 @@ void FullTargetUpdate::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
 
     if(is_blender_mode){
         const auto total_pixel = w * h;
-        auto display_tile = std::make_shared<DisplayTile>();
-        display_tile->x = 0;
-        display_tile->y = 0;
-        display_tile->w = w;
-        display_tile->h = h;
-        display_tile->title = title;
-        display_tile->is_blender_mode = is_blender_mode;
-        display_tile->m_data[0] = std::make_unique<float[]>(total_pixel * 4);
+        auto display_tile = std::make_shared<DisplayTile>(title, 0, 0, w, h, is_blender_mode);
         for( auto i = 0u ; i < h;  ++i ){
             for( auto j = 0u ; j < w; ++j ){
                 const auto& color = m_rt->GetColor(j, i);
-                auto local_index = j + (h - 1 - i) * w;
-                display_tile->m_data[0][4 * local_index] = color[0];
-                display_tile->m_data[0][4 * local_index + 1] = color[1];
-                display_tile->m_data[0][4 * local_index + 2] = color[2];
-                display_tile->m_data[0][4 * local_index + 3] = 1.0f;
+                display_tile->UpdatePixel(j, i, color);
             }
         }
         display_tile->Process(ptr_stream);
@@ -207,28 +249,15 @@ void FullTargetUpdate::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
                 const auto size_y = std::min(h - ori_y, big_tile_size);
                 const auto total_pixel = size_x * size_y;
 
-                auto display_tile = std::make_shared<DisplayTile>();
-                display_tile->x = ori_x;
-                display_tile->y = ori_y;
-                display_tile->w = size_x;
-                display_tile->h = size_y;
-                display_tile->title = title;
-                display_tile->is_blender_mode = is_blender_mode;
-
-                for (auto i = 0u; i < 3; ++i)
-                    display_tile->m_data[i] = std::make_unique<float[]>(total_pixel);
+                auto display_tile = std::make_shared<DisplayTile>(title, ori_x, ori_y, size_x, size_y, is_blender_mode);
 
                 // update the value if display server is connected
                 for( auto local_i = 0 ; local_i < size_y; ++local_i){
                     for (auto local_j = 0; local_j < size_x; ++local_j) {
                         const auto global_j = ori_x + local_j;
                         const auto global_i = ori_y + local_i;
-
                         const auto& color = m_rt->GetColor(global_j, global_i);
-                        for (auto i = 0u; i < RGBSPECTRUM_SAMPLE; ++i) {
-                            const auto local_index = local_i * size_x + local_j;
-                            display_tile->m_data[i][local_index] = color[i];
-                        }
+                        display_tile->UpdatePixel(local_j, local_i, color);
                     }
                 }
 
