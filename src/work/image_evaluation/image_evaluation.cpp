@@ -394,6 +394,7 @@ int ImageEvaluation::WaitForWorkToBeDone() {
 
         // send out the terminator indicator
         std::shared_ptr<TerminateIndicator> terminator = std::make_shared<TerminateIndicator>();
+        terminator->is_blender_mode = m_blender_mode;
         DisplayManager::GetSingleton().QueueDisplayItem(terminator);
     }
 

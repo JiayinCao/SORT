@@ -129,5 +129,5 @@ public:
 private:
     socket_t m_socket;
 
-    static constexpr unsigned SEND_MAX_SIZE = 16*1024;
+    static constexpr unsigned SEND_MAX_SIZE = 65535;
 };
