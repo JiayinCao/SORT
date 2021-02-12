@@ -15,14 +15,10 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
+#include <mutex>
 #include "display_mgr.h"
-#include "core/socket_mgr.h"
 #include "core/sassert.h"
 #include "texture/rendertarget.h"
-
-#ifndef SORT_IN_WINDOWS
-#include <unistd.h>
-#endif
 
 enum Type : char {
     OpenImage = 0,
@@ -35,27 +31,23 @@ enum Type : char {
 static std::string  channelNames[] = { "R", "G", "B" };
 static int          nChannels = 3;
 
-void DisplayManager::AddDisplayServer(const std::string host, const std::string& port) {
-    // It is fairly easy to support multiple display servers, but it makes little sense for me for now.
-    // So I will ignore the second one coming in.
-    if (m_stream)
-        return;
+void DisplayManager::SetupDisplayServer(const std::string host, const std::string& port) {
+    m_socket_connection = ConnectSocket(host, port);
 
-    m_socket = SocketManager::GetSingleton().AddSocket(SOCKET_TYPE::CLIENT, host, port);
-    m_stream = std::make_unique<OSocketStream>(m_socket);
+    if (m_socket_connection) {
+        slog(INFO, SOCKET, "Connected to display server %s:%s.", host.c_str(), port.c_str());
+        m_stream = std::make_unique<OSocketStream>(m_socket_connection->m_socket);
+        m_display_server_connected = true;
+    }
 }
 
 bool DisplayManager::IsDisplayServerConnected() const {
-    return m_stream != nullptr && ( CONNECTION_FAILED != m_status );
-}
-
-void DisplayManager::ResolveDisplayServerConnection(){
-    m_status = SocketManager::GetSingleton().ResolveSocket(m_socket) ? CONNECTION_SUCCEED : CONNECTION_FAILED;
+    return m_display_server_connected;
 }
 
 void DisplayManager::ProcessDisplayQueue(int cnt) {
-    // bail if connection is not established.
-    if(m_status != CONNECTION_SUCCEED)
+    // don't process anything if the server is not even connected
+    if (!m_display_server_connected)
         return;
 
     // we only process 4 display tiles everytime this thread gains control
@@ -84,13 +76,10 @@ void DisplayManager::QueueDisplayItem(std::shared_ptr<DisplayItemBase> item) {
 }
 
 void DisplayManager::DisconnectDisplayServer() {
-    if (m_status != CONNECTION_SUCCEED)
-        return;
-#ifdef SORT_IN_WINDOWS
-    closesocket(m_socket);
-#else
-    close(m_socket);
-#endif
+    if (m_display_server_connected) {
+        slog(INFO, SOCKET, "Disconnect display server.");
+        DisconnectSocket(m_socket_connection.get());
+    }
 }
 
 void DisplayTile::Process(std::unique_ptr<OSocketStream>& ptr_stream) {

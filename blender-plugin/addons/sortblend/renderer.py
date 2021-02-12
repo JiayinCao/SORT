@@ -47,8 +47,7 @@ def dipslay_update(sock, render_engine):
         try:
             header_bytes = connection.recv(4)
             if header_bytes == b'':
-                log('Socket disconnected from SORT.')
-                return
+                break
             
             pkg_length = int.from_bytes(header_bytes, "little")
             header = connection.recv(16)
@@ -88,8 +87,8 @@ def dipslay_update(sock, render_engine):
             log(e)
             break
     
+    log('Socket disconnected from SORT.')
     connection.close()
-
 
 @base.register_class
 class SORTRenderEngine(bpy.types.RenderEngine):

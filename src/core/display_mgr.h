@@ -20,6 +20,7 @@
 #include <queue>
 #include "core/thread.h"
 #include "core/singleton.h"
+#include "core/socket.h"
 #include "stream/sstream.h"
 #include "texture/rendertarget.h"
 
@@ -102,12 +103,6 @@ private:
     const RenderTarget* const m_rt = nullptr;
 };
 
-enum SocketStatus {
-    UNINITIALIZE = 0,
-    CONNECTION_FAILED,
-    CONNECTION_SUCCEED
-};
-
 //! @brief  Display is responsible for displaying intermediate result of the ray traced images.
 /*
  * Dynamic displaying intermediate buffer should work in either Blender or Tev(https://github.com/Tom94/tev).
@@ -125,13 +120,7 @@ public:
     //!
     //! @param host         The ip address of the server.
     //! @param port         The port the server is listening.
-    void AddDisplayServer(const std::string host, const std::string& port);
-
-    //! @brief  Whether there is any display server connected
-    bool IsDisplayServerConnected() const;
-
-    //! @brief  Resolve connection
-    void ResolveDisplayServerConnection();
+    void SetupDisplayServer(const std::string host, const std::string& port);
 
     //! @brief  Refresh the tile in display servers
     //!
@@ -148,6 +137,10 @@ public:
     //! This will be a blocking call to make sure display server is properly disconnected
     void DisconnectDisplayServer();
 
+    //! @brief  Whether the display server is connected
+    //!
+    bool IsDisplayServerConnected() const;
+
 private:
     /**< This data structure keeps track of all streams of servers. */
     std::unique_ptr<OSocketStream>                  m_stream;
@@ -156,9 +149,9 @@ private:
     std::queue<std::shared_ptr<DisplayItemBase>>    m_queue;
     /**< A spin lock to protect the queue from being accessed in multiple threads. */
     spinlock_mutex                                  m_lock;
+    /**< Whether the display server is connected. */
+    std::atomic<bool>                               m_display_server_connected;
 
-    /**< Whether the server is connected. */
-    SocketStatus                                    m_status = SocketStatus::UNINITIALIZE;
     /**< The socket of the server. */
-    socket_t                                        m_socket;
+    std::unique_ptr<SocketConnection>               m_socket_connection;
 };

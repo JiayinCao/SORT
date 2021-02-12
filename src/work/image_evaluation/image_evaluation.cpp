@@ -50,12 +50,15 @@ void thread_shut_down(int id) {
 void ImageEvaluation::StartRunning(int argc, char** argv) {
     m_image_title = "sort_" + logTimeString() + ".exr";
 
+    // Initialize socket system
+    InitializeSocketSystem();
+
     // parse command arugments first
     parseCommandArgs(argc, argv);
 
     // create tsl thread context
     CreateTSLThreadContexts();
-
+    
     // load the file
     std::unique_ptr<IStreamBase> stream_ptr = std::make_unique<IFileStream>( m_input_file );
     auto& stream = *stream_ptr;
@@ -70,6 +73,14 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
 
     m_scheduler = std::make_unique<marl::Scheduler>(cfg);
     m_scheduler->bind();
+
+    if (m_has_display_server) {
+        // build acceleration structure
+        marl::schedule([&]() {
+            // Try connecting the display server
+            DisplayManager::GetSingleton().SetupDisplayServer(m_display_server_ip, m_display_server_port);
+        });
+    }
 
     m_need_render_target = !m_blender_mode || m_integrator->NeedFinalUpdate();
     if (m_need_render_target)
@@ -97,8 +108,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
     m_scene.LoadScene(stream);
 
     // display the image first
-    DisplayManager::GetSingleton().ResolveDisplayServerConnection();
-    if (DisplayManager::GetSingleton().IsDisplayServerConnected()) {
+    if (m_has_display_server) {
         std::shared_ptr<DisplayImageInfo> image_info = std::make_shared<DisplayImageInfo>(m_image_title, m_image_width, m_image_height, m_blender_mode);
         DisplayManager::GetSingleton().QueueDisplayItem(image_info);
     }
@@ -185,12 +195,10 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
                 // request samples
                 m_integrator->RequestSample(sampler.get(), pixelSamples.get(), m_sample_per_pixel);
 
-                const bool display_server_connected = DisplayManager::GetSingleton().IsDisplayServerConnected();
                 const bool need_refresh_tile = m_integrator->NeedRefreshTile();
-
                 const auto total_pixel = size.x * size.y;
                 std::shared_ptr<DisplayTile> display_tile;
-                if (display_server_connected && need_refresh_tile) {
+                if (m_has_display_server && need_refresh_tile) {
                     // indicate that we are rendering this tile
                     std::shared_ptr<IndicationTile> indicate_tile = std::make_shared<IndicationTile>(m_image_title, ori.x, ori.y, size.x, size.y, m_blender_mode);
                     DisplayManager::GetSingleton().QueueDisplayItem(indicate_tile);
@@ -236,7 +244,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
                             UpdateImage(Vector2i(j,i), radiance);
 
                         // update the value if display server is connected
-                        if (display_server_connected && need_refresh_tile) {
+                        if (m_has_display_server && need_refresh_tile) {
                             auto local_i = i - ori.y;
                             auto local_j = j - ori.x;
                             display_tile->UpdatePixel(local_j, local_i, radiance);
@@ -245,7 +253,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
                 }
 
                 // update display server if needed
-                if (display_server_connected && need_refresh_tile)
+                if (m_has_display_server && need_refresh_tile)
                     DisplayManager::GetSingleton().QueueDisplayItem(display_tile);
 
                 // we are done with this tile
@@ -274,21 +282,21 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
 int ImageEvaluation::WaitForWorkToBeDone() {
     Timer timer;
     while (m_tile_cnt > 0) {
-        if (UNLIKELY(m_integrator->NeedFullTargetRealtimeUpdate())) {
-            // only update it every 1 second
-            if (timer.GetElapsedTime() > 1000) {
-                std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>(m_image_title, m_render_target.get(), m_blender_mode);
-                DisplayManager::GetSingleton().QueueDisplayItem(di);
-                timer.Reset();
+        if (DisplayManager::GetSingleton().IsDisplayServerConnected()) {
+            if (UNLIKELY(m_integrator->NeedFullTargetRealtimeUpdate())) {
+                if (timer.GetElapsedTime() > 1000) {
+                    std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>(m_image_title, m_render_target.get(), m_blender_mode);
+                    DisplayManager::GetSingleton().QueueDisplayItem(di);
+                    timer.Reset();
+                }
             }
-        }
 
-        DisplayManager::GetSingleton().ProcessDisplayQueue(6);
+            DisplayManager::GetSingleton().ProcessDisplayQueue(6);
+        }
         std::this_thread::yield();
     }
 
-    const bool display_server_connected = DisplayManager::GetSingleton().IsDisplayServerConnected();
-    if (display_server_connected && UNLIKELY(m_integrator->NeedFinalUpdate())) {
+    if (m_has_display_server && UNLIKELY(m_integrator->NeedFinalUpdate())) {
         std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>(m_image_title, m_render_target.get(), m_blender_mode);
         DisplayManager::GetSingleton().QueueDisplayItem(di);
     }
@@ -308,6 +316,9 @@ int ImageEvaluation::WaitForWorkToBeDone() {
 
     // Close the display server to make sure TEV/Blender receives all data
     DisplayManager::GetSingleton().DisconnectDisplayServer();
+
+    // shutdown socket system
+    ShutdownSocketSystem();
 
     return 0;
 }
@@ -333,9 +344,9 @@ void ImageEvaluation::parseCommandArgs(int argc, char** argv){
             if (split < 0)
                 continue;
 
-            const auto ip = value_str.substr(0, split);
-            const auto port = value_str.substr(split + 1);
-            DisplayManager::GetSingleton().AddDisplayServer(ip, port);
+            m_display_server_ip = value_str.substr(0, split);
+            m_display_server_port = value_str.substr(split + 1);
+            m_has_display_server = !m_display_server_ip.empty() && !m_display_server_port.empty();
         }
     }
 }

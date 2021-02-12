@@ -69,6 +69,9 @@ private:
     bool            m_need_render_target = false;
 
     std::string     m_resource_path;            // resource path
+    std::string     m_display_server_ip;        // display server ip
+    std::string     m_display_server_port;      // display server port
+    bool            m_has_display_server;       // whether it has a display server
     unsigned        m_thread_cnt = 6;           // thread cnt
     unsigned        m_sample_per_pixel = 16;    // sample per pixel to be evaluated.
     unsigned        m_image_width = 0;          // width of the image to be generated

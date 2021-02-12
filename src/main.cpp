@@ -21,7 +21,6 @@
 #include "core/stats.h"
 #include "core/profile.h"
 #include "core/path.h"
-#include "core/socket_mgr.h"
 
 #ifdef SORT_IN_WINDOWS
 int __cdecl main( int argc , char** argv )
@@ -36,8 +35,6 @@ int main(int argc, char* argv[])
     addLogDispatcher(std::make_unique<StdOutLogDispatcher>());
     addLogDispatcher(std::make_unique<FileLogDispatcher>("log.txt"));
 
-    SocketManager::GetSingleton().Initialize();
-
     const auto ret = RunSORT(argc, argv);
 
     SORT_PROFILE_END; // Main Thread
@@ -49,8 +46,6 @@ int main(int argc, char* argv[])
         slog(INFO, GENERAL, "Profiling file: \"%s\"", GetFilePathInExeFolder(filename).c_str());
     }
     slog(INFO, GENERAL, "Log file: \"%s\"", GetFilePathInExeFolder("log.txt").c_str());
-
-    SocketManager::GetSingleton().Shutdown();
 
     return ret;
 }

@@ -27,7 +27,7 @@
 
 #include "stream.h"
 #include "core/define.h"
-#include "core/socket_mgr.h"
+#include "core/socket.h"
 #include "stream/mstream.h"
 
 //! @brief Streaming from socket through network.
