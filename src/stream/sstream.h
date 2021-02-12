@@ -115,14 +115,19 @@ public:
     //! @brief Flush current written result.
     void Flush() override{
         // send the data out
-        const auto size = GetDataSize();
-        if (size > 0) {
-            const auto data = GetData();
-            send(m_socket, data, size, 0);
-            Clear();
+        auto size = GetDataSize();
+        auto data = GetData();
+        while( size > 0 ){
+            auto size_to_send = std::min(SEND_MAX_SIZE, size);
+            send(m_socket, data, size_to_send, 0);
+            size -= size_to_send;
+            data += size_to_send;
         }
+        Clear();
     }
 
 private:
     socket_t m_socket;
+
+    static constexpr unsigned SEND_MAX_SIZE = 16*1024;
 };
