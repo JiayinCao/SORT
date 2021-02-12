@@ -72,6 +72,6 @@ void DisconnectSocket(SocketConnection* ptr) {
 #ifdef SORT_IN_WINDOWS
     closesocket(ptr->m_socket);
 #else
-    close(m_socket);
+    close(ptr->m_socket);
 #endif
 }
