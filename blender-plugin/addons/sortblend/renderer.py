@@ -209,6 +209,9 @@ class SORTRenderEngine(bpy.types.RenderEngine):
 
             # terminate the process
             subprocess.Popen.terminate(process)
+        else:
+            # wait for the thread to be terminated before moving forward
+            self.display_thread.join()
 
         # clear immediate directory
         try:
