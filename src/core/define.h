@@ -65,6 +65,13 @@
     #error "Undefined target."
 #endif
 
+// Neon doesn't support 8 way SIMD
+#if defined(SORT_ARM64_TARGET) && defined(SORT_IN_MAC)
+    #ifdef SIMD_8WAY_ENABLED
+        #undef SIMD_8WAY_ENABLED
+    #endif
+#endif
+
 #define SORT_STATIC_FORCEINLINE     static SORT_FORCEINLINE
 
 #define IS_PTR_INVALID(p)           (nullptr == p)
