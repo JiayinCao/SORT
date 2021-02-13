@@ -285,7 +285,7 @@ int ImageEvaluation::WaitForWorkToBeDone() {
         if (DisplayManager::GetSingleton().IsDisplayServerConnected()) {
             if (UNLIKELY(m_integrator->NeedFullTargetRealtimeUpdate())) {
                 if (timer.GetElapsedTime() > 1000) {
-                    std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>(m_image_title, m_render_target.get());
+                    std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>(m_image_title, m_render_target.get(), m_blender_mode);
                     DisplayManager::GetSingleton().QueueDisplayItem(di);
                     timer.Reset();
                 }
@@ -297,7 +297,7 @@ int ImageEvaluation::WaitForWorkToBeDone() {
     }
 
     if (m_has_display_server && UNLIKELY(m_integrator->NeedFinalUpdate())) {
-        std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>(m_image_title, m_render_target.get());
+        std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>(m_image_title, m_render_target.get(), m_blender_mode);
         DisplayManager::GetSingleton().QueueDisplayItem(di);
     }
 

@@ -96,8 +96,8 @@ struct DisplayImageInfo : public DisplayItemBase {
 
 //! @brief  Full target update
 struct FullTargetUpdate : public DisplayItemBase {
-    FullTargetUpdate(const std::string& title, const RenderTarget* rt)
-        :DisplayItemBase(title, rt->GetWidth(), rt->GetHeight(), false), m_rt(rt) {}
+    FullTargetUpdate(const std::string& title, const RenderTarget* rt, const bool is_blender_mode)
+        :DisplayItemBase(title, rt->GetWidth(), rt->GetHeight(), is_blender_mode), m_rt(rt) {}
     void Process(std::unique_ptr<OSocketStream>& stream) override;
 private:
     const RenderTarget* const m_rt = nullptr;
