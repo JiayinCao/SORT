@@ -35,6 +35,9 @@ dep_dir = 'dependencies'
 # whether to sync dependencies
 sync_dep = False
 
+# sync pre-compiled tsl by default
+build_tsl = False
+
 # if forcing syncing is enabled, delete the dependencies even if it exists
 if forcing_sync:
     # check if the folder already exists, if it does, remove it
@@ -60,7 +63,10 @@ if sync_dep:
     os.makedirs(dep_dir)
 
     # TSL
-    exec(open("./scripts/build_tsl.py").read())
+    if build_tsl:
+        exec(open("./scripts/build_tsl.py").read())
+    else:
+        exec(open("./scripts/get_tsl.py").read())
 
     # marl
     exec(open("./scripts/get_marl.py").read())
