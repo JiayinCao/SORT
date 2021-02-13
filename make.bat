@@ -139,7 +139,6 @@ if "%BUILD_RELEASE%" == "1" (
 	make update_dep
 	powershell New-Item -Force -ItemType directory -Path proj_release
 	cd proj_release
-	cmake --version
 	cmake -A x64 ..
 	msbuild /p:Configuration=Release SORT.sln
 

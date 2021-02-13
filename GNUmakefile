@@ -27,7 +27,6 @@ BUILD_DEBUG_COMMAND          = @echo "building debug version.";cd $(SORT_DIR); m
 BUILD_RELWITHDEBINFO_COMMAND = @echo "building release version with debug information.";cd $(SORT_DIR); mkdir proj_relwithdebinfo; cd proj_relwithdebinfo; cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..;make -j 4;cd ..;
 
 release: .FORCE
-	cmake --version
 	$(UPDATE_DEP_COMMAND)
 	$(BUILD_RELEASE_COMMAND)
 
