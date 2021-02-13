@@ -21,6 +21,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# print cmake version
+message(STATUS "CMake Version: " ${CMAKE_MAJOR_VERSION} "." ${CMAKE_MINOR_VERSION} "." ${CMAKE_PATCH_VERSION} )
+
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # this will avoid generate ZERO_CHECK project
@@ -57,14 +60,20 @@ SET( ENABLE_SIMD_8WAY_OPTIMIZATION "NO"   CACHE BOOL "Enable AVX optimization, t
 # detect apple silicon
 set(APPLE_SILICON false)
 if(SORT_PLATFORM_MAC)
-    if("${CMAKE_HOST_SYSTEM_PROCESSOR}" EQUAL "arm64")
+    # detect if this is apple silicon Mac
+    find_program(CMAKE_UNAME uname /bin /usr/bin /usr/local/bin )
+    exec_program(${CMAKE_UNAME} ARGS -m OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_PROCESSOR)
+
+    if(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "arm64")
         set(APPLE_SILICON true)
     endif()
+    
+    if(APPLE_SILICON)
+        message(STATUS "Building on Apple Silicon Mac.")
+    else()
+        message(STATUS "Building on Intel Mac.")
+    endif(APPLE_SILICON)
 endif(SORT_PLATFORM_MAC)
-
-if(APPLE_SILICON)
-    message("Building on Apple Siligon")
-endif(APPLE_SILICON)
 
 # For Easy_Profiler to locate its library, but this doesn't need to show up as UI an option
 if(ENABLE_PROFILER)
@@ -90,7 +99,7 @@ project (SORT)
 # loading tsl lirary, this is mandatory
 set(TSL_DIR ${SORT_SOURCE_DIR}/dependencies/tsl/)
 find_package(TSL REQUIRED CONFIG)
-message(STATUS "Tiny Shading Langauge version: ${TSL_VERSION}")
+message(STATUS "Tiny Shading Langauge version: ${TSL_VERSION}.")
 
 # loading marl library
 set(MARL_INCLUDE_DIR ${SORT_SOURCE_DIR}/dependencies/marl/include)
@@ -202,6 +211,21 @@ if(ENABLE_PROFILER)
 else()
     message( STATUS "SORT Profiling System Disabled." )
 endif(ENABLE_PROFILER)
+
+# Print out some setup information
+if(ENABLE_SIMD_4WAY_OPTIMIZATION)
+    if(APPLE_SILICON)
+        message( STATUS "Neon optimization enabled.")
+    else()
+        message( STATUS "SSE optimization enabled.")
+    endif(APPLE_SILICON)
+endif(ENABLE_SIMD_4WAY_OPTIMIZATION)
+
+if(ENABLE_SIMD_8WAY_OPTIMIZATION)
+    if(NOT APPLE_SILICON)
+        message( STATUS "AVX optimization enabled.")
+    endif(APPLE_SILICON)
+endif(ENABLE_SIMD_8WAY_OPTIMIZATION)
 
 # Surpress a warning
 if(SORT_PLATFORM_MAC)
