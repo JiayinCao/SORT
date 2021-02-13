@@ -210,47 +210,13 @@ void FullTargetUpdate::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
     // WARNING, this thread might result in some unknown results because of unguarded data racing. However, it is not a big
     // deal to reveal slightly inconsistent data as long as the final result is fine.
 
-    if(is_blender_mode){
-        const auto total_pixel = w * h;
-        auto display_tile = std::make_shared<DisplayTile>(title, 0, 0, w, h, is_blender_mode);
-        for( auto i = 0u ; i < h;  ++i ){
-            for( auto j = 0u ; j < w; ++j ){
-                const auto& color = m_rt->GetColor(j, i);
-                display_tile->UpdatePixel(j, i, color);
-            }
-        }
-        display_tile->Process(ptr_stream);
-    }else{
-        // Ideally, the above logic should be used for TEV.
-        // However, has a upper limit of 1MB for temporary buffer.
-        // There is no way to update the full target in one go.
-        constexpr unsigned int big_tile_size = 256;
-
-        const unsigned int chunk_w = (w + big_tile_size - 1) / big_tile_size;
-        const unsigned int chunk_h = (h + big_tile_size - 1) / big_tile_size;
-
-        for (auto i = 0u; i < chunk_h; ++i) {
-            for (auto j = 0u; j < chunk_w; ++j) {
-                const auto ori_x = big_tile_size * j;
-                const auto ori_y = big_tile_size * i;
-                const auto size_x = std::min(w - ori_x, big_tile_size);
-                const auto size_y = std::min(h - ori_y, big_tile_size);
-                const auto total_pixel = size_x * size_y;
-
-                auto display_tile = std::make_shared<DisplayTile>(title, ori_x, ori_y, size_x, size_y, is_blender_mode);
-
-                // update the value if display server is connected
-                for( auto local_i = 0 ; local_i < size_y; ++local_i){
-                    for (auto local_j = 0; local_j < size_x; ++local_j) {
-                        const auto global_j = ori_x + local_j;
-                        const auto global_i = ori_y + local_i;
-                        const auto& color = m_rt->GetColor(global_j, global_i);
-                        display_tile->UpdatePixel(local_j, local_i, color);
-                    }
-                }
-
-                display_tile->Process(ptr_stream);
-            }
+    const auto total_pixel = w * h;
+    auto display_tile = std::make_shared<DisplayTile>(title, 0, 0, w, h, is_blender_mode);
+    for( auto i = 0u ; i < h;  ++i ){
+        for( auto j = 0u ; j < w; ++j ){
+            const auto& color = m_rt->GetColor(j, i);
+            display_tile->UpdatePixel(j, i, color);
         }
     }
+    display_tile->Process(ptr_stream);
 }
