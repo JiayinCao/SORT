@@ -118,10 +118,15 @@ public:
         auto size = GetDataSize();
         auto data = GetData();
         while( size > 0 ){
-            auto size_to_send = std::min(SEND_MAX_SIZE, size);
-            send(m_socket, data, size_to_send, 0);
-            size -= size_to_send;
-            data += size_to_send;
+            const auto size_to_send = std::min(SEND_MAX_SIZE, size);
+            const auto byte_sent = send(m_socket, data, size_to_send, 0);
+
+            // it is possible that the socket is disconnected already.
+            if( byte_sent < 0 )
+                break;
+
+            size -= byte_sent;
+            data += byte_sent;
         }
         Clear();
     }
