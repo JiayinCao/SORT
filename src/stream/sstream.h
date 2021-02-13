@@ -119,7 +119,7 @@ public:
         auto data = GetData();
         while( size > 0 ){
             const auto size_to_send = std::min(SEND_MAX_SIZE, size);
-            const auto byte_sent = send(m_socket, data, size_to_send, 0);
+            const auto byte_sent = send(m_socket, data, size_to_send, MSG_NOSIGNAL);
 
             // it is possible that the socket is disconnected already.
             if( byte_sent < 0 )
