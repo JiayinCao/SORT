@@ -119,7 +119,13 @@ public:
         auto data = GetData();
         while( size > 0 ){
             const auto size_to_send = std::min(SEND_MAX_SIZE, size);
-            const auto byte_sent = send(m_socket, data, size_to_send, MSG_NOSIGNAL);
+#ifdef SORT_IN_WINDOWS
+            const auto flag = 0;
+#else
+            // don't panic if we lost socket connection, otherwise this will lead to crash.
+            const auto flag = MSG_NOSIGNAL;
+#endif
+            const auto byte_sent = send(m_socket, data, size_to_send, flag);
 
             // it is possible that the socket is disconnected already.
             if( byte_sent < 0 )
