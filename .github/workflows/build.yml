@@ -64,10 +64,9 @@ jobs:
       run: make release ARCH=x86_64
     - name: Build Debug Version
       run: make debug ARCH=x86_64
-    - name: Veriby Build
+    - name: Verify Build
       run: |
-           file ./bin/sort_r
-           file ./bin/sort_d
+           make verify_builds
     - name: Unit Test
       run: cd bin;./sort_r --unittest
   MacOS_Apple_Silicon:
@@ -98,10 +97,9 @@ jobs:
       run: make release ARCH=arm64
     - name: Build Debug Version
       run: make debug ARCH=arm64
-    - name: Veriby Build
+    - name: Verify Build
       run: |
-           file ./bin/sort_r
-           file ./bin/sort_d
+           make verify_builds
   Ubuntu_20_04:
     runs-on: ubuntu-20.04
     steps:
@@ -127,10 +125,9 @@ jobs:
       run: make release
     - name: Build Debug Version
       run: make debug
-    - name: Veriby Build
+    - name: Verify Build
       run: |
-           file ./bin/sort_r
-           file ./bin/sort_d
+           make verify_builds
     - name: Unit Test
       run: cd bin;./sort_r --unittest
   Ubuntu_18_04:
@@ -158,10 +155,9 @@ jobs:
       run: make release
     - name: Build Debug Version
       run: make debug
-    - name: Veriby Build
+    - name: Verify Build
       run: |
-           file ./bin/sort_r
-           file ./bin/sort_d
+           make verify_builds
     - name: Unit Test
       run: cd bin;./sort_r --unittest
   Ubuntu_16_04:
@@ -199,9 +195,8 @@ jobs:
       run: make release
     - name: Build Debug Version
       run: make debug
-    - name: Veriby Build
+    - name: Verify Build
       run: |
-           file ./bin/sort_r
-           file ./bin/sort_d
+           make verify_builds
     - name: Unit Test
       run: cd bin;./sort_r --unittest

@@ -32,6 +32,7 @@ set BUILD_RELWITHDEBINFO=
 set REGISTER_SYS_ENV=
 set FORCE_UPDATE_DEP=
 set GENERATE_SRC=
+set VERIFY_BUILDS=
 
 rem parse arguments
 :argv_loop
@@ -74,6 +75,9 @@ if NOT "%1" == "" (
         goto EOF
     ) else if "%1" == "generate_src" (
         set GENERATE_SRC=1
+        goto EOF
+    ) else if "%1" == "verify_builds" (
+        set VERIFY_BUILDS=1
         goto EOF
     ) else (
         echo Unrecognized Command
@@ -191,6 +195,11 @@ if "%REGISTER_SYS_ENV%" == "1" (
 if "%GENERATE_SRC%" == "1" (
     echo Generating source code
     py .\scripts\generate_src.py
+)
+
+if "%VERIFY_BUILDS%" == "1" (
+    echo Verifying builds
+    py .\scripts\verify_builds.py
 )
 
 :EOF

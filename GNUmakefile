@@ -76,4 +76,8 @@ generate_src: .FORCE
 	@echo 'Generating source code'
 	@python3 ./scripts/generate_src.py
 
+verify_builds: .FORCE
+	@echo 'Verifying builds'
+	@python3 ./scripts/verify_builds.py
+
 .FORCE:
