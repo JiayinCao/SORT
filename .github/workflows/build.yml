@@ -50,7 +50,7 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: MacOS-Intel-dep-ver-55
+        key: MacOS-Intel-dep-ver-56
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: |
@@ -59,11 +59,11 @@ jobs:
            echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> ~/.bash_profile
            source ~/.bash_profile
            bison -V
-           make update_dep
+           make update_dep ARCH=x86_64
     - name: Build Release Version
-      run: make release
+      run: make release ARCH=x86_64
     - name: Build Debug Version
-      run: make debug
+      run: make debug ARCH=x86_64
     - name: Veriby Build
       run: |
            file ./bin/sort_r
@@ -84,7 +84,7 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: MacOS-Apple-Silicon-dep-ver-55
+        key: MacOS-Apple-Silicon-dep-ver-56
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: |
@@ -93,11 +93,11 @@ jobs:
            echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> ~/.bash_profile
            source ~/.bash_profile
            bison -V
-           make update_dep
+           make update_dep ARCH=arm64
     - name: Build Release Version
-      run: make release
+      run: make release ARCH=arm64
     - name: Build Debug Version
-      run: make debug
+      run: make debug ARCH=arm64
     - name: Veriby Build
       run: |
            file ./bin/sort_r
