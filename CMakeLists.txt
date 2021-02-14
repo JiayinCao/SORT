@@ -60,18 +60,14 @@ SET( ENABLE_SIMD_8WAY_OPTIMIZATION "NO"   CACHE BOOL "Enable AVX optimization, t
 # detect apple silicon
 set(APPLE_SILICON false)
 if(SORT_PLATFORM_MAC)
-    # detect if this is apple silicon Mac
-    find_program(CMAKE_UNAME uname /bin /usr/bin /usr/local/bin )
-    exec_program(${CMAKE_UNAME} ARGS -m OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_PROCESSOR)
-
-    if(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "arm64")
+    if(${CMAKE_OSX_ARCHITECTURES} STREQUAL "arm64")
         set(APPLE_SILICON true)
     endif()
     
     if(APPLE_SILICON)
-        message(STATUS "Building on Apple Silicon Mac.")
+        message(STATUS "Building for Apple Silicon Mac.")
     else()
-        message(STATUS "Building on Intel Mac.")
+        message(STATUS "Building for Intel Mac.")
     endif(APPLE_SILICON)
 endif(SORT_PLATFORM_MAC)
 

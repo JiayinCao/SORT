@@ -18,16 +18,23 @@
 import os
 import shutil
 import sys
+import get_tsl
+import get_marl
 
 # whether to force syncing
 forcing_sync = False
+arch = 'x86_64'
 
 if len(sys.argv) > 1:
     # output a message indicating this is a force syncing
     print( 'Force syncing dependencies.' )
 
     if sys.argv[1] == 'TRUE':
-        forcing_sync = sys.argv[0]
+        forcing_sync = sys.argv[1]
+
+    if len(sys.argv) > 2:
+        if sys.argv[2] == 'arm64':
+            arch = sys.argv[2]
 
 # dependencies folder
 dep_dir = 'dependencies'
@@ -66,7 +73,7 @@ if sync_dep:
     if build_tsl:
         exec(open("./scripts/build_tsl.py").read())
     else:
-        exec(open("./scripts/get_tsl.py").read())
+        get_tsl.get_dep_tsl(arch)
 
     # marl
-    exec(open("./scripts/get_marl.py").read())
+    get_marl.get_dep_marl(arch)

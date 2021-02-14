@@ -40,20 +40,19 @@ def sync_dep_utility( name, url ):
     # make sure the file is deleted
     os.remove(temp_zip_file)
 
-# sync marl
-if sys.platform == 'win32':
-    sync_dep_utility('marl', 'https://raw.githubusercontent.com/JiayinCao/SORT/dependencies/Master/win/marl.zip')
-elif sys.platform == "linux" or sys.platform == "linux2":
-    sync_dep_utility('marl', 'https://raw.githubusercontent.com/JiayinCao/SORT/dependencies/Master/linux/marl.zip')
-elif sys.platform == 'darwin':
-    # check if it is running on M1 chip
-    decoded_str = subprocess.check_output(['sh', './scripts/detect_apple_silicon.sh'])
-    str = decoded_str.decode('utf-8').rstrip()
-    if str == 'Apple Silicon':
-        print('Sycning arm version marl...')
-        sync_dep_utility('marl', 'https://raw.githubusercontent.com/JiayinCao/SORT/dependencies/Master/mac/marl_arm64.zip')
-    elif str == 'x86_64':
-        print('Syncing x86_64 version marl...')
-        sync_dep_utility('marl', 'https://raw.githubusercontent.com/JiayinCao/SORT/dependencies/Master/mac/marl_intel.zip')
-    else:
-        print('Error, unknown archtecture!')
+# fetch tsl dependency
+def get_dep_marl(arch):
+    # sync marl
+    if sys.platform == 'win32':
+        sync_dep_utility('marl', 'https://raw.githubusercontent.com/JiayinCao/SORT/dependencies/Master/win/marl.zip')
+    elif sys.platform == "linux" or sys.platform == "linux2":
+        sync_dep_utility('marl', 'https://raw.githubusercontent.com/JiayinCao/SORT/dependencies/Master/linux/marl.zip')
+    elif sys.platform == 'darwin':
+        if arch == 'arm64':
+            print('Sycning arm version marl...')
+            sync_dep_utility('marl', 'https://raw.githubusercontent.com/JiayinCao/SORT/dependencies/Master/mac/marl_arm64.zip')
+        elif arch == 'x86_64':
+            print('Syncing x86_64 version marl...')
+            sync_dep_utility('marl', 'https://raw.githubusercontent.com/JiayinCao/SORT/dependencies/Master/mac/marl_intel.zip')
+        else:
+            print('Error, unknown archtecture!')

@@ -36,7 +36,7 @@ jobs:
            cd bin
            sort_r.exe --unittest
       shell: cmd
-  Macos:
+  MacOs_Intel:
     runs-on: macOS-latest
     steps:
     - name: Checking Out Source Code
@@ -50,7 +50,7 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: MacOS-dep-ver-55
+        key: MacOS-Intel-dep-ver-55
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: |
@@ -64,8 +64,44 @@ jobs:
       run: make release
     - name: Build Debug Version
       run: make debug
+    - name: Veriby Build
+      run: |
+           file ./bin/sort_r
+           file ./bin/sort_d
     - name: Unit Test
       run: cd bin;./sort_r --unittest
+  MacOS_Apple_Silicon:
+    runs-on: macOS-latest
+    steps:
+    - name: Checking Out Source Code
+      uses: actions/checkout@v1
+    - name: Get Cache Directory
+      id: cache-dir
+      run: |
+          echo "::set-output name=dir::$(pwd)"
+    - name: Load Dependencies from Cache
+      uses: actions/cache@v1
+      id: cache-dep
+      with:
+        path: ${{ steps.cache-dir.outputs.dir }}/dependencies
+        key: MacOS-Apple-Silicon-dep-ver-55
+    - name: Install Dependencies
+      if: steps.cache-dep.outputs.cache-hit != 'true'
+      run: |
+           brew install flex
+           brew install bison
+           echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> ~/.bash_profile
+           source ~/.bash_profile
+           bison -V
+           make update_dep
+    - name: Build Release Version
+      run: make release
+    - name: Build Debug Version
+      run: make debug
+    - name: Veriby Build
+      run: |
+           file ./bin/sort_r
+           file ./bin/sort_d
   Ubuntu_20_04:
     runs-on: ubuntu-20.04
     steps:
@@ -91,6 +127,10 @@ jobs:
       run: make release
     - name: Build Debug Version
       run: make debug
+    - name: Veriby Build
+      run: |
+           file ./bin/sort_r
+           file ./bin/sort_d
     - name: Unit Test
       run: cd bin;./sort_r --unittest
   Ubuntu_18_04:
@@ -118,6 +158,10 @@ jobs:
       run: make release
     - name: Build Debug Version
       run: make debug
+    - name: Veriby Build
+      run: |
+           file ./bin/sort_r
+           file ./bin/sort_d
     - name: Unit Test
       run: cd bin;./sort_r --unittest
   Ubuntu_16_04:
@@ -155,5 +199,9 @@ jobs:
       run: make release
     - name: Build Debug Version
       run: make debug
+    - name: Veriby Build
+      run: |
+           file ./bin/sort_r
+           file ./bin/sort_d
     - name: Unit Test
       run: cd bin;./sort_r --unittest
