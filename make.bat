@@ -200,6 +200,11 @@ if "%GENERATE_SRC%" == "1" (
 if "%VERIFY_BUILDS%" == "1" (
     echo Verifying builds
     py .\scripts\verify_builds.py
+
+    :: catch msbuild error
+	if ERRORLEVEL 1 (
+		goto BUILD_ERR
+	)
 )
 
 :EOF

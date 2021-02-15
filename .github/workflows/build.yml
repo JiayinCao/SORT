@@ -10,6 +10,11 @@ jobs:
       uses: actions/checkout@v1
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.2
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+        architecture: 'x64'
     - name: Get Cache Directory
       id: cache-dir
       run: |
@@ -31,6 +36,9 @@ jobs:
     - name: Build Debug Version
       run: make debug
       shell: cmd
+    - name: Verify Build
+      run: make verify_builds
+      shell: cmd
     - name: Unit Test
       run: |
            cd bin
@@ -43,8 +51,7 @@ jobs:
       uses: actions/checkout@v1
     - name: Get Cache Directory
       id: cache-dir
-      run: |
-          echo "::set-output name=dir::$(pwd)"
+      run: echo "::set-output name=dir::$(pwd)"
     - name: Load Dependencies from Cache
       uses: actions/cache@v1
       id: cache-dep
@@ -65,8 +72,7 @@ jobs:
     - name: Build Debug Version
       run: make debug ARCH=x86_64
     - name: Verify Build
-      run: |
-           make verify_builds
+      run: make verify_builds
     - name: Unit Test
       run: cd bin;./sort_r --unittest
   MacOS_Apple_Silicon:
@@ -76,8 +82,7 @@ jobs:
       uses: actions/checkout@v1
     - name: Get Cache Directory
       id: cache-dir
-      run: |
-          echo "::set-output name=dir::$(pwd)"
+      run: echo "::set-output name=dir::$(pwd)"
     - name: Load Dependencies from Cache
       uses: actions/cache@v1
       id: cache-dep
@@ -98,8 +103,7 @@ jobs:
     - name: Build Debug Version
       run: make debug ARCH=arm64
     - name: Verify Build
-      run: |
-           make verify_builds
+      run: make verify_builds
   Ubuntu_20_04:
     runs-on: ubuntu-20.04
     steps:
@@ -107,8 +111,7 @@ jobs:
       uses: actions/checkout@v1
     - name: Get Cache Directory
       id: cache-dir
-      run: |
-           echo "::set-output name=dir::$(pwd)"
+      run: echo "::set-output name=dir::$(pwd)"
     - name: Load Dependencies from Cache
       uses: actions/cache@v1
       id: cache-dep
@@ -126,8 +129,7 @@ jobs:
     - name: Build Debug Version
       run: make debug
     - name: Verify Build
-      run: |
-           make verify_builds
+      run: make verify_builds
     - name: Unit Test
       run: cd bin;./sort_r --unittest
   Ubuntu_18_04:
@@ -137,8 +139,7 @@ jobs:
       uses: actions/checkout@v1
     - name: Get Cache Directory
       id: cache-dir
-      run: |
-           echo "::set-output name=dir::$(pwd)"
+      run: echo "::set-output name=dir::$(pwd)"
     - name: Load Dependencies from Cache
       uses: actions/cache@v1
       id: cache-dep
@@ -156,8 +157,7 @@ jobs:
     - name: Build Debug Version
       run: make debug
     - name: Verify Build
-      run: |
-           make verify_builds
+      run: make verify_builds
     - name: Unit Test
       run: cd bin;./sort_r --unittest
   Ubuntu_16_04:
@@ -177,8 +177,7 @@ jobs:
            g++ --version
     - name: Get Cache Directory
       id: cache-dir
-      run: |
-           echo "::set-output name=dir::$(pwd)"
+      run: echo "::set-output name=dir::$(pwd)"
     - name: Load Dependencies from Cache
       uses: actions/cache@v1
       id: cache-dep
@@ -196,7 +195,6 @@ jobs:
     - name: Build Debug Version
       run: make debug
     - name: Verify Build
-      run: |
-           make verify_builds
+      run: make verify_builds
     - name: Unit Test
       run: cd bin;./sort_r --unittest
