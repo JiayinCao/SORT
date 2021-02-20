@@ -20,6 +20,7 @@ import shutil
 import sys
 import get_tsl
 import get_marl
+import build_tsl
 
 # whether to force syncing
 forcing_sync = False
@@ -43,7 +44,8 @@ dep_dir = 'dependencies'
 sync_dep = False
 
 # sync pre-compiled tsl by default
-build_tsl = False
+# change this value to False to build tsl from source code if needed
+sync_tsl = True
 
 # if forcing syncing is enabled, delete the dependencies even if it exists
 if forcing_sync:
@@ -70,8 +72,8 @@ if sync_dep:
     os.makedirs(dep_dir)
 
     # TSL
-    if build_tsl:
-        exec(open("./scripts/build_tsl.py").read())
+    if sync_tsl is False:
+        build_tsl.build(arch)
     else:
         get_tsl.get_dep_tsl(arch)
 
