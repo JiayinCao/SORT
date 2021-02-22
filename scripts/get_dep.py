@@ -45,7 +45,7 @@ sync_dep = False
 
 # sync pre-compiled tsl by default
 # change this value to False to build tsl from source code if needed
-sync_tsl = False
+sync_tsl = True
 
 # if forcing syncing is enabled, delete the dependencies even if it exists
 if forcing_sync:
