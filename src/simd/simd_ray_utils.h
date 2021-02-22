@@ -41,20 +41,20 @@ SORT_STATIC_FORCEINLINE float sign( const float x ){
 
 struct alignas(SIMD_ALIGNMENT) Simd_Ray_Data{
     simd_data  ori_dir_x;    /**< -Ori.x/Dir.x , this is used in ray AABB intersection. */
-	simd_data  ori_dir_y;    /**< -Ori.y/Dir.y , this is used in ray AABB intersection. */
-	simd_data  ori_dir_z;    /**< -Ori.z/Dir.z , this is used in ray AABB intersection. */
-	simd_data  rcp_dir_x;    /**< 1.0/Dir.x , this is used in ray AABB intersection. */
-	simd_data  rcp_dir_y;    /**< 1.0/Dir.y , this is used in ray AABB intersection. */
-	simd_data  rcp_dir_z;    /**< 1.0/Dir.z , this is used in ray AABB intersection. */
-	simd_data  ori_x;        /**< Ori.x , this is used in ray Triangle&Line intersection. */
-	simd_data  ori_y;        /**< Ori.y , this is used in ray Triangle&Line intersection. */
-	simd_data  ori_z;        /**< Ori.z , this is used in ray Triangle&Line intersection. */
-	simd_data  dir_x;        /**< Dir.x , this is used in ray Line intersection. */
-	simd_data  dir_y;        /**< Dir.x , this is used in ray Line intersection. */
-	simd_data  dir_z;        /**< Dir.x , this is used in ray Line intersection. */
-	simd_data  scale_x;      /**< Scaling along each axis in local coordinate. */
-	simd_data  scale_y;      /**< Scaling along each axis in local coordinate. */
-	simd_data  scale_z;      /**< Scaling along each axis in local coordinate. */
+    simd_data  ori_dir_y;    /**< -Ori.y/Dir.y , this is used in ray AABB intersection. */
+    simd_data  ori_dir_z;    /**< -Ori.z/Dir.z , this is used in ray AABB intersection. */
+    simd_data  rcp_dir_x;    /**< 1.0/Dir.x , this is used in ray AABB intersection. */
+    simd_data  rcp_dir_y;    /**< 1.0/Dir.y , this is used in ray AABB intersection. */
+    simd_data  rcp_dir_z;    /**< 1.0/Dir.z , this is used in ray AABB intersection. */
+    simd_data  ori_x;        /**< Ori.x , this is used in ray Triangle&Line intersection. */
+    simd_data  ori_y;        /**< Ori.y , this is used in ray Triangle&Line intersection. */
+    simd_data  ori_z;        /**< Ori.z , this is used in ray Triangle&Line intersection. */
+    simd_data  dir_x;        /**< Dir.x , this is used in ray Line intersection. */
+    simd_data  dir_y;        /**< Dir.x , this is used in ray Line intersection. */
+    simd_data  dir_z;        /**< Dir.x , this is used in ray Line intersection. */
+    simd_data  scale_x;      /**< Scaling along each axis in local coordinate. */
+    simd_data  scale_y;      /**< Scaling along each axis in local coordinate. */
+    simd_data  scale_z;      /**< Scaling along each axis in local coordinate. */
 };
 
 void resolveRayData( const Ray& ray , Simd_Ray_Data& simd_ray_data ){

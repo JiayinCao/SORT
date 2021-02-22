@@ -131,17 +131,17 @@ struct alignas(SIMD_ALIGNMENT) Simd_Line{
         if( !m_ori_pri[0] )
             return false;
 
-		bool	mask[SIMD_CHANNEL] = { false };
+        bool    mask[SIMD_CHANNEL] = { false };
         float   p0_x[SIMD_CHANNEL] , p0_y[SIMD_CHANNEL] , p0_z[SIMD_CHANNEL] , p1_x[SIMD_CHANNEL] , p1_y[SIMD_CHANNEL] , p1_z[SIMD_CHANNEL];
         float   w0[SIMD_CHANNEL] , w1[SIMD_CHANNEL] , length[SIMD_CHANNEL];
         float   mat_00[SIMD_CHANNEL] , mat_01[SIMD_CHANNEL] , mat_02[SIMD_CHANNEL] , mat_03[SIMD_CHANNEL];
         float   mat_10[SIMD_CHANNEL] , mat_11[SIMD_CHANNEL] , mat_12[SIMD_CHANNEL] , mat_13[SIMD_CHANNEL];
         float   mat_20[SIMD_CHANNEL] , mat_21[SIMD_CHANNEL] , mat_22[SIMD_CHANNEL] , mat_23[SIMD_CHANNEL];
         for( auto i = 0 ; i < SIMD_CHANNEL ; ++i ){
-			if(IS_PTR_INVALID(m_ori_pri[i])){
-				mask[i] = false;
-				continue;
-			}
+            if(IS_PTR_INVALID(m_ori_pri[i])){
+                mask[i] = false;
+                continue;
+            }
 
             const auto line = m_ori_line[i];
 

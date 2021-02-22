@@ -69,26 +69,26 @@ bool Accelerator::GetAttenuation( Ray& ray , Spectrum& attenuation , RenderConte
 #endif
 
 bool Accelerator::UpdateMediumStack( Ray& ray , MediumStack& ms , RenderContext& rc, const bool reversed ) const{
-	SurfaceInteraction intersection;
+    SurfaceInteraction intersection;
 
 #ifdef ENABLE_TRANSPARENT_SHADOW
-	intersection.query_shadow = false;
+    intersection.query_shadow = false;
 #endif
 
-	if (!GetIntersect(rc, ray, intersection))
-		return false;
+    if (!GetIntersect(rc, ray, intersection))
+        return false;
 
     // make sure there is primitive intersected
     sAssert(IS_PTR_VALID(intersection.primitive), SPATIAL_ACCELERATOR);
 
-	// get the material of the intersected primitive
-	const MaterialBase* material = intersection.primitive->GetMaterial();
-	sAssert( IS_PTR_VALID( material ) , SPATIAL_ACCELERATOR );
+    // get the material of the intersected primitive
+    const MaterialBase* material = intersection.primitive->GetMaterial();
+    sAssert( IS_PTR_VALID( material ) , SPATIAL_ACCELERATOR );
 
 #if 0
-	const auto theta_wi = dot(ray.m_Dir, intersection.gnormal);
-	const auto theta_wo = -theta_wi;
-	auto interaction_flag = update_interaction_flag(theta_wi, theta_wo);
+    const auto theta_wi = dot(ray.m_Dir, intersection.gnormal);
+    const auto theta_wo = -theta_wi;
+    auto interaction_flag = update_interaction_flag(theta_wi, theta_wo);
 
     if (reversed) {
         if (SE_LEAVING == interaction_flag)
@@ -102,15 +102,15 @@ bool Accelerator::UpdateMediumStack( Ray& ray , MediumStack& ms , RenderContext&
     const auto interaction_flag = ((theta_wi > 0.0f) != (reversed)) ? SE_LEAVING : SE_ENTERING;
 #endif
 
-	// at this point, we know for sure the ray pass through the surface.
-	MediumInteraction mi;
-	mi.intersect = intersection.intersect;
+    // at this point, we know for sure the ray pass through the surface.
+    MediumInteraction mi;
+    mi.intersect = intersection.intersect;
     mi.mesh = intersection.primitive->GetMesh();
-	material->UpdateMediumStack(mi, interaction_flag, ms, rc);
+    material->UpdateMediumStack(mi, interaction_flag, ms, rc);
 
-	ray.m_Ori = intersection.intersect;
-	ray.m_fMin = 0.001f;              // avoid self collision again.
-	ray.m_fMax -= intersection.t;
+    ray.m_Ori = intersection.intersect;
+    ray.m_fMin = 0.001f;              // avoid self collision again.
+    ray.m_fMax -= intersection.t;
 
-	return true;
+    return true;
 }

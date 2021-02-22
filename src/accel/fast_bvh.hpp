@@ -109,8 +109,8 @@ void Fbvh::Build(const std::vector<const Primitive*>& primitives, const BBox& bb
     SORT_PROFILE("Build Fbvh");
 
     m_primitives = &primitives;
-	if( primitives.empty() )
-		return;
+    if( primitives.empty() )
+        return;
 
     m_bvhpri = std::make_unique<Bvh_Primitive[]>(m_primitives->size());
 
@@ -816,9 +816,9 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , Rende
 }
 
 std::unique_ptr<Accelerator> Fbvh::Clone() const {
-	auto ret = std::make_unique<Fbvh>();
-	ret->m_maxNodeDepth = m_maxNodeDepth;
-	ret->m_maxPriInLeaf = m_maxPriInLeaf;
+    auto ret = std::make_unique<Fbvh>();
+    ret->m_maxNodeDepth = m_maxNodeDepth;
+    ret->m_maxPriInLeaf = m_maxPriInLeaf;
 
-	return ret;
+    return ret;
 }

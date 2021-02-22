@@ -43,8 +43,8 @@ void Bvh::Build(const std::vector<const Primitive*>& primitives, const BBox& bbo
     SORT_PROFILE("Build Bvh");
 
     m_primitives = &primitives;
-	if (primitives.empty())
-		return;
+    if (primitives.empty())
+        return;
 
     m_bvhpri = std::make_unique<Bvh_Primitive[]>(m_primitives->size());
 
@@ -292,9 +292,9 @@ void Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , BSSRDFIntersecti
 }
 
 std::unique_ptr<Accelerator> Bvh::Clone() const {
-	auto ret = std::make_unique<Bvh>();
-	ret->m_maxNodeDepth = m_maxNodeDepth;
-	ret->m_maxPriInLeaf = m_maxPriInLeaf;
+    auto ret = std::make_unique<Bvh>();
+    ret->m_maxNodeDepth = m_maxNodeDepth;
+    ret->m_maxPriInLeaf = m_maxPriInLeaf;
 
-	return ret;
+    return ret;
 }

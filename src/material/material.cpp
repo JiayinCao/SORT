@@ -143,7 +143,7 @@ void Material::BuildMaterial(Tsl_Namespace::ShadingContext* context) {
     if (build_shader_succesfully)
         slog(INFO, MATERIAL, "Build material %s successfully.", m_name.c_str());
     else
-		slog(WARNING, MATERIAL, "Build material %s unsuccessfully.", m_name.c_str());
+        slog(WARNING, MATERIAL, "Build material %s unsuccessfully.", m_name.c_str());
 
     // fake transparent mode if necessary
     if (m_special_transparent)

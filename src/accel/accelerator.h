@@ -95,15 +95,15 @@ public:
     bool         GetAttenuation( Ray& r , Spectrum& attenuation , RenderContext& rc ,MediumStack* ms = nullptr ) const;
 #endif
 
-	//! @brief	Update medium stack.
-	//!
-	//! The only difference between this function and 'GetAttenuation' is there is no need to evaluate attenuation.
-	//!
-	//! @param	ray			The ray to be tested.
-	//! @param	ms			The medium stack to be populated.
+    //! @brief    Update medium stack.
+    //!
+    //! The only difference between this function and 'GetAttenuation' is there is no need to evaluate attenuation.
+    //!
+    //! @param    ray            The ray to be tested.
+    //! @param    ms            The medium stack to be populated.
     //! @param  reversed    Reversing the order of updating medium stack.
-	//! @return				Whether there is an intersection found.
-	bool		UpdateMediumStack( Ray& r , MediumStack& ms , RenderContext& rc , const bool reversed = false ) const;
+    //! @return                Whether there is an intersection found.
+    bool        UpdateMediumStack( Ray& r , MediumStack& ms , RenderContext& rc , const bool reversed = false ) const;
 
     //! @brief Get multiple intersections between the ray and the primitive set using spatial data structure.
     //!
@@ -140,12 +140,12 @@ public:
         return m_isValid;
     }
 
-	//! @brief	Clone the accelerator.
-	//!
-	//! Only configuration will be cloned, not the data inside the accelerator, this is for primitives that has volumes attached.
-	//!
-	//! @return		Cloned accelerator.
-	virtual std::unique_ptr<Accelerator>	Clone() const = 0;
+    //! @brief    Clone the accelerator.
+    //!
+    //! Only configuration will be cloned, not the data inside the accelerator, this is for primitives that has volumes attached.
+    //!
+    //! @return        Cloned accelerator.
+    virtual std::unique_ptr<Accelerator>    Clone() const = 0;
 
 protected:
     /**< The vector holding all primitive pointers. */

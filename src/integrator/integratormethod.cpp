@@ -52,18 +52,18 @@ Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Sce
             }
         }
 #else
-		if( !f.IsBlack() ){
-			const auto attenuation = visibility.GetAttenuation(rc);
-			if (!attenuation.IsBlack()) {
-				if (light->IsDelta()) {
-					radiance += attenuation * li * f / light_pdf;
-				} else {
-					bsdf_pdf = se.Pdf_BSDF(wo, wi);
-					const auto weight = MisFactor(light_pdf, bsdf_pdf);
-					radiance = attenuation * li * f * weight / light_pdf;
-				}
-			}
-		}
+        if( !f.IsBlack() ){
+            const auto attenuation = visibility.GetAttenuation(rc);
+            if (!attenuation.IsBlack()) {
+                if (light->IsDelta()) {
+                    radiance += attenuation * li * f / light_pdf;
+                } else {
+                    bsdf_pdf = se.Pdf_BSDF(wo, wi);
+                    const auto weight = MisFactor(light_pdf, bsdf_pdf);
+                    radiance = attenuation * li * f * weight / light_pdf;
+                }
+            }
+        }
 #endif
     }
 
@@ -85,11 +85,11 @@ Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Sce
             if( !li.IsBlack() && visibility.IsVisible() )
                 radiance += li * f * weight / bsdf_pdf;
 #else
-			if( !li.IsBlack() ){
-				const auto attenuation = visibility.GetAttenuation(rc);
-				if (!attenuation.IsBlack())
-					radiance += attenuation * li * f * weight / bsdf_pdf;
-			}
+            if( !li.IsBlack() ){
+                const auto attenuation = visibility.GetAttenuation(rc);
+                if (!attenuation.IsBlack())
+                    radiance += attenuation * li * f * weight / bsdf_pdf;
+            }
 #endif
         }
     }
@@ -249,10 +249,10 @@ Spectrum SampleOneLight( const ScatteringEvent& se , const Ray& r, const Surface
             material->UpdateMediumStack(mi, interaction_flag, ms_copy, rc);
         }
 
-		if( !f.IsBlack() ){
-			const auto attenuation = visibility.GetAttenuation(rc, &ms_copy );
-			if( !attenuation.IsBlack() )
-				radiance += attenuation * li * f / light_pdf / light_pick_pdf;
+        if( !f.IsBlack() ){
+            const auto attenuation = visibility.GetAttenuation(rc, &ms_copy );
+            if( !attenuation.IsBlack() )
+                radiance += attenuation * li * f / light_pdf / light_pick_pdf;
         }
 #endif
     }

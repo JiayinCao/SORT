@@ -37,14 +37,14 @@ class HeterogenousMedium : public Medium{
 public:
     //! @brief  Constructor.
     //!
-    //! @param param		Parameter to build the volume.
-    //! @param material		Material that spawns the medium.
+    //! @param param        Parameter to build the volume.
+    //! @param material        Material that spawns the medium.
     HeterogenousMedium(RenderContext& rc, const ClosureTypeHeterogenous& param, const MaterialBase* material) :
         Medium(rc, param.base_color, param.emission, param.absorption, param.scattering, param.anisotropy, material) {}
 
     //! @brief  Constructor.
     //!
-    //! @param material		Material that spawns the medium.
+    //! @param material        Material that spawns the medium.
     //! @param mesh         Mesh that wraps the medium
     HeterogenousMedium(RenderContext& rc, const MaterialBase* material, const Mesh* mesh) :
         Medium(rc, WHITE_SPECTRUM, 0.0f, 0.0f, 0.0f, 0.0f, material), m_mesh(mesh){}

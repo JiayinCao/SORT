@@ -42,8 +42,8 @@ void UniGrid::Build( const std::vector<const Primitive*>& primitives , const BBo
     SORT_PROFILE("Build Uniform Grid");
 
     m_primitives = &primitives;
-	if (m_primitives->empty())
-		return;
+    if (m_primitives->empty())
+        return;
 
     m_bbox = bbox;
 
@@ -393,5 +393,5 @@ void UniGrid::traverse( const Ray& ray , BSSRDFIntersections& intersect , unsign
 }
 
 std::unique_ptr<Accelerator> UniGrid::Clone() const {
-	return std::make_unique<UniGrid>();
+    return std::make_unique<UniGrid>();
 }

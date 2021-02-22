@@ -18,22 +18,22 @@
 import os
 
 def build(arch):
-	# the current directory is the sort root
-	sort_dir = os.getcwd()
+    # the current directory is the sort root
+    sort_dir = os.getcwd()
 
-	# dependencies folder
-	dep_dir = sort_dir + '/dependencies'
+    # dependencies folder
+    dep_dir = sort_dir + '/dependencies'
 
-	# tsl source target folder
-	tsl_dir = dep_dir + '/tsl_src'
+    # tsl source target folder
+    tsl_dir = dep_dir + '/tsl_src'
 
-	# sync tsl code from github
-	os.system('git clone --depth 1 https://github.com/JiayinCao/Tiny-Shading-Language.git ' + tsl_dir)
+    # sync tsl code from github
+    os.system('git clone --depth 1 https://github.com/JiayinCao/Tiny-Shading-Language.git ' + tsl_dir)
 
-	# build tsl from source code
-	os.chdir(tsl_dir)
-	os.system('make install INSTALL_PATH="../tsl" ARCH=' + arch)
-	os.chdir(sort_dir)
+    # build tsl from source code
+    os.chdir(tsl_dir)
+    os.system('make install INSTALL_PATH="../tsl" ARCH=' + arch)
+    os.chdir(sort_dir)
 
-	# remove the tsl source dir
-	os.system('rm -rf ' + tsl_dir)
+    # remove the tsl source dir
+    os.system('rm -rf ' + tsl_dir)

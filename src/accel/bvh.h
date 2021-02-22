@@ -114,12 +114,12 @@ public:
         stream >> m_maxPriInLeaf;
     }
 
-	//! @brief	Clone the accelerator.
-	//!
-	//! Only configuration will be cloned, not the data inside the accelerator, this is for primitives that has volumes attached.
-	//!
-	//! @return		Cloned accelerator.
-	std::unique_ptr<Accelerator>	Clone() const override;
+    //! @brief    Clone the accelerator.
+    //!
+    //! Only configuration will be cloned, not the data inside the accelerator, this is for primitives that has volumes attached.
+    //!
+    //! @return        Cloned accelerator.
+    std::unique_ptr<Accelerator>    Clone() const override;
 
 private:
     /**< Primitive list during BVH construction. */

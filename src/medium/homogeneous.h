@@ -38,8 +38,8 @@ class HomogeneousMedium : public Medium{
 public:
     //! @brief  Constructor.
     //!
-    //! @param param		Parameter to build the volume.
-	//! @param material		Material that spawns the medium.
+    //! @param param        Parameter to build the volume.
+    //! @param material        Material that spawns the medium.
     HomogeneousMedium(RenderContext& rc, const ClosureTypeHomogeneous& param, const MaterialBase* material):
         Medium(rc, param.base_color, param.emission, param.absorption, param.scattering, param.anisotropy, material){}
 

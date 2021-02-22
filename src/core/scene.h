@@ -78,11 +78,11 @@ public:
     Spectrum    GetAttenuation( const Ray& r , RenderContext& rc , MediumStack* ms = nullptr ) const;
 #endif
 
-	//! @brief	Restore the medium stack at a specific point.
-	//!
-	//! @param	p			The point where the evaluation is done.
-	//! @param	ms			The medium stack to be populated.
-	void		RestoreMediumStack( const Point& p , RenderContext& rc , MediumStack& ms ) const ;
+    //! @brief    Restore the medium stack at a specific point.
+    //!
+    //! @param    p            The point where the evaluation is done.
+    //! @param    ms            The medium stack to be populated.
+    void        RestoreMediumStack( const Point& p , RenderContext& rc , MediumStack& ms ) const ;
 
     //! @brief Get multiple intersections between the ray and the primitive set using spatial data structure.
     //!
@@ -138,9 +138,9 @@ public:
     void AddPrimitive( const Primitive* primitive) {
         m_primitives.push_back( std::move(primitive) );
 
-		const auto material = primitive->GetMaterial();
-		if( material->HasVolumeAttached() )
-			m_volPrimitives.push_back( primitive );
+        const auto material = primitive->GetMaterial();
+        if( material->HasVolumeAttached() )
+            m_volPrimitives.push_back( primitive );
     }
     
     //! @brief  Get all of the primitives in the scene.
@@ -150,12 +150,12 @@ public:
         return m_primitives;
     }
 
-	//! @brief  Get all of the primitives that has volume attached in the scene.
-	//!
-	//! @return     A vector that holds all primitives in the scene.
-	const std::vector<const Primitive*>&   GetPrimitivesVol() const {
-		return m_volPrimitives;
-	}
+    //! @brief  Get all of the primitives that has volume attached in the scene.
+    //!
+    //! @return     A vector that holds all primitives in the scene.
+    const std::vector<const Primitive*>&   GetPrimitivesVol() const {
+        return m_volPrimitives;
+    }
 
     // Evaluate sky
     Spectrum    Le( const Ray& ray ) const;

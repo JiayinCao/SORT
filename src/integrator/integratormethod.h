@@ -19,8 +19,8 @@
 
 #include "integrator.h"
 
-struct	SurfaceInteraction;
-class	Light;
+struct    SurfaceInteraction;
+class    Light;
 class   MediumStack;
 struct  RenderContext;
 

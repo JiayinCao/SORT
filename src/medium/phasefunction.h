@@ -154,12 +154,12 @@ private:
     const float sqrG;
     const float twoG;
 
-	// Henyey-Greenstein phase function with asymmetry parameter smaller than this value will be treated as totally isotropic.
-	static constexpr float threshold = 0.03f;
+    // Henyey-Greenstein phase function with asymmetry parameter smaller than this value will be treated as totally isotropic.
+    static constexpr float threshold = 0.03f;
 
     SORT_FORCEINLINE float evaluate( const Vector& wo , const Vector& wi ) const{
-		if( fabs(g) < threshold )
-			return INV_FOUR_PI;
+        if( fabs(g) < threshold )
+            return INV_FOUR_PI;
 
         // Note, the original paper has a function with slightly different denominator.
         // - Original ->    1 + g^2 - 2*g*cos(theta)
@@ -170,9 +170,9 @@ private:
         return INV_FOUR_PI * ( 1 - sqrG ) / ( denom * sqrt( denom ) );
     }
 
-	// It is necessary to avoid g equals to 1 or -1, which turns this phase function into a Dirac-Delta function, easily leading to some problems.
-	// Instead of adding more branches in the code above, a better approach is simply to clamp it to prevent it happening at the very beginning.
-	SORT_FORCEINLINE float clampG( const float g ){
-		return clamp( g , -0.995f , 0.995f );
-	}
+    // It is necessary to avoid g equals to 1 or -1, which turns this phase function into a Dirac-Delta function, easily leading to some problems.
+    // Instead of adding more branches in the code above, a better approach is simply to clamp it to prevent it happening at the very beginning.
+    SORT_FORCEINLINE float clampG( const float g ){
+        return clamp( g , -0.995f , 0.995f );
+    }
 };

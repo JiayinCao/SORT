@@ -41,8 +41,8 @@ void OcTree::Build(const std::vector<const Primitive*>& primitives, const BBox& 
     SORT_PROFILE("Build OcTree");
 
     m_primitives = &primitives;
-	if (m_primitives->empty())
-		return;
+    if (m_primitives->empty())
+        return;
 
     m_bbox = bbox;
 
@@ -364,9 +364,9 @@ void OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , BSSRDFInt
 }
 
 std::unique_ptr<Accelerator> OcTree::Clone() const {
-	auto ret = std::make_unique<OcTree>();
-	ret->m_maxDepthInOcTree = m_maxDepthInOcTree;
-	ret->m_maxPriInLeaf = m_maxPriInLeaf;
+    auto ret = std::make_unique<OcTree>();
+    ret->m_maxDepthInOcTree = m_maxDepthInOcTree;
+    ret->m_maxPriInLeaf = m_maxPriInLeaf;
 
-	return ret;
+    return ret;
 }

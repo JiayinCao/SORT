@@ -35,7 +35,7 @@ public:
     //! @brief  Constructor.
     //!
     //! @param param        Parameter to build the volume.
-	//! @param material		Material that spawns the medium.
+    //! @param material        Material that spawns the medium.
     AbsorptionMedium(RenderContext& rc, const ClosureTypeAbsorption& param , const MaterialBase* material):
         Medium(rc, param.base_color, 0.0f, param.absorption, 0.0f, 0.0f, material){}
 

@@ -44,7 +44,7 @@ void ProcessSurfaceClosure(const Tsl_Namespace::ClosureTreeNodeBase* closure, co
 //! @param  w               The weight of this closure tree, this also counts the weight inherits from the higher level tree nodes.
 //! @param  mediumStack     The medium stack container that holds the result.
 //! @param  flag            A flag indicates whether to add or remove the medium.
-//! @param	material		The material that spawns the medium.
+//! @param    material        The material that spawns the medium.
 //! @param  mesh            The mesh that wraps the volume.
 void ProcessVolumeClosure(const Tsl_Namespace::ClosureTreeNodeBase* closure, const Tsl_Namespace::float3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh, RenderContext& rc);
 

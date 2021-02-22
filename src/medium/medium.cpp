@@ -45,8 +45,8 @@ bool MediumStack::RemoveMedium(const StringID medium_id) {
     // medium in the data structure, it is necessary to iterate through everything to find it.
     const Medium* last_medium = m_mediums[m_mediumCnt - 1];
     for (int i = m_mediumCnt - 1; i >= 0; --i) {
-		const auto material_i	= m_mediums[i]->GetMaterial();
-		const auto medium_id_i	= material_i ? material_i->GetUniqueID() : INVALID_SID;
+        const auto material_i    = m_mediums[i]->GetMaterial();
+        const auto medium_id_i    = material_i ? material_i->GetUniqueID() : INVALID_SID;
         if (medium_id_i == medium_id) {
             m_mediums[i] = last_medium;
             --m_mediumCnt;

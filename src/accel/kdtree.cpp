@@ -42,8 +42,8 @@ void KDTree::Build( const std::vector<const Primitive*>& primitives, const BBox&
     SORT_PROFILE("Build KdTree");
 
     m_primitives = &primitives;
-	if (primitives.empty())
-		return;
+    if (primitives.empty())
+        return;
 
     // pre-malloc node and leaf primitive list memory
     auto tmp = std::make_unique<unsigned char[]>(m_primitives->size());
@@ -402,9 +402,9 @@ void KDTree::traverse( const Kd_Node* node , const Ray& ray , BSSRDFIntersection
 }
 
 std::unique_ptr<Accelerator> KDTree::Clone() const {
-	auto ret = std::make_unique<KDTree>();
-	ret->m_maxDepth = m_maxDepth;
-	ret->m_maxPriInLeaf = m_maxPriInLeaf;
+    auto ret = std::make_unique<KDTree>();
+    ret->m_maxDepth = m_maxDepth;
+    ret->m_maxPriInLeaf = m_maxPriInLeaf;
 
-	return ret;
+    return ret;
 }

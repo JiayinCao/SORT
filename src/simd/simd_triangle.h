@@ -136,13 +136,13 @@ struct alignas(SIMD_ALIGNMENT) Simd_Triangle{
         if( !m_ori_pri[0] )
             return false;
 
-        bool	mask[SIMD_CHANNEL] = { false };
+        bool    mask[SIMD_CHANNEL] = { false };
         float   p0_x[SIMD_CHANNEL] , p0_y[SIMD_CHANNEL] , p0_z[SIMD_CHANNEL] , p1_x[SIMD_CHANNEL] , p1_y[SIMD_CHANNEL] , p1_z[SIMD_CHANNEL] , p2_x[SIMD_CHANNEL] , p2_y[SIMD_CHANNEL] , p2_z[SIMD_CHANNEL];
         for( auto i = 0 ; i < SIMD_CHANNEL ; ++i ){
-			if (IS_PTR_INVALID(m_ori_pri[i])) {
-				mask[i] = false;
-				continue;
-			}
+            if (IS_PTR_INVALID(m_ori_pri[i])) {
+                mask[i] = false;
+                continue;
+            }
 
             const auto triangle = m_ori_tri[i];
 
@@ -356,10 +356,10 @@ SORT_FORCEINLINE bool intersectTriangle_SIMD( const Ray& ray , const Simd_Ray_Da
     if (!intersected)
         return false;
 
-	mask = simd_and_ps(mask, simd_cmplt_ps(t_simd, simd_set_ps1(ret->t)));
-	const auto c = simd_movemask_ps(mask);
-	if (0 == c)
-		return false;
+    mask = simd_and_ps(mask, simd_cmplt_ps(t_simd, simd_set_ps1(ret->t)));
+    const auto c = simd_movemask_ps(mask);
+    if (0 == c)
+        return false;
 
     // find the closest result
     simd_data t0 = simd_minreduction_ps( t_simd );
@@ -416,10 +416,10 @@ SORT_FORCEINLINE void intersectTriangleMulti_SIMD(const Ray& ray, const Simd_Ray
     if (!intersected)
         return;
 
-	mask = simd_and_ps(mask, simd_cmplt_ps(t_simd, simd_set_ps1(intersections.maxt)));
-	auto resolved_mask = simd_movemask_ps(mask);
-	if (0 == resolved_mask)
-		return;
+    mask = simd_and_ps(mask, simd_cmplt_ps(t_simd, simd_set_ps1(intersections.maxt)));
+    auto resolved_mask = simd_movemask_ps(mask);
+    if (0 == resolved_mask)
+        return;
 
     sAssert(resolved_mask > 0 && resolved_mask < pow(2,SIMD_CHANNEL), SPATIAL_ACCELERATOR);
 

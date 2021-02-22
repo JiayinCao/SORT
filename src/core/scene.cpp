@@ -109,10 +109,10 @@ void Scene::RestoreMediumStack( const Point& p , RenderContext& rc, MediumStack&
     if (IS_PTR_INVALID(m_accelerator))
         return;
 
-	Ray ray;
-	ray.m_Ori = p;
-	ray.m_Dir = Vector( 0.0f , 1.0f , 0.0f );		// shoot the ray through a random direction.
-	while (m_accelerator->UpdateMediumStack(ray, ms, rc, true)) {}
+    Ray ray;
+    ray.m_Ori = p;
+    ray.m_Dir = Vector( 0.0f , 1.0f , 0.0f );        // shoot the ray through a random direction.
+    while (m_accelerator->UpdateMediumStack(ray, ms, rc, true)) {}
 }
 
 void Scene::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , RenderContext& rc, const StringID matID ) const{

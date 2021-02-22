@@ -103,7 +103,7 @@ set(MARL_LIBRARY_DIR ${SORT_SOURCE_DIR}/dependencies/marl/lib)
 set(MARL_LIBS        marl)
 
 if(ENABLE_PROFILER)
-	find_package(easy_profiler REQUIRED)
+    find_package(easy_profiler REQUIRED)
 endif(ENABLE_PROFILER)
 
 include_directories( "${SORT_SOURCE_DIR}/src" )
@@ -190,7 +190,7 @@ endif (SORT_PLATFORM_WIN)
 # Enable SORT Stats system.
 if(ENABLE_STATS)
     message( STATUS "SORT Stats System Enabled.")
-	add_definitions(-DSORT_ENABLE_STATS_COLLECTION)
+    add_definitions(-DSORT_ENABLE_STATS_COLLECTION)
 else()
     message( STATUS "SORT Stats Sysatem Disabled." )
 endif(ENABLE_STATS)

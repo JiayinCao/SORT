@@ -66,15 +66,15 @@ struct MediumSample {
 //! @brief  Medium is a data structure holding volumetric rendering data.
 class Medium{
 public:
-	//! @brief	Constructor taking the material that spawns the medium.
-	//!
+    //! @brief    Constructor taking the material that spawns the medium.
+    //!
     //! @param  baseColor   Base color of the volume.
     //! @param  emission    Emission coefficient.
     //! @param  absorption  Absorption of the volume.
     //! @param  scattering  Scattering of the volume.
     //! @param  anisotropy  Anisotropy of the phase function.
-	//! @param	material	Material that spawns the medium.
-	Medium( RenderContext& rc, const Spectrum& baseColor , const float emission, const float absorption , const float scattering , const float anisotropy , const MaterialBase* material ) : 
+    //! @param    material    Material that spawns the medium.
+    Medium( RenderContext& rc, const Spectrum& baseColor , const float emission, const float absorption , const float scattering , const float anisotropy , const MaterialBase* material ) : 
         rc(rc), m_material( material ) , m_globalMediumSample(baseColor, emission, absorption, scattering, anisotropy) {}
 
     //! @brief  Evaluation of beam transmittance.
@@ -96,16 +96,16 @@ public:
     //! @return             The beam transmittance between the ray origin and the interaction.
     virtual Spectrum Sample( const Ray& ray , const float max_t , MediumInteraction*& interaction, Spectrum& emission, RenderContext& rc) const = 0;
 
-	//! @brief	Get the material that spawns the medium.
-	//!
-	//! @return				The material that spawns the medium.
-	SORT_FORCEINLINE  const MaterialBase* GetMaterial() const {
-		return m_material;
-	}
+    //! @brief    Get the material that spawns the medium.
+    //!
+    //! @return                The material that spawns the medium.
+    SORT_FORCEINLINE  const MaterialBase* GetMaterial() const {
+        return m_material;
+    }
 
 protected:
-	/**< Material that spawn the medium. */
-	const MaterialBase*	m_material;
+    /**< Material that spawn the medium. */
+    const MaterialBase*    m_material;
     
     /**< A generic medium sample keeps consistant data for homogeneous volume and absorption volume. */
     MediumSample        m_globalMediumSample;
