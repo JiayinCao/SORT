@@ -28,7 +28,7 @@ from . import base
 from . import exporter
 
 # this thread runs forever
-def dipslay_update(sock, render_engine):
+def display_update(sock, render_engine):
     # we only wait for 5 seconds before bail
     time_out = 5.0
     time_start = time.time()
@@ -190,7 +190,7 @@ class SORTRenderEngine(bpy.types.RenderEngine):
         process = subprocess.Popen(cmd_argument,cwd=binary_dir)
 
         # start a background pool thread
-        self.display_thread = threading.Thread(target=dipslay_update, args=(self.sock, self))
+        self.display_thread = threading.Thread(target=display_update, args=(self.sock, self))
         self.display_thread.start()
 
         # wait for the process to finish
