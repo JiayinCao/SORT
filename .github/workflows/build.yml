@@ -25,7 +25,7 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: Windows-dep-ver-55
+        key: Windows-dep-ver-60
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: make update_dep
@@ -57,7 +57,7 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: MacOS-Intel-dep-ver-56
+        key: MacOS-Intel-dep-ver-60
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: |
@@ -88,7 +88,7 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: MacOS-Apple-Silicon-dep-ver-56
+        key: MacOS-Apple-Silicon-dep-ver-60
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: |
@@ -117,7 +117,7 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: Ubuntu-20-04-dep-ver-55
+        key: Ubuntu-20-04-dep-ver-60
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: |
@@ -145,45 +145,7 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: Ubuntu-18-04-dep-ver-55
-    - name: Install Dependencies
-      if: steps.cache-dep.outputs.cache-hit != 'true'
-      run: |
-           sudo apt-get install flex
-           sudo apt-get install bison
-           make update_dep
-    - name: Build Release Version
-      run: make release
-    - name: Build Debug Version
-      run: make debug
-    - name: Verify Build
-      run: make verify_builds
-    - name: Unit Test
-      run: cd bin;./sort_r --unittest
-  Ubuntu_16_04:
-    runs-on: ubuntu-16.04
-    steps:
-    - name: Checking Out Source Code
-      uses: actions/checkout@v1
-    - name: Configure Environment
-      run: |
-           sudo apt-get install -y software-properties-common
-           sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-           sudo apt update
-           sudo apt install g++-7 -y
-           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /usr/bin/g++ g++ /usr/bin/g++-7
-           sudo update-alternatives --config gcc
-           gcc --version
-           g++ --version
-    - name: Get Cache Directory
-      id: cache-dir
-      run: echo "::set-output name=dir::$(pwd)"
-    - name: Load Dependencies from Cache
-      uses: actions/cache@v1
-      id: cache-dep
-      with:
-        path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: Ubuntu-16-04-dep-ver-53
+        key: Ubuntu-18-04-dep-ver-60
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: |
