@@ -145,6 +145,7 @@ if "%CLEAN%" == "1" (
 
 if "%BUILD_RELEASE%" == "1" (
     make update_dep
+    make generate_src
     powershell New-Item -Force -ItemType directory -Path proj_release
     cd proj_release
     cmake -A x64 ..
@@ -160,6 +161,7 @@ if "%BUILD_RELEASE%" == "1" (
 
 if "%BUILD_RELWITHDEBINFO%" == "1" (
     make update_dep
+    make generate_src
     powershell New-Item -Force -ItemType directory -Path proj_relwithdebinfo
     cd proj_relwithdebinfo
     cmake -A x64 ..
@@ -175,6 +177,7 @@ if "%BUILD_RELWITHDEBINFO%" == "1" (
 
 if "%BUILD_DEBUG%" == "1" (
     make update_dep
+    make generate_src
     powershell New-Item -Force -ItemType directory -Path proj_debug
     cd proj_debug
     cmake -A x64 ..

@@ -100,8 +100,18 @@ def hammersley2d(i, N):
 # Revisiting Physically Based Shading at Imageworks
 # http://www.aconty.com/pdf/s2017_pbs_imageworks_slides.pdf
 def generate():
+    # target file name
+    target_filename = "multi_scattering_lut.h"
+
+    # if the target file is already generated, avoid generating it again
+    if os.path.isfile(target_filename):
+        return
+
+    # output some log
+    print('Generating file ' + target_filename + '.')
+
     # open the file to be written
-    f = open("multi_scattering_lut.h", "w")
+    f = open(target_filename, "w")
 
     # generate header and warnings
     common.generate_header(f)

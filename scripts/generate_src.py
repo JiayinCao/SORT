@@ -18,6 +18,7 @@
 import os
 import shutil
 import glob
+import sys
 from file_generator import fabric_brdf_lut, multi_scattering_lut
 
 # the current directory is the sort root
@@ -26,11 +27,20 @@ sort_dir = os.getcwd()
 # set the current directory as the generated source directory
 sort_generated_src_dir = sort_dir + '/generated_src'
 
+# if there is a second argument check what it is
+allowremoving = False
+if len(sys.argv) > 1:
+    if sys.argv[1] == "force":
+        allowremoving = True
+
 # check if the folder already exists, if it does, remove it
 if os.path.isdir(sort_generated_src_dir):
-    files = glob.glob(sort_generated_src_dir + '/*')
-    for f in files:
-        os.remove(f)
+    if allowremoving:
+        print('Source files are being regenerated.')
+
+        files = glob.glob(sort_generated_src_dir + '/*')
+        for f in files:
+            os.remove(f)
 else:
     # generate a new directory
     os.makedirs(sort_generated_src_dir)

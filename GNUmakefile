@@ -27,20 +27,25 @@ ARCH ?= $(shell uname -m)
 UPDATE_DEP_COMMAND           = @python3 ./scripts/get_deps.py FALSE "${ARCH}"
 FORCE_UPDATE_DEP_COMMAND     = @python3 ./scripts/get_deps.py TRUE "${ARCH}"
 
+GENERATE_SRC_COMMAND         = @python3 ./scripts/generate_src.py
+
 BUILD_RELEASE_COMMAND        = @echo "building release version.";cd $(SORT_DIR); mkdir proj_release; cd proj_release; cmake -DCMAKE_OSX_ARCHITECTURES=${ARCH} -DCMAKE_BUILD_TYPE=Release ..;make -j 4;cd ..;
 BUILD_DEBUG_COMMAND          = @echo "building debug version.";cd $(SORT_DIR); mkdir proj_debug; cd proj_debug; cmake -DCMAKE_OSX_ARCHITECTURES=${ARCH} -DCMAKE_BUILD_TYPE=Debug ..;make -j 4;cd ..;
 BUILD_RELWITHDEBINFO_COMMAND = @echo "building release version with debug information.";cd $(SORT_DIR); mkdir proj_relwithdebinfo; cd proj_relwithdebinfo; cmake -DCMAKE_OSX_ARCHITECTURES=${ARCH} -DCMAKE_BUILD_TYPE=RelWithDebInfo ..;make -j 4;cd ..;
 
 release: .FORCE
 	$(UPDATE_DEP_COMMAND)
+	$(GENERATE_SRC_COMMAND)
 	$(BUILD_RELEASE_COMMAND)
 
 debug: .FORCE
 	$(UPDATE_DEP_COMMAND)
+	$(GENERATE_SRC_COMMAND)
 	$(BUILD_DEBUG_COMMAND)
 
 relwithdebinfo: .FORCE
 	$(UPDATE_DEP_COMMAND)
+	$(GENERATE_SRC_COMMAND)
 	$(BUILD_RELWITHDEBINFO_COMMAND)
 
 update: .FORCE
@@ -78,7 +83,7 @@ dep_info: .FORCE
 
 generate_src: .FORCE
 	@echo 'Generating source code'
-	@python3 ./scripts/generate_src.py
+	$(GENERATE_SRC_COMMAND)
 
 verify_builds: .FORCE
 	@echo 'Verifying builds'
