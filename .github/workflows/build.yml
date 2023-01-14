@@ -9,9 +9,9 @@ jobs:
     - name: Checking Out Source Code
       uses: actions/checkout@v3
     - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v1.0.2
+      uses: microsoft/setup-msbuild@v1.1
     - name: Setup Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: '3.x'
         architecture: 'x64'
@@ -104,6 +104,34 @@ jobs:
       run: make debug ARCH=arm64
     - name: Verify Build
       run: make verify_builds
+  Ubuntu_22_04:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checking Out Source Code
+      uses: actions/checkout@v3
+    - name: Get Cache Directory
+      id: cache-dir
+      run: echo "dir=%CD%" >> $GITHUB_OUTPUT
+    - name: Load Dependencies from Cache
+      uses: actions/cache@v3
+      id: cache-dep
+      with:
+        path: ${{ steps.cache-dir.outputs.dir }}/dependencies
+        key: Ubuntu-22-04-dep-ver-60
+    - name: Install Dependencies
+      if: steps.cache-dep.outputs.cache-hit != 'true'
+      run: |
+           sudo apt-get install flex
+           sudo apt-get install bison
+           make update_dep
+    - name: Build Release Version
+      run: make release
+    - name: Build Debug Version
+      run: make debug
+    - name: Verify Build
+      run: make verify_builds
+    - name: Unit Test
+      run: cd bin;./sort_r --unittest
   Ubuntu_20_04:
     runs-on: ubuntu-20.04
     steps:
