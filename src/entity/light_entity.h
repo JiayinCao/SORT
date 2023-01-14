@@ -21,7 +21,7 @@
 #include "light/pointlight.h"
 #include "light/distant.h"
 #include "light/spot.h"
-#include "light/skylight.h"
+#include "light/ambientlight.h"
 #include "light/area.h"
 
 //! @brief Light entity definition.
@@ -121,7 +121,6 @@ public:
     void    FillScene(class Scene& scene) override;
 
 protected:
-    std::unique_ptr<Primitive>  m_primitive;                                /**< The primitive of the area light source. */
     std::unique_ptr<AreaLight>  m_light = std::make_unique<AreaLight>();    /**< Light in the entity. */
 };
 
@@ -129,6 +128,9 @@ protected:
 class SkyLightEntity : public LightEntity {
 public:
     DEFINE_RTTI( SkyLightEntity , Entity );
+
+    //! @brief  Constructor setup a default ambient light
+    SkyLightEntity();
 
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -145,5 +147,5 @@ public:
     void    FillScene(class Scene& scene) override;
 
 protected:
-    std::unique_ptr<SkyLight>  m_light = std::make_unique<SkyLight>();    /**< Light in the entity. */
+    std::unique_ptr<SkyLight>  m_light = std::make_unique<AmbientLight>();    /**< Light in the entity. */
 };

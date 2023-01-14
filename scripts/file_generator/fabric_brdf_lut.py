@@ -16,20 +16,19 @@
 #
 
 import os
+from . import common
 from random import seed, random
 from math import sin, cos
 
 # Physically Based Shading at DreamWorks Animation
 # https://blog.selfshadow.com/publications/s2017-shading-course/dreamworks/s2017_pbs_dreamworks_notes.pdf
 
-def generate(license_header, warning):
+def generate():
     # open the file to be written
     f = open("fabric_lut.h", "w")
 
-    # license header
-    f.write(license_header)
-    # warning to indicate not to modify the file
-    f.write(warning)
+    # generate header and warnings
+    common.generate_header(f)
 
     # make sure this file is only compiled once
     f.write('#pragma once\n\n')

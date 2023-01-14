@@ -16,28 +16,27 @@
  */
 
 #include "skylight.h"
-#include "sampler/sample.h"
-#include "core/samplemethod.h"
 
-Spectrum SkyLight::sample_l(const Point& ip, const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{
+Spectrum SkyLight::sample_l(const Point& ip, const LightSample* ls, Vector& dirToLight, float* distance, 
+                            float* pdfw, float* emissionPdf, float* cosAtLight, Visibility& visibility) const {
     // sample a ray
     float _pdfw = 0.0f;
-    const Vector localDir = sky.sample_v( ls->u , ls->v , &_pdfw , 0 );
-    if( _pdfw == 0.0f )
+    Vector local_dir, global_dir;
+    SampleLocalDirection(*ls, _pdfw, local_dir, global_dir);
+    if (_pdfw == 0.0f)
         return 0.0f;
-    dirToLight = m_light2world.TransformVector(localDir);
+    dirToLight = global_dir;
 
-    if( pdfw )
+    if (pdfw)
         *pdfw = _pdfw;
 
-    if( distance )
+    if (distance)
         *distance = 1e6f;
 
-    if( cosAtLight )
+    if (cosAtLight)
         *cosAtLight = 1.0f;
 
-    if( emissionPdf )
-    {
+    if (emissionPdf){
         const BBox& box = m_scene->GetBBox();
         const Vector delta = box.m_Max - box.m_Min;
         *emissionPdf = _pdfw * 4.0f * INV_PI / delta.SquaredLength();
@@ -45,32 +44,18 @@ Spectrum SkyLight::sample_l(const Point& ip, const LightSample* ls , Vector& dir
 
     // setup visibility tester
     const float delta = 0.01f;
-    visibility.ray = Ray( ip , dirToLight , 0 , delta , FLT_MAX );
+    visibility.ray = Ray(ip, dirToLight, 0, delta, FLT_MAX);
 
-    return sky.Evaluate( localDir ) * intensity;
-}
-
-Spectrum SkyLight::Le( const SurfaceInteraction& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const{
-    const BBox& box = m_scene->GetBBox();
-    const Vector delta = box.m_Max - box.m_Min;
-
-    const float directPdf = sky.Pdf( m_light2world.GetInversed().TransformVector(-wo) );
-    const float positionPdf = 4.0f * INV_PI / delta.SquaredLength();
-
-    if( directPdfA )
-        *directPdfA = directPdf;
-    if( emissionPdf )
-        *emissionPdf = directPdf * positionPdf;
-
-    return sky.Evaluate( m_light2world.GetInversed().TransformVector(-wo) ) * intensity;
+    return RadianceFromDirection(local_dir);
 }
 
 Spectrum SkyLight::sample_l( RenderContext& rc, const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const{
     r.m_fMin = 0.0f;
     r.m_fMax = FLT_MAX;
     float _pdfw;
-    auto localDir = -sky.sample_v( ls.u , ls.v , &_pdfw , 0 );
-    r.m_Dir = m_light2world.TransformVector(localDir);
+    Vector3f local_dir, global_dir;
+    SampleLocalDirection(ls, _pdfw, local_dir, global_dir);
+    r.m_Dir = -global_dir;
 
     const BBox& box = m_scene->GetBBox();
     const Point center = ( box.m_Max + box.m_Min ) * 0.5f;
@@ -93,25 +78,24 @@ Spectrum SkyLight::sample_l( RenderContext& rc, const LightSample& ls , Ray& r ,
     if( pdfA )
         *pdfA = _pdfw;
 
-    return sky.Evaluate( -localDir ) * intensity;
+    return RadianceFromDirection(local_dir);
 }
 
-Spectrum SkyLight::Power() const{
-    sAssert(IS_PTR_VALID(m_scene), LIGHT );
-    const BBox box = m_scene->GetBBox();
-    const float radius = (box.m_Max - box.m_Min).Length() * 0.5f;
+Spectrum SkyLight::Le(const SurfaceInteraction& intersect, const Vector& wo, float* directPdfA, float* emissionPdf) const {
+    const BBox& box = m_scene->GetBBox();
+    const Vector delta = box.m_Max - box.m_Min;
 
-    return radius * radius * PI * sky.GetAverage() * intensity;
-}
+    // flipping wo
+    const auto flipped_wo = -wo;
 
-bool SkyLight::Le( const Ray& ray , SurfaceInteraction* intersect , Spectrum& radiance ) const{
-    if( intersect && intersect->t != FLT_MAX )
-        return false;
+    const float directPdf = Pdf(intersect.intersect, flipped_wo);
+    const float positionPdf = 4.0f * INV_PI / delta.SquaredLength();
 
-    radiance = sky.Evaluate( m_light2world.GetInversed().TransformVector(ray.m_Dir) ) * intensity;
-    return true;
-}
+    if (directPdfA)
+        *directPdfA = directPdf;
+    if (emissionPdf)
+        *emissionPdf = directPdf * positionPdf;
 
-float SkyLight::Pdf( const Point& p , const Vector& wi ) const{
-    return sky.Pdf( m_light2world.GetInversed().TransformVector(wi) );
+    const auto local_dir = m_light2world.GetInversed().TransformVector(flipped_wo);
+    return RadianceFromDirection(local_dir);
 }

@@ -42,9 +42,11 @@ public:
     float Pdf(const Vector& wi) const;
 
     // load image file
-    void Load(const std::string& str) {
-        m_sky.LoadResource(str);
+    bool Load(const std::string& str) {
+        if(!m_sky.LoadResource(str))
+            return false;
         _generateDistribution2D();
+        return true;
     }
 
 private:

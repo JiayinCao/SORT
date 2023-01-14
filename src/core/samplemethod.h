@@ -122,7 +122,7 @@ SORT_FORCEINLINE Vector UniformSampleSphere( float u , float v ){
 
 // pdf of uniformly sampling a vector on sphere
 SORT_FORCEINLINE float UniformSpherePdf(){
-    return INV_TWOPI * 0.5f;
+    return INV_FOUR_PI;
 }
 
 // one dimensional distribution

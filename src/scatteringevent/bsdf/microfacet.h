@@ -21,6 +21,7 @@
 #include "fresnel.h"
 #include "spectrum/spectrum.h"
 #include "scatteringevent/bsdf/bxdf_utils.h"
+#include "multi_scattering_lut.h"
 
 DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMirror, "mirror")
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMirror, Tsl_float3, base_color)
@@ -93,6 +94,9 @@ DECLARE_CLOSURE_TYPE_END(ClosureTypeMicrofacetRefractionBeckmann)
 //! @brief Normal distribution function.
 class MicroFacetDistribution{
 public:
+    //! @brief constructor taking in roughness
+    MicroFacetDistribution(float roughness):roughness(roughness){}
+
     //! @brief probability of facet with specific normal (h)
     virtual float D(const Vector& h) const = 0;
 
@@ -100,6 +104,27 @@ public:
     float G( const Vector& wo , const Vector& wi ) const {
         return G1( wo ) * G1( wi );
     }
+
+    //! @brief Hemispherical-directional reflectance
+    //!
+    //! This function returns the total amount of engery reflected along one direction
+    //! with the ambient light that has a value of 1.0.
+    //! Mathematically speaking, it is
+    //! E(\mu) = \int_{0}^{2*\pi} \int_{0}^{1} f(\mu_o, \mu_i, \phi) \mu_i d\mu_i d\phi
+    //!
+    //! @param wo   Outgoing direction.
+    //! @return     Hemispherical-directional reflectance.
+    float E(const Vector& wo) const;
+
+    //! @brief Hemispherical-hemispherical reflectance
+    //!
+    //! This function returns the total amount of engery reflected along all directions.
+    //! Mathematically speaking, it is
+    //! Eavg() = 2.0 \int_{0}^{1} E(\mu) \mu d \mu
+    //! This is actually exactly the same with the last equation on page 430, pbrt 3rd.
+    //!
+    //! @return     Hemispherical-hemispherical reflectance
+    float Eavg() const;
 
     //! @brief Sampling a normal respect to the NDF.
     //! @param bs   Sample holding all necessary random variables.
@@ -112,12 +137,24 @@ public:
         return D( wh ) * absCosTheta(wh);
     }
 
+    //! @brief Get the roughness of the distribution
+    float Roughness() const {
+        return roughness;
+    }
+
 protected:
+    //! @brief  Roughness of the distribution, this is merely for multi-scattering brdf
+    const float roughness;
+
     //! @brief Smith shadow-masking function G1
     virtual float G1( const Vector& v ) const  = 0;
 
     //! @brief Check if the two vectors are in the same hemisphere in shading coordinate
     bool SameHemiSphere(const Vector& wo, const Vector& wi) const { return wo.y * wi.y > 0.0f; }
+
+    //! @brief Get the pointer to the pre-baked lut for integral
+    virtual const float* GetE_Lut() const = 0;
+    virtual const float* GetEAvg_Lut() const = 0;
 };
 
 //! @brief Blinn NDF.
@@ -143,6 +180,10 @@ private:
 
     //! @brief Smith shadow-masking function G1
     float G1( const Vector& v ) const override;
+
+    //! @brief Get the pointer to the pre-baked lut for integral
+    const float* GetE_Lut() const override { return nullptr; }
+    const float* GetEAvg_Lut() const override { return nullptr; };
 };
 
 //! @brief Beckmann NDF.
@@ -168,6 +209,10 @@ private:
 
     //! @brief Smith shadow-masking function G1
     float G1( const Vector& v ) const override;
+
+    //! @brief Get the pointer to the pre-baked lut for integral
+    const float* GetE_Lut() const override { return nullptr; }
+    const float* GetEAvg_Lut() const override { return nullptr; };
 };
 
 //! @brief GGX NDF.
@@ -193,6 +238,10 @@ protected:
 
     //! @brief Smith shadow-masking function G1
     float G1( const Vector& v ) const override;
+
+    //! @brief Get the pointer to the pre-baked lut for integral
+    const float* GetE_Lut() const override { return multi_scattering_ggs_no_fresnel::g_ms_E; }
+    const float* GetEAvg_Lut() const override { return multi_scattering_ggs_no_fresnel::g_ms_Eavg; };
 };
 
 enum MF_Dist_Type {
@@ -261,12 +310,6 @@ public:
     //! @param  doubleSided     Whether the BRDF is double sided.
     MicroFacetReflection(RenderContext& rc, const ClosureTypeMicrofacetReflectionDielectric& params, const Spectrum& weight, bool doubleSided = false);
 
-    // //! @brief Constructor a mirror
-    // //!
-    // //! @param  params          Parameter set.
-    // //! @param  weight          Weight of this BRDF.
-    // MicroFacetReflection(const MirrorParams &params, const Spectrum& weight);
-
     //! @brief Constructor
     //! @param reflectance      Direction hemisphere reflection.
     //! @param f                Fresnel term.
@@ -295,9 +338,36 @@ public:
     //! @return     The probability of choosing the out-going direction based on the Incident direction.
     float pdf( const Vector& wo , const Vector& wi ) const override;
 
-private:
+protected:
     const Spectrum R;                   /**< Direction-hemisphere reflection. */
     const Fresnel* fresnel = nullptr;   /**< Fresnel term. */
+};
+
+//! @brief Microfacet reflection Brdf with multi-scattering.
+/**
+ * Unlike the single scattering microfacet reflection model, this model also has multi-scattering.
+ * This means that the brdf will be more energy conservative than the single scattering one.
+ * 
+ * I could have make the 'MicroFacetReflection' model energy conservative. However, I would not like
+ * to adjust the behavior of Disney Brdf since it is well adjusted as the paper describes.
+ * For materials that needs Multi-scattering support, they can simply use this class rather than the
+ * parent one.
+ */
+class MicroFacetReflectionMS : public MicroFacetReflection{
+public:
+    //! @brief Constructor
+    //! @param reflectance      Direction hemisphere reflection.
+    //! @param f                Fresnel term.
+    //! @param d                NDF term.
+    //! @param w                Weight of this BRDF
+    MicroFacetReflectionMS(RenderContext& rc, const Spectrum &reflectance, const Fresnel* f, const MicroFacetDistribution* d, const Spectrum& weight , const Vector& n , bool doubleSided = false ) :
+        MicroFacetReflection(rc, reflectance, f, d, weight, n, doubleSided) {}
+
+    //! @brief Evaluate the BRDF
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
+    //! @return     The Evaluated BRDF value.
+    Spectrum f( const Vector& wo , const Vector& wi ) const override;
 };
 
 //! @brief Microfacet Refraction BTDF.
@@ -366,7 +436,7 @@ public:
     //! @return     The probability of choosing the out-going direction based on the Incident direction.
     float pdf( const Vector& wo , const Vector& wi ) const override;
 
-private:
+protected:
     const Spectrum            T;          /**< Direction-hemisphere transmittance. */
     float                     etaI;       /**< Index of refraction of the side that normal points. */
     float                     etaT;       /**< Index of refraction of the other side that normal points. */

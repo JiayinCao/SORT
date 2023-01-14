@@ -25,7 +25,12 @@
  * The quad center is always at the origin of its local coordinate, the normal of the quad points exactly
  * upward in its local coordinate.
  */
-class   Quad : public Shape{
+#if INTEL_EMBREE_ENABLED
+class   Quad : public Shape, EmbreeShape<Quad>
+#else
+class   Quad : public Shape
+#endif
+{
 public:
     //! @brief Sample a point on the surface of the shape given a shading point.
     //!
@@ -101,4 +106,21 @@ public:
 protected:
     float sizeX = 1.0f;     /**< The size of the quad along x axis. */
     float sizeY = 1.0f;     /**< The size of the quad along y axis. */
+
+#if INTEL_EMBREE_ENABLED
+public:
+    //! @brief      Construct instersection data from Embree intersection.
+    //!
+    //! @param ray_hit   Embree intersection data.
+    //! @param inter     SORT intersection data.
+    void ConvertIntersection(const RTCRayHit& ray_hit, SurfaceInteraction& inter) const override;
+
+    //! @brief  Process embree data.
+    //!
+    //! @param device   Embree device.
+    EmbreeGeometry* BuildEmbreeGeometry(RTCDevice device, Embree& ebmree) const override;
+
+    // Make sure the base class can access protected method in derived class
+    friend class EmbreeShape<Quad>;
+#endif
 };

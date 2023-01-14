@@ -67,3 +67,42 @@ float Bxdf::pdf( const Vector& wo , const Vector& wi ) const{
 bool Bxdf::PointingUp( const Vector& v ) const {
     return dot( v , gnormal ) > 0.0f;
 }
+
+Spectrum Bxdf::HDR(const Vector& wo) const {
+    const unsigned sample_cnt = 4096 * 4;
+
+    Spectrum ret;
+    for (auto i = 0u; i < sample_cnt; ++i) {
+        Vector wi;
+        BsdfSample bs(rc);
+        float pdf;
+        const auto tmp = sample_f(wo, wi, bs, &pdf);
+
+        sAssert(wi.y >= 0.0f, MATERIAL);
+
+        ret += tmp / pdf;
+    }
+    return ret / (float)sample_cnt;
+}
+
+Spectrum Bxdf::HHR() const {
+    const unsigned sample_cnt = 4096;
+
+    Spectrum ret;
+    for (auto i = 0u; i < sample_cnt; ++i) {
+        const auto r0 = sort_rand<float>(rc);
+        const auto r1 = sort_rand<float>(rc);
+        const auto wo = UniformSampleHemisphere(r0, r1);
+        const auto wo_pdf = UniformHemispherePdf();
+
+        Vector wi;
+        BsdfSample bs(rc);
+        float wi_pdf;
+        const auto tmp = sample_f(wo, wi, bs, &wi_pdf);
+        sAssert(wi.y >= 0.0f, MATERIAL);
+
+        if(wi_pdf > 0.0f && !tmp.IsBlack())
+            ret += tmp * absCosTheta(wo) / (wo_pdf * wi_pdf);
+    }
+    return ret * INV_PI / (float)sample_cnt;
+}

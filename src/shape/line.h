@@ -38,7 +38,12 @@ struct Ray8_Data;
  * This is more robust in term of ray-shape intersection and leads way less problem than billboard solution,
  * which may work well if the radius is small enough, but it is still buggy.
  */
-class   Line : public Shape{
+#if INTEL_EMBREE_ENABLED
+class   Line : public Shape, EmbreeShape<Line>
+#else
+class   Line : public Shape
+#endif
+{
 public:
     //! @brief Constructor
     //!
@@ -172,5 +177,22 @@ private:
 #ifdef SIMD_8WAY_ENABLED
     friend struct Line8;
     friend SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Ray8_Data& ray_simd , const Line8& line_simd , SurfaceInteraction* ret );
+#endif
+
+#if INTEL_EMBREE_ENABLED
+public:
+    //! @brief      Construct instersection data from Embree intersection.
+    //!
+    //! @param ray_hit   Embree intersection data.
+    //! @param inter     SORT intersection data.
+    void ConvertIntersection(const RTCRayHit& ray_hit, SurfaceInteraction& inter) const override;
+
+    //! @brief  Process embree data.
+    //!
+    //! @param device   Embree device.
+    EmbreeGeometry* BuildEmbreeGeometry(RTCDevice device, Embree& ebmree) const override;
+
+    // Make sure the base class can access protected method in derived class
+    friend class EmbreeShape<Line>;
 #endif
 };

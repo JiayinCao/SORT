@@ -1530,40 +1530,33 @@ class SORTNode_Material_Glass(SORTShadingNode):
         self.inputs['RoughnessV'].serialize(fs)
         self.inputs['Normal'].serialize(fs)
 
+# This is a node that should be identical with Kylin Engine's principle node.
 @SORTShaderNodeTree.register_node('Materials')
-class SORTNode_Material_UE4Principle(SORTShadingNode):
-    bl_label = 'UE4 Principle'
-    bl_idname = 'SORTNode_Material_UE4Principle'
+class SORTNode_Material_KylinPrinciple(SORTShadingNode):
+    bl_label = 'Kylin Principle'
+    bl_idname = 'SORTNode_Material_KylinPrinciple'
     osl_shader = '''
-        shader Principle( float RoughnessU ,
-                          float RoughnessV ,
+        shader Principle( float Roughness ,
                           float Metallic ,
                           float Specular ,
                           color BaseColor ,
                           vector Normal ,
                           out closure Result ){
-            // UE4 PBS model, this is obviously very wrong since I have no time digging into UE4 for now.
-            color ior = color( 0.37f, 0.37f, 0.37f );
-            color absorb = color( 2.82f, 2.82f, 2.82f );
-            Result = make_closure<lambert>( BaseColor , Normal ) * ( 1.0f - Metallic ) * 0.92f + 
-                     make_closure<microfacet_reflection_ggx>( ior, absorb, RoughnessU, RoughnessV, BaseColor , Normal ) * ( Metallic * 0.92 + 0.08 * Specular );
+            Result = make_closure<kylin_principle>( BaseColor, Metallic, Specular, Roughness, Normal );
         }
     '''
     def init(self, context):
         self.inputs.new( 'SORTNodeSocketColor' , 'BaseColor' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Metallic' )
-        self.inputs.new( 'SORTNodeSocketFloat' , 'RoughnessU' )
-        self.inputs.new( 'SORTNodeSocketFloat' , 'RoughnessV' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Specular' )
+        self.inputs.new( 'SORTNodeSocketFloat' , 'Roughness' )
         self.inputs.new( 'SORTNodeSocketNormal' , 'Normal' )
         self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
         self.inputs['Metallic'].default_value = 1.0
-        self.inputs['RoughnessU'].default_value = 0.2
-        self.inputs['RoughnessV'].default_value = 0.2
+        self.inputs['Roughness'].default_value = 0.2
     def serialize_prop(self, fs):
-        fs.serialize( 6 )
-        self.inputs['RoughnessU'].serialize(fs)
-        self.inputs['RoughnessV'].serialize(fs)
+        fs.serialize( 5 )
+        self.inputs['Roughness'].serialize(fs)
         self.inputs['Metallic'].serialize(fs)
         self.inputs['Specular'].serialize(fs)
         self.inputs['BaseColor'].serialize(fs)

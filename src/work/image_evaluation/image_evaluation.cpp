@@ -92,7 +92,7 @@ void ImageEvaluation::StartRunning(int argc, char** argv) {
     recycleContext(m_sc_holder, sc);
 
 #ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
-    marl::WaitGroup build_mat_wait_group(mat_pool.size());
+    marl::WaitGroup build_mat_wait_group((unsigned)mat_pool.size());
     for (auto& mat : mat_pool) {
         marl::schedule([&](MaterialBase* mat) {
             defer(build_mat_wait_group.done());
@@ -340,8 +340,8 @@ void ImageEvaluation::parseCommandArgs(int argc, char** argv){
         }else if (key_str == "nomaterial" ){
             m_no_material_mode = true;
         }else if (key_str == "displayserver") {
-            int split = value_str.find_last_of(':');
-            if (split < 0)
+            const auto split = value_str.find_last_of(':');
+            if (split == std::string::npos)
                 continue;
 
             m_display_server_ip = value_str.substr(0, split);

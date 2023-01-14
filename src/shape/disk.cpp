@@ -18,6 +18,7 @@
 #include "disk.h"
 #include "core/samplemethod.h"
 #include "sampler/sample.h"
+#include "accel/embree.h"
 
 Point Disk::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const{
     float u , v;
@@ -94,3 +95,22 @@ const BBox& Disk::GetBBox() const{
 
     return *m_bbox;
 }
+
+#if INTEL_EMBREE_ENABLED
+void Disk::ConvertIntersection(const RTCRayHit& ray_hit, SurfaceInteraction& sinter) const{
+    sinter.t = ray_hit.ray.tfar;
+    sinter.normal = Vector(ray_hit.hit.Ng_x, ray_hit.hit.Ng_y, ray_hit.hit.Ng_z);
+    sinter.gnormal = sinter.normal;
+    sinter.tangent = m_transform.TransformVector(Vector(0.0f, 0.0f, 1.0f));
+
+    const auto& ray = ray_hit.ray;
+    sinter.intersect = Vector(ray.org_x + ray.dir_x * sinter.t,
+                              ray.org_y + ray.dir_y * sinter.t,
+                              ray.org_z + ray.dir_z * sinter.t);
+    sinter.view = -Vector(ray.dir_x, ray.dir_y, ray.dir_z);
+}
+
+EmbreeGeometry* Disk::BuildEmbreeGeometry(RTCDevice device, Embree& embree) const{
+    return buildEmbreeGeometry(device, embree, this);
+}
+#endif

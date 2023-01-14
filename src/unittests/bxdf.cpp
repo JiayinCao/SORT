@@ -33,6 +33,7 @@
 #include "scatteringevent/bsdf/dielectric.h"
 #include "scatteringevent/bsdf/hair.h"
 #include "scatteringevent/bsdf/fabric.h"
+#include "scatteringevent/bsdf/kylin_principle.h"
 #include "core/render_context.h"
 
 using namespace unittest;
@@ -308,4 +309,16 @@ TEST(BXDF, DISABLED_HairSamplingConsistance) {
             checkPDF( &hair );
         }
     }
+}
+
+TEST(BXDF, KylinPrinciple) {
+    auto& rc = GetRenderContext();
+    ClosureTypeKylinPrinciple params;
+    params.base_color = { 1.0f, 1.0f, 1.0f };
+    params.roughness = 0.0f;
+    params.metallic = 0.0f;
+    params.normal = { 0.0f, 1.0f, 0.0f };
+    params.specular = 1.0f;
+    KylinPrinciple principle(rc, params);
+    checkAll(&principle);
 }

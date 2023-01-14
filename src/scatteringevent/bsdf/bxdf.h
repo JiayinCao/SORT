@@ -120,13 +120,16 @@ public:
         return m_type;
     }
 
-protected:
-    //! @brief Evaluate the BRDF.
-    //!
-    //! @param wo   Exitant direction in shading coordinate.
-    //! @param wi   Incident direction in shading coordinate.
-    //! @return     The Evaluated BRDF value.
-    virtual Spectrum f( const Vector& wo , const Vector& wi ) const = 0;
+    //! @brief  Hemispherical-Direcitonal reflectance
+    //! 
+    //! @param wo   Outgoing direction.
+    //! @return Hemispherical-Direcitonal reflectance
+    virtual Spectrum HDR(const Vector& wo) const;
+
+    //! @brief  Hemispherical-Hemispherical reflectance
+    //! 
+    //! @return Hemispherical-Hemispherical reflectance
+    virtual Spectrum HHR() const;
 
     //! @brief  Importance sampling for the bxdf.
     //!
@@ -153,6 +156,14 @@ protected:
     //! @param wi   Incident direction in shading coordinate.
     //! @return     The probability of choosing the out-going direction based on the Incident direction.
     virtual float pdf( const Vector& wo , const Vector& wi ) const;
+    
+protected:
+    //! @brief Evaluate the BRDF.
+    //!
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
+    //! @return     The Evaluated BRDF value.
+    virtual Spectrum f( const Vector& wo , const Vector& wi ) const = 0;
 
     //! @brief  Helper function to decide if a vector is pointing on the other side of the primitive.
     //!

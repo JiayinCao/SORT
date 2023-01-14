@@ -39,6 +39,76 @@ SORT_STATS_DEFINE_COUNTER(sSceneLightCount)
 SORT_STATS_COUNTER("Statistics", "Total Primitive Count", sScenePrimitiveCount);
 SORT_STATS_COUNTER("Statistics", "Total Light Count", sSceneLightCount);
 
+ScenePrimitiveIterator::ScenePrimitiveIterator(const Scene& scene):m_scene(scene){
+    Reset();
+}
+
+void ScenePrimitiveIterator::Reset(){
+    m_indices[0] = 0;
+    m_indices[1] = 0;
+    m_indices[2] = -1;
+}
+
+const Primitive* ScenePrimitiveIterator::Next(){
+    int eid = m_indices[0];        // entity id
+    int vid = m_indices[1];        // visual id
+    int pid = m_indices[2] + 1;    // primitive id
+
+    while(eid < m_scene.m_entities.size()){
+        m_indices[0] = eid;
+
+        const auto entity = m_scene.m_entities[eid].get();
+        while(vid < entity->m_visuals.size()){
+            m_indices[1] = vid;
+
+            const auto visual = entity->m_visuals[vid].get();
+            if(pid < visual->m_primitives.size()){
+                m_indices[2] = pid;
+                return visual->m_primitives[pid].get();
+            }
+
+            pid = 0;
+            ++vid;
+        }
+
+        vid = 0;
+        ++eid;
+    }
+
+    m_indices[0] = eid;
+    return nullptr;
+}
+
+SceneVisualIterator::SceneVisualIterator(const Scene& scene):m_scene(scene){
+    Reset();
+}
+
+void SceneVisualIterator::Reset(){
+    m_indices[0] = 0;
+    m_indices[1] = -1;
+}
+
+const Visual* SceneVisualIterator::Next(){
+    int eid = m_indices[0];        // entity id
+    int vid = m_indices[1] + 1;    // visual id
+
+    while(eid < m_scene.m_entities.size()){
+        m_indices[0] = eid;
+
+        const auto entity = m_scene.m_entities[eid].get();
+        while(vid < entity->m_visuals.size()){
+            m_indices[1] = vid;
+            return entity->m_visuals[vid].get();
+        }
+
+        vid = 0;
+        ++eid;
+    }
+
+    m_indices[0] = eid;
+    return nullptr;
+}
+
 bool Scene::LoadScene( IStreamBase& stream ){
     const StringID verificationBit( "verification bits" );
 
@@ -59,11 +129,34 @@ bool Scene::LoadScene( IStreamBase& stream ){
         m_entities.push_back(std::move(entity));
     }
 
+    // this will populate data in the scene
+    for( auto& entity : m_entities )
+        entity->FillScene(*this);
+    
+    // If there is no light in the scene, a default ambient light will be created.
+    if (m_lights.empty()) {
+        slog(WARNING, LIGHT, "No light is setup in the scene. A default ambient light will be added");
+        auto entity = MakeUniqueInstance<Entity>(SID("SkyLightEntity"));
+        entity->FillScene(*this);
+
+        m_entities.push_back(std::move(entity));
+    }
+    
+    // get the bounding box of the whole scene
+    ScenePrimitiveIterator iter(*this);
+    while(auto primitive = iter.Next())
+        m_bbox.Union(primitive->GetBBox());
+
+    // enlarge the bounding box a little
+    static const auto threshold = 0.001f;
+    auto delta = (m_bbox.m_Max - m_bbox.m_Min) * threshold;
+    m_bbox.m_Min -= delta;
+    m_bbox.m_Max += delta;
+
     // generate triangle buffer after parsing from stream
-    generatePriBuf();
     genLightDistribution();
 
-    SORT_STATS(sScenePrimitiveCount=(StatsInt)m_primitives.size());
+    SORT_STATS(sScenePrimitiveCount=(StatsInt)GetPrimitiveCount());
     SORT_STATS(sSceneLightCount=(StatsInt)m_lights.size());
 
     // parse the acceleration structure configuration
@@ -72,6 +165,16 @@ bool Scene::LoadScene( IStreamBase& stream ){
     m_accelerator = MakeUniqueInstance<Accelerator>(accelType);
     if (m_accelerator)
         m_accelerator->Serialize(stream);
+
+    if (!m_accelerator) {
+#if SIMD_4WAY_ENABLED
+        slog(WARNING, SPATIAL_ACCELERATOR, "Acceleration structure not supported. Use QBVH instead.");
+        m_accelerator = MakeUniqueInstance<Accelerator>(SID("Qbvh"));
+#else
+        slog(WARNING, SPATIAL_ACCELERATOR, "Acceleration structure not supported. Use BVH instead.");
+        m_accelerator = MakeUniqueInstance<Accelerator>(SID("Bvh"));
+#endif
+    }
 
     return true;
 }
@@ -119,30 +222,6 @@ void Scene::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , Render
     // no brute force support in BSSRDF
     if(IS_PTR_VALID(m_accelerator))
         m_accelerator->GetIntersect( r , intersect , rc , matID );
-}
-
-void Scene::generatePriBuf(){
-    for( auto& entity : m_entities )
-        entity->FillScene( *this );
-    
-    auto generate_bbox = [](const std::vector<const Primitive*>& primitives) {
-        BBox bbox;
-
-        // update bounding box again
-        for (auto& primitive : primitives)
-            bbox.Union(primitive->GetBBox());
-
-        // enlarge the bounding box a little
-        static const auto threshold = 0.001f;
-        auto delta = (bbox.m_Max - bbox.m_Min) * threshold;
-        bbox.m_Min -= delta;
-        bbox.m_Max += delta;
-
-        return bbox;
-    };
-
-    m_bbox      = generate_bbox(m_primitives);
-    m_bboxVol   = generate_bbox(m_volPrimitives);
 }
 
 void Scene::genLightDistribution(){
@@ -199,5 +278,12 @@ void Scene::AddLight( Light* light ){
 }
 
 void Scene::BuildAccelerationStructure() {
-    m_accelerator->Build(GetPrimitives(), GetBBox());
+    m_accelerator->Build(*this);
+}
+
+unsigned Scene::GetPrimitiveCount() const{
+    unsigned int cnt = 0;
+    for(const auto& entity: m_entities)
+        cnt += entity->GetPrimitiveCount();
+    return cnt;
 }

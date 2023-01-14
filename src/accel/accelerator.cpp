@@ -114,3 +114,30 @@ bool Accelerator::UpdateMediumStack( Ray& ray , MediumStack& ms , RenderContext&
 
     return true;
 }
+
+void Accelerator::GetIntersect(const Ray& r, BSSRDFIntersections& intersect, RenderContext& rc, const StringID matID) const {
+    SORT_PROFILE("Traverse Uniform Grid");
+
+    Ray ray = r;
+
+    intersect.cnt = 0;
+    while (intersect.cnt < TOTAL_SSS_INTERSECTION_CNT) {
+        // allocate the memory if needed
+        auto& ptr_surface_intersection = intersect.intersections[intersect.cnt];
+        ptr_surface_intersection = ptr_surface_intersection ? ptr_surface_intersection : SORT_MALLOC(rc.m_memory_arena, BSSRDFIntersection)();
+
+        // try getting the next intersection
+        if (!GetIntersect(rc, ray, ptr_surface_intersection->intersection))
+            break;
+
+        // adjust the ray minimium to start over again.
+        ray.m_fMin = ptr_surface_intersection->intersection.t + 0.001f;
+
+        // we only care about the meshes with the same material
+        if (ptr_surface_intersection->intersection.primitive->GetMaterial()->GetUniqueID() != matID)
+            continue;
+
+        // we know for a fact we have a valid intersection, at this point
+        intersect.cnt++;
+    }
+}

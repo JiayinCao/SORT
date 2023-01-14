@@ -25,7 +25,12 @@
  * The disk center is always at the origin of its local coordinate, the normal of the disk points exactly
  * upward in its local coordinate.
  */
-class   Disk : public Shape{
+#if INTEL_EMBREE_ENABLED
+class   Disk : public Shape, EmbreeShape<Disk>
+#else
+class   Disk : public Shape
+#endif
+{
 public:
     //! @brief Sample a point on the surface of the shape given a shading point.
     //!
@@ -97,4 +102,21 @@ public:
 
 private:
     float radius = 1.0f;    /**< The radius of the disk. */
+
+#if INTEL_EMBREE_ENABLED
+public:
+    //! @brief      Construct instersection data from Embree intersection.
+    //!
+    //! @param ray_hit   Embree intersection data.
+    //! @param inter     SORT intersection data.
+    void ConvertIntersection(const RTCRayHit& ray_hit, SurfaceInteraction& inter) const override;
+
+    //! @brief  Process embree data.
+    //!
+    //! @param device   Embree device.
+    EmbreeGeometry* BuildEmbreeGeometry(RTCDevice device, Embree& ebmree) const override;
+
+    // Make sure the base class can access protected method in derived class
+    friend class EmbreeShape<Disk>;
+#endif
 };

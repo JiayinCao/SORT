@@ -24,7 +24,13 @@
 #include "math/ray.h"
 #include "math/interaction.h"
 
+#ifdef INTEL_EMBREE_ENABLED
+    #include <embree3/rtcore.h>
+    #include "accel/embree_util.h"
+#endif
+
 class LightSample;
+class Embree;
 struct RenderContext;
 
 enum SHAPE_TYPE{
@@ -139,6 +145,20 @@ public:
     //!
     //! @return     The type of the shape.
     virtual SHAPE_TYPE GetShapeType() const = 0;
+
+#if INTEL_EMBREE_ENABLED
+    //! @brief      Construct instersection data from Embree intersection.
+    //!
+    //! @param ray_hit   Embree intersection data.
+    //! @param inter     SORT intersection data.
+    virtual void ConvertIntersection(const RTCRayHit& ray_hit, SurfaceInteraction& inter) const = 0;
+
+    //! @brief  Process embree data.
+    //!
+    //! @param device   Embree device.
+    //! @param geom     Embree geometry wrapper
+    virtual EmbreeGeometry* BuildEmbreeGeometry(RTCDevice device, Embree& ebmree) const = 0;
+#endif
     
 protected:
     Transform                       m_transform;    /**< Transform of the shape from local space to world space. It is assumed there is no scaling in this matrix, the upper level code should handle it. */

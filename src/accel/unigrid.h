@@ -77,7 +77,7 @@ public:
     //!
     //! @param primitives       A vector holding all primitives.
     //! @param bbox             The bounding box of the scene.
-    void    Build(const std::vector<const Primitive*>& primitives, const BBox& bbox) override;
+    void    Build(const Scene& scene) override;
 
     //! @brief      Serializing data from stream, this data structure is not configurable in Blender.
     //!

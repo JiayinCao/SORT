@@ -15,15 +15,20 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
+#include "core/define.h"
 #include <regex>
 #include "imagetexture2d.h"
 #include "core/sassert.h"
+
+BEGIN_EXTERNAL_INCLUDES
 
 #define TINYEXR_IMPLEMENTATION
 #include "thirdparty/tiny_exr/tinyexr.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "thirdparty/stb_image/stb_image.h"
+
+END_EXTERNAL_INCLUDES
 
 Spectrum ImageTexture2D::GetColor( int x , int y ) const{
     // if there is no image, just crash

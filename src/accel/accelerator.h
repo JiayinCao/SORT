@@ -31,6 +31,7 @@
 #include "core/primitive.h"
 
 class Ray;
+class Scene;
 
 #ifdef ENABLE_TRANSPARENT_SHADOW
 SORT_FORCEINLINE bool isShadowRay( const SurfaceInteraction* intersection ){
@@ -118,13 +119,13 @@ public:
     //! @param  r           The input ray to be tested.
     //! @param  intersect   The intersection result that holds all intersection.
     //! @param  matID       We are only interested in intersection with the same material, whose material id should be set to matID.
-    virtual void GetIntersect( const Ray& r , BSSRDFIntersections& intersect , RenderContext& rc , const StringID matID = INVALID_SID ) const = 0;
+    virtual void GetIntersect(const Ray& r, BSSRDFIntersections& intersect, RenderContext& rc, const StringID matID = INVALID_SID) const;
 
     //! @brief Build the acceleration structure.
     //!
     //! @param primitives       A vector holding all primitives.
     //! @param bbox             The bounding box of the scene.
-    virtual void Build(const std::vector<const Primitive*>& primitives, const BBox& bbox) = 0;
+    virtual void Build(const Scene& scene) = 0;
 
     //! @brief Get the bounding box of the primitive set.
     //!
@@ -148,8 +149,6 @@ public:
     virtual std::unique_ptr<Accelerator>    Clone() const = 0;
 
 protected:
-    /**< The vector holding all primitive pointers. */
-    const std::vector<const Primitive*>*    m_primitives = nullptr;
     /**< The bounding box of all primitives. */
     BBox                                    m_bbox;
     /**< Whether the spatial structure is constructed before. */

@@ -19,6 +19,7 @@
 #include "sampler/sample.h"
 #include "core/samplemethod.h"
 #include "core/log.h"
+#include "accel/embree.h"
 
 Point Sphere::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const{
     sAssertMsg(false, SAMPLING, "N is not filled in Sphere::sample_l");
@@ -134,3 +135,27 @@ const BBox& Sphere::GetBBox() const{
 
     return *m_bbox;
 }
+
+#if INTEL_EMBREE_ENABLED
+void Sphere::ConvertIntersection(const RTCRayHit& ray_hit, SurfaceInteraction& sinter) const {
+    sinter.t = ray_hit.ray.tfar;
+    sinter.normal = Vector(ray_hit.hit.Ng_x, ray_hit.hit.Ng_y, ray_hit.hit.Ng_z);
+    sinter.gnormal = sinter.normal;
+
+    // Warning, this doesn't generate exactly same result with other spatial data structure.
+    // However, since this is not even used anywhere in the renderer. I'll live with it.
+    Vector v0, v1;
+    coordinateSystem(sinter.normal, v0, v1);
+    sinter.tangent = v0;
+
+    const auto& ray = ray_hit.ray;
+    sinter.intersect = Vector(ray.org_x + ray.dir_x * sinter.t,
+                              ray.org_y + ray.dir_y * sinter.t,
+                              ray.org_z + ray.dir_z * sinter.t);
+    sinter.view = -Vector(ray.dir_x, ray.dir_y, ray.dir_z);
+}
+
+EmbreeGeometry* Sphere::BuildEmbreeGeometry(RTCDevice device, Embree& embree) const {
+    return buildEmbreeGeometry(device, embree, this);
+}
+#endif

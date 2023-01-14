@@ -19,32 +19,23 @@
 #include "visual.h"
 #include "material/matmanager.h"
 #include "core/scene.h"
-
-void MeshVisual::FillScene( Scene& scene ){
-    for (const auto& mi : m_memory->m_indices){
-        m_triangles.push_back( std::make_unique<Triangle>( this , mi ) );
-        m_primitives.push_back(std::make_unique<Primitive>(m_memory.get(), mi.m_mat, m_triangles.back().get()));
-        scene.AddPrimitive(m_primitives.back().get());
-    }
-}
+#include "accel/embree_util.h"
+#include "accel/embree.h"
 
 void MeshVisual::Serialize( IStreamBase& stream ){
     m_memory = std::make_unique<Mesh>();
     m_memory->Serialize(stream);
+
+    for (const auto& mi : m_memory->m_indices){
+        m_triangles.push_back( std::make_unique<Triangle>( this , mi ) );
+        m_primitives.push_back(std::make_unique<Primitive>(m_memory.get(), mi.m_mat, m_triangles.back().get()));
+    }
 }
 
 void MeshVisual::ApplyTransform( const Transform& transform ){
     m_memory->ApplyTransform( transform );
     m_memory->GenUV();
     m_memory->GenSmoothTagent();
-}
-
-void HairVisual::FillScene( Scene& scene ){
-    for( const auto& line : m_lines ){
-        auto mat = MatManager::GetSingleton().GetMaterial(line->GetMaterialId());
-        m_primitives.push_back(std::make_unique<Primitive>(nullptr, mat, line.get()));
-        scene.AddPrimitive(m_primitives.back().get());
-    }
 }
 
 void HairVisual::Serialize( IStreamBase& stream ){
@@ -94,6 +85,9 @@ void HairVisual::Serialize( IStreamBase& stream ){
 
             m_lines.push_back(std::make_unique<Line>(prevP, curP, prev_v, cur_v, prev_w, cur_w, mat_id));
 
+            auto mat = MatManager::GetSingleton().GetMaterial(m_lines.back()->GetMaterialId());
+            m_primitives.push_back(std::make_unique<Primitive>(nullptr, mat, m_lines.back().get()));
+
             prev_w = cur_w;
             prev_v = cur_v;
         }
@@ -104,3 +98,80 @@ void HairVisual::ApplyTransform( const Transform& transform ){
     for( auto& line : m_lines )
         line->SetTransform( transform );
 }
+
+SinglePrimitiveVisual::SinglePrimitiveVisual(std::unique_ptr<Primitive> primitive){
+    m_primitives.push_back(std::move(primitive));
+}
+
+void SinglePrimitiveVisual::Serialize( IStreamBase& stream ){
+    // This visual doesn't support serialization for now
+    sAssert(false, GENERAL);
+}
+
+void SinglePrimitiveVisual::ApplyTransform( const Transform& transform ){
+    // This is not currently needed for now
+    sAssert(false, GENERAL);
+}
+
+#if INTEL_EMBREE_ENABLED
+void Visual::BuildEmbreeGeometry(RTCDevice device, Embree& embree) const{
+    for (const auto& primitive : m_primitives)
+        primitive->BuildEmbreeGeometry(device, embree);
+}
+
+void MeshVisual::BuildEmbreeGeometry(RTCDevice device, Embree& embree) const{
+    // if there is nothing in this mesh, just bail early.
+    if(!m_memory)
+        return;
+
+    // ideally, there should be multiple geometries, not just one.
+    auto geometry = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
+
+    // get the vertex buffer and index buffer sizes
+    const auto vert_cnt = m_memory->m_vertices.size();
+    const auto indices_cnt = m_memory->m_indices.size();
+    const auto vert_stride = sizeof(float) * 3;
+    const auto index_stride = sizeof(unsigned int) * 3;
+
+    if (vert_cnt == 0 || indices_cnt == 0)
+        return;
+
+    auto embree_geom = std::make_unique<EmbreeGeometry>();
+
+    auto vertices = (float*)rtcSetNewGeometryBuffer(geometry, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, vert_stride, vert_cnt);
+    auto indices = (unsigned int*)rtcSetNewGeometryBuffer(geometry, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, index_stride, indices_cnt);
+    
+    // fill vertex buffer
+    auto i = 0;
+    for(const auto& vert : m_memory->m_vertices){
+        const auto offset = 3 * i++;
+        vertices[offset] = vert.m_position.x;
+        vertices[offset + 1] = vert.m_position.y;
+        vertices[offset + 2] = vert.m_position.z;
+    }
+    sAssert(i == vert_cnt, SPATIAL_ACCELERATOR);
+
+    i = 0;
+    for(const auto& index : m_memory->m_indices){
+        const auto offset = 3 * i++;
+        indices[offset] = index.m_id[0];
+        indices[offset + 1] = index.m_id[1];
+        indices[offset + 2] = index.m_id[2];
+    }
+    sAssert(i == indices_cnt, SPATIAL_ACCELERATOR);
+    
+    // we are done with creating the geometry
+    rtcCommitGeometry(geometry);
+
+    // due to native support of Embree, just one geometry is enough for MeshVisual
+    embree_geom->m_geometry = geometry;
+
+    // copy the triangle list
+    for(const auto& triangle : m_primitives)
+        embree_geom->m_primitives.push_back(triangle.get());
+
+    // we are done creating the geomtry, push it in the spatial data structure.
+    embree.PushGeometry(std::move(embree_geom));
+}
+
+#endif

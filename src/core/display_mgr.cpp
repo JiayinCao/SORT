@@ -101,7 +101,7 @@ void DisplayTile::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
     } else {
         // This is for TEV
         // https://github.com/Tom94/tev
-        for (auto i = 0u; i < nChannels; ++i) {
+        for (auto i = 0; i < nChannels; ++i) {
             stream << int(0);            // reserved for length
             stream << char(UpdateImage); // indicate to update some of the images
             stream << char(0);           // indicate to grab the current image
@@ -157,7 +157,7 @@ void IndicationTile::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
         auto data = m_data[0].get();
         memset(data, 0, sizeof(float) * total_pixel * 4);
 
-        for (auto i = 0u; i < w; ++i) {
+        for (auto i = 0; i < w; ++i) {
             if ((i >> 2) % 2 == 0)
                 continue;
 
@@ -168,7 +168,7 @@ void IndicationTile::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
             data[4 * i + 3] = 1.0f;
             data[4 * (total_pixel - 1 - i) + 3] = 1.0f;
         }
-        for (auto i = 0u; i < h; ++i) {
+        for (auto i = 0; i < h; ++i) {
             if ((i >> 2) % 2 == 0)
                 continue;
 
@@ -185,13 +185,13 @@ void IndicationTile::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
             auto data = m_data[i].get();
             memset(data, 0, sizeof(float) * total_pixel);
 
-            for (auto i = 0u; i < w; ++i) {
+            for (auto i = 0; i < w; ++i) {
                 if ((i >> 2) % 2 == 0)
                     continue;
                 data[i] = indication_intensity;
                 data[total_pixel - 1 - i] = indication_intensity;
             }
-            for (auto i = 0u; i < h; ++i) {
+            for (auto i = 0; i < h; ++i) {
                 if ((i >> 2) % 2 == 0)
                     continue;
                 data[i * w] = indication_intensity;
@@ -212,8 +212,8 @@ void FullTargetUpdate::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
 
     const auto total_pixel = w * h;
     auto display_tile = std::make_shared<DisplayTile>(title, 0, 0, w, h, is_blender_mode);
-    for( auto i = 0u ; i < h;  ++i ){
-        for( auto j = 0u ; j < w; ++j ){
+    for( auto i = 0; i < h;  ++i ){
+        for( auto j = 0; j < w; ++j ){
             const auto& color = m_rt->GetColor(j, i);
             display_tile->UpdatePixel(j, i, color);
         }

@@ -25,6 +25,7 @@
 
 class Light;
 class Mesh;
+class Embree;
 
 //! @brief  Primitive of SORT world.
 /**
@@ -125,6 +126,27 @@ public:
     SORT_FORCEINLINE const Mesh*     GetMesh() const {
         return m_mesh;
     }
+
+    #if INTEL_EMBREE_ENABLED
+        //! @brief      Construct instersection data from Embree intersection.
+        //!
+        //! @param ray_hit   Embree intersection data.
+        //! @param inter     SORT intersection data.
+        void ConvertIntersection(const RTCRayHit& ray_hit, SurfaceInteraction& inter) const{
+            sAssert(m_shape, GENERAL);
+
+            inter.primitive = this;
+            m_shape->ConvertIntersection(ray_hit, inter);
+        }
+
+        //! @brief  Process embree data.
+        //!
+        //! @param device   Embree device.
+        void BuildEmbreeGeometry(RTCDevice device, Embree& embree) const{
+            if (auto geometry = m_shape->BuildEmbreeGeometry(device, embree))
+                geometry->m_primitives.push_back(this);
+        }
+    #endif
 
 private:
     const MaterialBase*     m_mat;      /**< The material attached to the primitive. */

@@ -23,6 +23,7 @@
 #include "core/profile.h"
 #include "scatteringevent/scatteringevent.h"
 #include "core/memory.h"
+#include "core/scene.h"
 
 SORT_STATS_DEFINE_COUNTER(sUGGridCount)
 SORT_STATS_DEFINE_COUNTER(sUniformGridX)
@@ -38,25 +39,24 @@ SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Y", sUniformGrid
 SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Z", sUniformGridZ);
 SORT_STATS_AVG_COUNT("Spatial-Structure(UniformGrid)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-void UniGrid::Build( const std::vector<const Primitive*>& primitives , const BBox& bbox ){
+void UniGrid::Build(const Scene& scene){
     SORT_PROFILE("Build Uniform Grid");
 
-    m_primitives = &primitives;
-    if (m_primitives->empty())
+    const auto prim_cnt = scene.GetPrimitiveCount();
+    if (!prim_cnt)
         return;
 
-    m_bbox = bbox;
+    ScenePrimitiveIterator iter(scene);
+
+    m_bbox = scene.GetBBox();
 
     // get the maximum extent id and distance
     auto id = m_bbox.MaxAxisId();
     auto delta = m_bbox.m_Max - m_bbox.m_Min;
     auto extent = delta[id];
 
-    // get the total number of primitives
-    auto count = (unsigned)m_primitives->size();
-
     // grid per distance
-    auto gridPerDistance = 3 * powf( (float)count , 0.333f ) / extent ;
+    auto gridPerDistance = 3 * powf( (float)prim_cnt , 0.333f ) / extent ;
 
     // the grid size
     for(auto i = 0 ; i < 3 ; i++ ){
@@ -71,7 +71,7 @@ void UniGrid::Build( const std::vector<const Primitive*>& primitives , const BBo
     m_voxels.resize( m_voxelCount );
 
     // distribute the primitives
-    for( auto& primitive : *m_primitives ){
+    while(auto primitive = iter.Next()){
         unsigned maxGridId[3];
         unsigned minGridId[3];
         for(auto i = 0 ; i < 3 ; i++ ){

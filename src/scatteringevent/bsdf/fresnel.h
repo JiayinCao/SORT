@@ -91,6 +91,19 @@ public:
     //! @param cosI     Absolute cosine value of the angle between the incident ray and the normal. Caller of this function has to make sure cosI >= 0.0f.
     //! @return         Evaluated fresnel value.
     virtual Spectrum Evaluate( float cosI ) const = 0;
+
+    //! @brief Evaluate the average of the fresnel term
+    //!
+    //! Fresnel average is defined this way
+    //! F_avg = 2.0 /int_0^1 F(/mu) /mu d /mu
+    //! With only a few parameters, it is totally possible to pre-bake integrations for all arguments in a Lut.
+    //! However, since only Schlick Fresnel is used with Multi-scattering microfacet brdf in SORT. The implementation is left empty for other
+    //! type of fresnels. Default implementation will simply crash to attract attention if accidentally used somewhere.
+    virtual Spectrum EvaluateAvg() const{
+        // If this is needed, bake the lut first.
+        sAssert(false, MATERIAL);
+        return 0.f;
+    }
 };
 
 //! @brief A hack that presents no fresnel.
@@ -156,6 +169,14 @@ public:
     //! @return         Evaluated fresnel value.
     Spectrum Evaluate(float cosI) const override{
         return SchlickFresnel(F0, cosI);
+    }
+
+    //! @brief Evaluate the average of the fresnel term
+    //!
+    //! Luckily, for Schlick's approximation, there is an analytical solution to the integral.
+    //! @return         The average of the fresnel.
+    Spectrum EvaluateAvg() const override{
+        return 1.0f / 21.0f + ( 20.f / 21.f ) * F0;
     }
 
 private:

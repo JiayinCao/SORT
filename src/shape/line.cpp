@@ -17,6 +17,7 @@
 
 #include "line.h"
 #include "math/utils.h"
+#include "accel/embree.h"
 
 bool Line::GetIntersect( const Ray& r , SurfaceInteraction* intersect ) const{
     // convert it to line space first
@@ -76,9 +77,9 @@ bool Line::GetIntersect( const Ray& r , SurfaceInteraction* intersect ) const{
             intersect->gnormal = normalize(m_world2Line.GetInversed().TransformVector( Vector( inter.x , 0.0f , inter.z ) ) );
             intersect->normal = intersect->gnormal;
             intersect->tangent = normalize( m_gp1 - m_gp0 );
-
-            intersect->view = -r.m_Dir;
         }
+
+        intersect->view = -r.m_Dir;
 
         intersect->u = 1.0f;
         intersect->v = slerp( m_v0 , m_v1 , inter.y / m_length );
@@ -124,3 +125,29 @@ void Line::SetTransform( const Transform& transform ){
     const auto lp1 = world2line.TransformPoint( m_gp1 );
     m_length = lp1.y - lp0.y;
 }
+
+#if INTEL_EMBREE_ENABLED
+void Line::ConvertIntersection(const RTCRayHit& ray_hit, SurfaceInteraction& sinter) const{
+    const auto& ray = ray_hit.ray;
+    sinter.t = ray_hit.ray.tfar;
+    sinter.intersect = Vector(ray.org_x + ray.dir_x * sinter.t,
+                              ray.org_y + ray.dir_y * sinter.t,
+                              ray.org_z + ray.dir_z * sinter.t);
+    sinter.view = -Vector(ray.dir_x, ray.dir_y, ray.dir_z);
+
+    sinter.gnormal = Vector(ray_hit.hit.Ng_x, ray_hit.hit.Ng_y, ray_hit.hit.Ng_z);
+    sinter.normal = sinter.gnormal;
+    sinter.u = ray_hit.hit.u;
+    sinter.v = ray_hit.hit.v;
+
+    const auto& inter = sinter.intersect;
+    if (inter.y == m_length)
+        sinter.tangent = normalize(m_world2Line.GetInversed().TransformVector(Vector(1.0f, 0.0f, 0.0f)));
+    else
+        sinter.tangent = normalize(m_gp1 - m_gp0);
+}
+
+EmbreeGeometry* Line::BuildEmbreeGeometry(RTCDevice device, Embree& embree) const{
+    return buildEmbreeGeometry(device, embree, this);
+}
+#endif

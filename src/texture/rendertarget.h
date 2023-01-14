@@ -36,5 +36,5 @@ public:
 private:
     std::unique_ptr<Spectrum[]> m_pData;
 
-    friend class FullTargetUpdate;
+    friend struct FullTargetUpdate;
 };

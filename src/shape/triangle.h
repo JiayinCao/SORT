@@ -108,6 +108,19 @@ public:
         return SHAPE_TRIANGLE;
     }
 
+#if INTEL_EMBREE_ENABLED
+    //! @brief      Construct instersection data from Embree intersection.
+    //!
+    //! @param ray_hit   Embree intersection data.
+    //! @param sinter    SORT intersection data.
+    void ConvertIntersection(const RTCRayHit& ray_hit, SurfaceInteraction& sinter) const override;
+
+    //! @brief  Process embree data.
+    //!
+    //! @param device   Embree device.
+    EmbreeGeometry* BuildEmbreeGeometry(RTCDevice device, Embree& ebmree) const override;
+#endif
+
 // This is very weird, somehow friend struct doesn't work on Linux and Mac since this change below
 // https://github.com/JiayinCao/SORT/commit/9e22f5bc62bfe5a3bdf29cc0cf1ffcb06ac96cd3
 // This is low priority since I only have limited time to support Neon, I'll leave it this way for now.

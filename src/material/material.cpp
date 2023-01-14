@@ -54,10 +54,10 @@ void Material::BuildMaterial(Tsl_Namespace::ShadingContext* context) {
         if (shader_valid) {
             shader_valid = false;
             trying_building_shader_type = true;
-    
+
             for (const auto& shader : shader_data.m_sources)
                 shader_units[shader.name] = MatManager::GetSingleton().GetShaderUnitTemplate(shader.type);
-    
+
             // build the root shader
             const auto root_shader_name = prefix + output_node_name;
             if(auto shader_unit_template = context->begin_shader_unit_template(root_shader_name)){
@@ -76,12 +76,12 @@ void Material::BuildMaterial(Tsl_Namespace::ShadingContext* context) {
             } else {
                 return;
             }
-    
+
             // begin compiling shader group
             auto shader_group = context->begin_shader_group_template(prefix + m_name);
             if (!shader_group)
                 return;
-            
+
             // register tsl global
             TslGlobal::shader_unit_register(shader_group.get());
 
@@ -91,30 +91,30 @@ void Material::BuildMaterial(Tsl_Namespace::ShadingContext* context) {
                 if (!ret)
                     return;
             }
-    
+
             // connect the shader units
             for (auto connection : shader_data.m_connections) {
                 const auto target_shader = connection.target_shader == output_node_name ? prefix + output_node_name : connection.target_shader;
                 shader_group->connect_shader_units(connection.source_shader, connection.source_property, target_shader, connection.target_property);
             }
-    
+
             // expose the shader interface
             shader_group->expose_shader_argument(root_shader_name, "result", true, "out_bxdf");
-    
+
             // update default values
             for (const auto& dv : m_paramDefaultValues)
                 shader_group->init_shader_input(dv.shader_unit_name, dv.shader_unit_param_name, dv.default_value);
-            
+
             // end building the shader group
             auto ret = context->end_shader_group_template(shader_group.get());
             if (TSL_Resolving_Status::TSL_Resolving_Succeed != ret)
                 return;
-    
+
             shader_instance = shader_group->make_shader_instance();
             ret = shader_instance->resolve_shader_instance();
             if (TSL_Resolving_Status::TSL_Resolving_Succeed != ret)
                 return;
-    
+
             shader_valid = true;
         }
     };

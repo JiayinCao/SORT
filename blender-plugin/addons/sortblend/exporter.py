@@ -247,18 +247,20 @@ def export_scene(depsgraph, is_preview, fs):
         print("There is no active camera.")
         return
 
+    camera_data = camera.data
+
     pos, target, up = lookat_camera(camera)
-    sensor_w = bpy.data.cameras[0].sensor_width
-    sensor_h = bpy.data.cameras[0].sensor_height
+    sensor_w = camera_data.sensor_width
+    sensor_h = camera_data.sensor_height
     sensor_fit = 0.0 # auto
-    sfit = bpy.data.cameras[0].sensor_fit
+    sfit = camera_data.sensor_fit
     if sfit == 'VERTICAL':
         sensor_fit = 2.0
     elif sfit == 'HORIZONTAL':
         sensor_fit = 1.0
     aspect_ratio_x = scene.render.pixel_aspect_x
     aspect_ratio_y = scene.render.pixel_aspect_y
-    fov_angle = bpy.data.cameras[0].angle
+    fov_angle = camera_data.angle
 
     # resolution of the final image
     xres = scene.render.resolution_x * scene.render.resolution_percentage / 100
@@ -357,14 +359,20 @@ def export_scene(depsgraph, is_preview, fs):
             elif lamp.shape == 'DISK':
                 fs.serialize(lamp.size * 0.5)
 
+    hdr_sky_color = scene.sort_hdr_sky.ambient_sky_color
+    hdr_sky_intensity = scene.sort_hdr_sky.ambient_sky_intensity
     hdr_sky_image = scene.sort_hdr_sky.hdr_image
-    if hdr_sky_image is not None:
+    if hdr_sky_intensity > 0.0 and ( hdr_sky_color[0] > 0.0 or hdr_sky_color[1] > 0.0 or hdr_sky_color[2] > 0.0 ):
         fs.serialize(SID('SkyLightEntity'))
         global_matrix = mathutils.Matrix()
         fs.serialize(matrix_to_tuple(global_matrix))
-        fs.serialize(( 1.0 , 1.0 , 1.0 ))   # light tint color
-        fs.serialize( 1.0 )                 # sky light scaling, not supported since it is not pbs.
-        fs.serialize(bpy.path.abspath( hdr_sky_image.filepath ))
+        fs.serialize(hdr_sky_intensity)
+        fs.serialize(hdr_sky_color[:])
+
+        if hdr_sky_image is None:
+            fs.serialize('')
+        else:
+            fs.serialize(bpy.path.abspath( hdr_sky_image.filepath ))
 
     # to indicate the scene stream comes to an end
     fs.serialize(SID('End of Entities'))
@@ -392,8 +400,10 @@ def export_scene(depsgraph, is_preview, fs):
         fs.serialize( SID('Obvh') )
         fs.serialize( int(sort_data.obvh_max_node_depth) )
         fs.serialize( int(sort_data.obvh_max_pri_in_leaf) )
-    else:
+    elif accelerator_type == "UniGrid":
         fs.serialize( SID('UniGrid') )
+    elif accelerator_type == "Embree":
+        fs.serialize( SID('Embree'))
 
 # avoid having space in material name
 def name_compat(name):

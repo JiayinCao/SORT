@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include <list>
+#include <vector>
 #include <memory>
 #include "math/transform.h"
 #include "stream/stream.h"
@@ -40,9 +40,20 @@ public:
     //! Base entity has nothing in it, which pops nothing in the world.
     //!
     //! @param  scene       The scene to be filled.
-    virtual void   FillScene( class Scene& scene ) {};
+    virtual void    FillScene( class Scene& scene ) {};
+
+    //! @brief  Get the number of primitives in this entity.
+    unsigned        GetPrimitiveCount() const{
+        unsigned cnt = 0;
+        for(auto& visual: m_visuals)
+            cnt += visual->GetPrimitiveCount();
+        return cnt;
+    }
 
 protected:
-    Transform                           m_transform;    /**< Transform of the entity from local space to world space. */
-    std::list<std::unique_ptr<Visual>>  m_visuals;      /**< Visual attached to this entity. */
+    Transform                               m_transform;    /**< Transform of the entity from local space to world space. */
+    std::vector<std::unique_ptr<Visual>>    m_visuals;      /**< Visual attached to this entity. */
+
+    friend class ScenePrimitiveIterator;
+    friend class SceneVisualIterator;
 };

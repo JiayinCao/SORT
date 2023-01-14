@@ -47,8 +47,11 @@ class SORTHDRSky(bpy.types.PropertyGroup):
         item.previews = enum_items
         return item.previews
 
+    ambient_sky_intensity : bpy.props.FloatProperty(name="Sky Intensity", min=0.0, default=1.0)
+    ambient_sky_color : bpy.props.FloatVectorProperty(name="Sky Color", subtype='COLOR', default=(1.0, 1.0, 1.0), min=0.0, max=1.0)
     hdr_image : bpy.props.PointerProperty(type=bpy.types.Image)
     preview : bpy.props.EnumProperty(items=generate_preview)
+
     @classmethod
     def register(cls):
         bpy.types.Scene.sort_hdr_sky = bpy.props.PointerProperty(name="SORT HDR Sky", type=cls)
@@ -61,7 +64,7 @@ class HDRSKY_PT_SORTPanel(bpy.types.Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "world"
-    bl_label = 'HDR Sky'
+    bl_label = 'Sky'
 
     COMPAT_ENGINES = {'SORT'}
     @classmethod
@@ -69,5 +72,9 @@ class HDRSKY_PT_SORTPanel(bpy.types.Panel):
         return context.scene.render.engine in cls.COMPAT_ENGINES
 
     def draw(self, context):
+        sort_hdr_sky = context.scene.sort_hdr_sky
+
+        self.layout.prop(sort_hdr_sky,"ambient_sky_intensity")
+        self.layout.prop(sort_hdr_sky,"ambient_sky_color")
         self.layout.template_ID(context.scene.sort_hdr_sky, 'hdr_image', open='image.open')
         self.layout.template_icon_view(context.scene.sort_hdr_sky, 'preview', show_labels=True)

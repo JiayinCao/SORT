@@ -35,6 +35,7 @@
 #include "scatteringevent/bsdf/transparent.h"
 #include "scatteringevent/scatteringevent.h"
 #include "scatteringevent/bssrdf/bssrdf.h"
+#include "scatteringevent/bsdf/kylin_principle.h"
 #include "medium/medium.h"
 #include "medium/absorption.h"
 #include "medium/homogeneous.h"
@@ -82,6 +83,7 @@ IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeEmpty)
         CLOSURE_ACTION(Surface_Closure_Coat)\
         CLOSURE_ACTION(Surface_Closure_FourierBRDF)\
         CLOSURE_ACTION(Surface_Closure_MERL)\
+        CLOSURE_ACTION(Surface_Closure_Kylin_Principle)\
         CLOSURE_ACTION(Volume_Closure_Absorption)\
         CLOSURE_ACTION(Volume_Closure_Homogeneous)\
         CLOSURE_ACTION(Volume_Closure_Heterogeneous)
@@ -379,6 +381,15 @@ namespace {
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
              const auto& params = *(const ClosureTypeMERL*)param;
              se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,Merl)(rc, params, w));
+         }
+     };
+
+     struct Surface_Closure_Kylin_Principle : public Surface_Closure_Base {
+         DEFINE_CLOSURETYPE(ClosureTypeKylinPrinciple)
+
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se, RenderContext& rc) const override {
+             const auto& params = *(const ClosureTypeKylinPrinciple*)param;
+             se.AddBxdf(SORT_MALLOC(rc.m_memory_arena,KylinPrinciple)(rc, params, w));
          }
      };
 

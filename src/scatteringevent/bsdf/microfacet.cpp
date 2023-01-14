@@ -22,6 +22,7 @@
 #include "core/memory.h"
 #include "core/render_context.h"
 #include "scatteringevent/bsdf/fresnel.h"
+#include "multi_scattering.h"
 
 IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeMirror)
 IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeMirror, Tsl_float3, base_color)
@@ -91,7 +92,15 @@ IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionBeckmann, Tsl_float3, 
 IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionBeckmann, Tsl_float3, normal)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeMicrofacetRefractionBeckmann)
 
-Blinn::Blinn( float roughnessU , float roughnessV ) {
+float MicroFacetDistribution::E(const Vector& wo) const{
+    return ::E(multi_scattering_ggs_no_fresnel::sample_cnt, roughness, wo.y, GetE_Lut());
+}
+
+float MicroFacetDistribution::Eavg() const{
+    return ::Eavg(multi_scattering_ggs_no_fresnel::sample_cnt, roughness, GetEAvg_Lut());
+}
+
+Blinn::Blinn( float roughnessU , float roughnessV ): MicroFacetDistribution(roughnessU) {
     // UE4 style way to convert roughness to alpha used here because it still keeps sharp reflection with low value of roughness
     // http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
     // PBRT way of converting roughness will result slightly blurred reflection even with 0 as roughness.
@@ -159,7 +168,7 @@ float Blinn::G1( const Vector& v ) const {
     return ( 3.535f * a + 2.181f * a * a ) / ( 1.0f + 2.276f * a + 2.577f * a * a );
 }
 
-Beckmann::Beckmann( float roughnessU , float roughnessV ) {
+Beckmann::Beckmann( float roughnessU , float roughnessV ): MicroFacetDistribution(roughnessU) {
     // UE4 style way to convert roughness to alpha used here because it still keeps sharp reflection with low value of roughness
     // http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
     // PBRT way of converting roughness will result slightly blurred reflection even with 0 as roughness.
@@ -217,7 +226,7 @@ float Beckmann::G1( const Vector& v ) const {
     return ( 3.535f * a + 2.181f * a * a ) / ( 1.0f + 2.276f * a + 2.577f * a * a );
 }
 
-GGX::GGX( float roughnessU , float roughnessV ) {
+GGX::GGX( float roughnessU , float roughnessV ): MicroFacetDistribution(roughnessU) {
     // UE4 style way to convert roughness to alpha used here because it still keeps sharp reflection with low value of roughness
     // http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
     // PBRT way of converting roughness will result slightly blurred reflection even with 0 as roughness.
@@ -344,6 +353,23 @@ float MicroFacetReflection::pdf( const Vector& wo , const Vector& wi ) const {
     const auto h = normalize( wo + wi );
     const auto EoH = absDot( wo , h );
     return distribution->Pdf(h) / (4.0f * EoH);
+}
+
+Spectrum MicroFacetReflectionMS::f( const Vector& wo , const Vector& wi ) const {
+    if (!SameHemiSphere(wo, wi)) return 0.0f;
+    if (!doubleSided && !PointingUp(wo)) return 0.0f;
+
+    const auto NoV = absCosTheta( wo );
+    if (NoV == 0.f)
+        return Spectrum(0.f);
+
+    // evaluate fresnel term
+    const auto wh = normalize(wi + wo);
+    const auto F = fresnel->Evaluate( dot(wo,wh) );
+    const auto single_scattering = R * distribution->D(wh) * F * distribution->G(wo,wi) / ( 4.0f * NoV );
+    const auto multi_scattering = MicrofacetMs(wo, wi, distribution, fresnel) * absCosTheta(wi);
+    
+    return single_scattering + multi_scattering;
 }
 
 MicroFacetRefraction::MicroFacetRefraction(RenderContext& rc, const ClosureTypeMicrofacetRefractionGGX&params, const Spectrum& weight):

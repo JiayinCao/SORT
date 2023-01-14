@@ -33,6 +33,7 @@ set REGISTER_SYS_ENV=
 set FORCE_UPDATE_DEP=
 set GENERATE_SRC=
 set VERIFY_BUILDS=
+set SETUP=
 
 rem parse arguments
 :argv_loop
@@ -79,6 +80,9 @@ if NOT "%1" == "" (
     ) else if "%1" == "verify_builds" (
         set VERIFY_BUILDS=1
         goto EOF
+    ) else if "%1" == "setup" (
+        set SETUP=1
+        goto EOF
     ) else (
         echo Unrecognized Command
         goto EOF
@@ -113,13 +117,13 @@ if "%GIT_UPDATE%" == "1" (
 
 if "%UPDATE_DEP%" == "1" (
     echo Syncing dependencies
-    py .\scripts\get_dep.py
+    py .\scripts\get_deps.py
     goto EOF
 )
 
 if "%FORCE_UPDATE_DEP%" == "1" (
     echo Syncing dependencies
-    py .\scripts\get_dep.py TRUE
+    py .\scripts\get_deps.py TRUE
     goto EOF
 )
 
@@ -144,9 +148,9 @@ if "%BUILD_RELEASE%" == "1" (
     powershell New-Item -Force -ItemType directory -Path proj_release
     cd proj_release
     cmake -A x64 ..
-    msbuild /p:Configuration=Release SORT.sln
+    cmake --build . --config Release
 
-    :: catch msbuild error
+    :: catch error
     if ERRORLEVEL 1 ( 
         goto BUILD_ERR
     )
@@ -159,9 +163,9 @@ if "%BUILD_RELWITHDEBINFO%" == "1" (
     powershell New-Item -Force -ItemType directory -Path proj_relwithdebinfo
     cd proj_relwithdebinfo
     cmake -A x64 ..
-    msbuild /p:Configuration=RelWithDebInfo SORT.sln
+    cmake --build . --config RelWithDebInfo
 
-    :: catch msbuild error
+    :: catch error
     if ERRORLEVEL 1 ( 
         goto BUILD_ERR
     )
@@ -174,9 +178,9 @@ if "%BUILD_DEBUG%" == "1" (
     powershell New-Item -Force -ItemType directory -Path proj_debug
     cd proj_debug
     cmake -A x64 ..
-    msbuild /p:Configuration=Debug SORT.sln
+    cmake --build . --config Debug
 
-    :: catch msbuild error
+    :: catch error
     if ERRORLEVEL 1 ( 
         goto BUILD_ERR
     )
@@ -201,10 +205,15 @@ if "%VERIFY_BUILDS%" == "1" (
     echo Verifying builds
     py .\scripts\verify_builds.py
 
-    :: catch msbuild error
+    :: catch error
     if ERRORLEVEL 1 (
         goto BUILD_ERR
     )
+)
+
+if "%SETUP%" == "1" (
+    make update_dep
+    make generate_src
 )
 
 :EOF

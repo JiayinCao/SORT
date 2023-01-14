@@ -34,6 +34,38 @@
 class Light;
 struct BSSRDFIntersections;
 
+//! @brief  A helper structure for iterating the primitives in the scene
+class ScenePrimitiveIterator{
+public:
+    ScenePrimitiveIterator(const Scene& scene);
+
+    //! @brief  Proceed to the next primitive. Do nothing if all primitives are visited.
+    const Primitive* Next();
+
+    //! @brief  Reset the iterator
+    void Reset();
+
+private:
+    int             m_indices[3];
+    const Scene&    m_scene;
+};
+
+//! @brief  A helper structure for iterating all the visuals in a scene
+class SceneVisualIterator{
+public:
+    SceneVisualIterator(const Scene& scene);
+
+    //! @brief  Proceed to the next visual. Do nothing if all primitives are visisted
+    const Visual* Next();
+
+    //! @brief  Reset the iterator
+    void Reset();
+
+private:
+    int             m_indices[2];
+    const Scene&    m_scene;
+};
+
 //! @brief  Data structure representing the whole scene.
 /**
  * Scene is responsible for maintaining all of the lifetime of its own data structure.
@@ -127,36 +159,6 @@ public:
         return m_bbox;
     }
 
-    //! @brief  Get the bounding box of the primitives that are attached with volumes.
-    //!
-    //! @return     The bounding box of the primitives that are attached with volumes.
-    const BBox& GetBBoxVol() const {
-        return m_bboxVol;
-    }
-    
-    //! @brief  Add a primitive in the scene.
-    void AddPrimitive( const Primitive* primitive) {
-        m_primitives.push_back( std::move(primitive) );
-
-        const auto material = primitive->GetMaterial();
-        if( material->HasVolumeAttached() )
-            m_volPrimitives.push_back( primitive );
-    }
-    
-    //! @brief  Get all of the primitives in the scene.
-    //!
-    //! @return     A vector that holds all primitives in the scene.
-    const std::vector<const Primitive*>&   GetPrimitives() const {
-        return m_primitives;
-    }
-
-    //! @brief  Get all of the primitives that has volume attached in the scene.
-    //!
-    //! @return     A vector that holds all primitives in the scene.
-    const std::vector<const Primitive*>&   GetPrimitivesVol() const {
-        return m_volPrimitives;
-    }
-
     // Evaluate sky
     Spectrum    Le( const Ray& ray ) const;
 
@@ -172,12 +174,12 @@ public:
     // Build acceleration structure
     void BuildAccelerationStructure();
 
+    // Get the primitive count
+    unsigned GetPrimitiveCount() const;
+
 private:
     std::vector<std::unique_ptr<Entity>>        m_entities;             /**< Entities in the scene. */
     std::vector<Light*>                         m_lights;               /**< Lights in the scene. */
-
-    std::vector<const Primitive*>               m_primitives;           /**< A list holding all primitives. */
-    std::vector<const Primitive*>               m_volPrimitives;        /**< A list holding all primitives that has volume attached to it. */
 
     std::unique_ptr<Accelerator>                m_accelerator;          /**< Acceleration structure for the whole scene. */
     
@@ -189,13 +191,11 @@ private:
 
     // bounding box for the scene
     BBox    m_bbox;
-    BBox    m_bboxVol;
-
-    // generate primitive buffer
-    void    generatePriBuf();
 
     // compute light cdf
     void    genLightDistribution();
 
     friend class MeshVisual;
+    friend class ScenePrimitiveIterator;
+    friend class SceneVisualIterator;
 };

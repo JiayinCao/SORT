@@ -21,6 +21,7 @@
 #include "math/interaction.h"
 #include "scatteringevent/scatteringevent.h"
 #include "core/memory.h"
+#include "core/scene.h"
 
 SORT_STATS_DEFINE_COUNTER(sKDTreeNodeCount)
 SORT_STATS_DEFINE_COUNTER(sKDTreeLeafNodeCount)
@@ -38,39 +39,45 @@ SORT_STATS_COUNTER("Spatial-Structure(KDTree)", "Maximum Primitive in Leaf", sKD
 SORT_STATS_AVG_COUNT("Spatial-Structure(KDTree)", "Average Primitive Count in Leaf", sKDTreePrimitiveCount , sKDTreeLeafNodeCount );
 SORT_STATS_AVG_COUNT("Spatial-Structure(KDTree)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-void KDTree::Build( const std::vector<const Primitive*>& primitives, const BBox& bbox){
+void KDTree::Build(const Scene& scene){
     SORT_PROFILE("Build KdTree");
 
-    m_primitives = &primitives;
-    if (primitives.empty())
+    const auto prim_cnt = scene.GetPrimitiveCount();
+    if(prim_cnt == 0)
         return;
 
-    // pre-malloc node and leaf primitive list memory
-    auto tmp = std::make_unique<unsigned char[]>(m_primitives->size());
+    ScenePrimitiveIterator iter(scene);
 
-    m_bbox = bbox;
+    // pre-malloc node and leaf primitive list memory
+    auto tmp = std::make_unique<unsigned char[]>(prim_cnt);
+
+    m_bbox = scene.GetBBox();
 
     // create the split candidates
-    auto count = (unsigned int)m_primitives->size();
     Splits splits;
     for(auto i = 0 ; i < 3 ; i++ )
-        splits.split[i] = std::make_unique<Split[]>(2*count);
+        splits.split[i] = std::make_unique<Split[]>(2*prim_cnt);
     for(auto k = 0 ; k < 3 ; k++ ){
-        for(auto i = 0u ; i < count ; i++ ){
-            auto pri = (*m_primitives)[i];
+        iter.Reset();
+
+        auto i = 0u;
+        while(auto pri = iter.Next()){
             auto box = pri->GetBBox();
             splits.split[k][2*i] = Split(box.m_Min[k], Split_Type::Split_Start, i, pri);
             splits.split[k][2*i+1] = Split(box.m_Max[k], Split_Type::Split_End, i, pri);
+            ++i;
         }
+
+        sAssert(i == prim_cnt, SPATIAL_ACCELERATOR);
     }
     for(auto i = 0 ; i < 3 ; i++ )
-        std::sort( splits.split[i].get() , splits.split[i].get() + 2 * count);
+        std::sort( splits.split[i].get() , splits.split[i].get() + 2 * prim_cnt);
 
     // create root node
     m_root = std::make_unique<Kd_Node>(m_bbox);
 
     // build kd-tree
-    splitNode( m_root.get() , splits , count , 1u , tmp.get() );
+    splitNode( m_root.get() , splits , prim_cnt , 1u , tmp.get() );
 
     SORT_STATS(++sKDTreeNodeCount);
 

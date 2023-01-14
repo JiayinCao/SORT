@@ -18,11 +18,12 @@
 #pragma once
 
 #include "light.h"
-#include "core/rtti.h"
-#include "math/sky.h"
 #include "core/log.h"
 
 //! @brief  Definition of sky light.
+/**
+ * SkyLight is an abstruction of different kinds of sky lights.
+ */
 class   SkyLight : public Light{
 public:
     //! @brief  Sample a direction given the intersection.
@@ -42,7 +43,7 @@ public:
     //! @param  cosAtLight      The cos of the angle between the light out-going direction, the opposite of 'dirToLight'.
     //! @param  visibility      The visibility data structured filled by the light source.
     //! @return                 The radiance goes from the light source to the intersected point.
-    Spectrum sample_l(const Point& ip, const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const override;
+    Spectrum sample_l(const Point& ip, const LightSample* ls, Vector& dirToLight, float* distance, float* pdfw, float* emissionPdf, float* cosAtLight, Visibility& visibility) const override;
 
     //! @brief      Sample a point and light out-going direction.
     //!
@@ -62,23 +63,11 @@ public:
     //! even if with a ray that accidentally hits the delta light sources.
     //!
     //! @param  intersect       The intersection information.
-    //! @param  wo              The direction goes from the intersection to the light source.
+    //! @param  wo              The direction goes from the light source to the intersecion, NOT the ray points to the light source!
     //! @param  directPdfA      The pdf w.r.t area to pick the point, intersection between the direction and the light source.
     //! @param  emissionPdf     The pdf w.r.t solid angle to pick to sample such a position and direction goes to the intersection.
     //! @return                 The radiance goes from the light source to the intersection, black if there is no intersection.
-    Spectrum Le( const SurfaceInteraction& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const override;
-
-    //! @brief  Given a ray, sample the light source if there is any intersection between the ray and the light source.
-    //!
-    //! It simply returns false for delta function, meaning there is no way to pick a ray hitting the delta light source.
-    //! Integrator has to explicitly sample delta light sources instead of using this function and hoping to get radiances
-    //! even if with a ray that accidentally hits the delta light sources.
-    //!
-    //! @param  ray             The ray to be evaluated.
-    //! @param  intersect       The intersection between the ray and the light source.
-    //! @param  radiance        The radiance goes from the light source to the ray origin.
-    //! @return                 Whether there is an intersection between the ray and the light source.
-    bool Le( const Ray& ray , SurfaceInteraction* intersect , Spectrum& radiance ) const override;
+    Spectrum Le(const SurfaceInteraction& intersect, const Vector& wo, float* directPdfA, float* emissionPdf) const override;
 
     //! @brief  Whether the light is an infinite light source.
     //!
@@ -94,7 +83,13 @@ public:
     //! only used to pick a light for importance sampling, it is fine to be biased.
     //!
     //! @return     Approximation of the light power.
-    Spectrum Power() const override;
+    Spectrum Power() const override{
+        sAssert(IS_PTR_VALID(m_scene), LIGHT );
+        const BBox box = m_scene->GetBBox();
+        const float radius = (box.m_Max - box.m_Min).Length() * 0.5f;
+
+        return radius * radius * PI * GetAverage();
+    }
 
     //! @brief  Whether the light is a delta light source.
     //!
@@ -103,16 +98,31 @@ public:
         return false;
     }
 
-    //! @brief  The pdf w.r.t solid angle if the ray starting from 'p', tracing through 'wi' hits the light source.
+    //! @brief  Get the average color of the sky
     //!
-    //! @param  p       The point in world space to be shaded.
-    //! @param  wi      The direction pointing from the point.
-    //! @return         The pdf w.r.t solid angle if the ray starting from 'p', tracing through 'wi' hits the light source.
-    float Pdf( const Point& p , const Vector& wi ) const override;
-
-private:
-    /**< Sky information. */
-    Sky sky;
+    //! @return     Average color of the sky
+    virtual Spectrum GetAverage() const = 0;
 
     friend class SkyLightEntity;
+
+protected:
+    //! @brief  Evalaute the radiance along a specific direction.
+    //!
+    //! @param dir   Direction pointing from the shading point to the sky
+    //! @return      Radiance value of the sky along the input direction.
+    virtual Spectrum RadianceFromDirection( const Vector& dir ) const = 0;
+
+    //! @brief  Sample a local direction in the light's local space
+    //!
+    //! @param ls           LightSample used to take the random sample
+    //! @param pdf_w        Pdf w.r.t solid angle
+    //! @param local_dir    Direction sampled in light's local space, pointing from the shaded point to the sky
+    //! @param global_dir   Direction sampled in global sapce, pointing from the shaded point to the sky
+    virtual void   SampleLocalDirection(const LightSample& ls, float& pdf_w, Vector& local_dir, Vector& global_dir) const = 0;
+
+    //! @brief  Convert the direction from world space to local space
+    //!
+    //! @param world_dir    Direction in world space.
+    //! @return             Direction in local space.
+    virtual Vector LocalDirFromWorldDir(const Vector& world_dir) const = 0;
 };

@@ -24,8 +24,8 @@ SORT_DIR       := $(shell pwd -P)
 ARCH ?= $(shell uname -m)
 
 # unified command by using python script
-UPDATE_DEP_COMMAND           = @python3 ./scripts/get_dep.py FALSE "${ARCH}"
-FORCE_UPDATE_DEP_COMMAND     = @python3 ./scripts/get_dep.py TRUE "${ARCH}"
+UPDATE_DEP_COMMAND           = @python3 ./scripts/get_deps.py FALSE "${ARCH}"
+FORCE_UPDATE_DEP_COMMAND     = @python3 ./scripts/get_deps.py TRUE "${ARCH}"
 
 BUILD_RELEASE_COMMAND        = @echo "building release version.";cd $(SORT_DIR); mkdir proj_release; cd proj_release; cmake -DCMAKE_OSX_ARCHITECTURES=${ARCH} -DCMAKE_BUILD_TYPE=Release ..;make -j 4;cd ..;
 BUILD_DEBUG_COMMAND          = @echo "building debug version.";cd $(SORT_DIR); mkdir proj_debug; cd proj_debug; cmake -DCMAKE_OSX_ARCHITECTURES=${ARCH} -DCMAKE_BUILD_TYPE=Debug ..;make -j 4;cd ..;
@@ -54,6 +54,10 @@ update_dep: .FORCE
 force_update_dep: .FORCE
 	@echo 'Syncing dependencies'
 	$(FORCE_UPDATE_DEP_COMMAND)
+
+setup: .FORCE
+	@make update_dep
+	@make generate_src
 
 clean: .FORCE
 	@echo 'Cleaning all generated files'

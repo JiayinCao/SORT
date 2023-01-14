@@ -20,6 +20,7 @@
 #include "core/log.h"
 #include "scatteringevent/scatteringevent.h"
 #include "core/memory.h"
+#include "core/scene.h"
 
 SORT_STATS_DEFINE_COUNTER(sOcTreeNodeCount)
 SORT_STATS_DEFINE_COUNTER(sOcTreeLeafNodeCount)
@@ -37,18 +38,20 @@ SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Maximum Primitive in Leaf", sOc
 SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Count in Leaf", sOcTreePrimitiveCount , sOcTreeLeafNodeCount);
 SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-void OcTree::Build(const std::vector<const Primitive*>& primitives, const BBox& bbox){
+void OcTree::Build(const Scene& scene){
     SORT_PROFILE("Build OcTree");
 
-    m_primitives = &primitives;
-    if (m_primitives->empty())
+    const auto prim_cnt = scene.GetPrimitiveCount();
+    if (!prim_cnt)
         return;
 
-    m_bbox = bbox;
+    ScenePrimitiveIterator iter(scene);
+
+    m_bbox = scene.GetBBox();
 
     // initialize a primitive container
     std::unique_ptr<NodePrimitiveContainer> container = std::make_unique<NodePrimitiveContainer>();
-    for( auto& primitive : *m_primitives )
+    while(auto primitive = iter.Next())
         container->primitives.push_back( primitive );
 
     // create root node

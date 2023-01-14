@@ -224,3 +224,46 @@ bool Triangle::GetIntersect(const BBox& box) const{
 
     return true;
 }
+
+
+#if INTEL_EMBREE_ENABLED
+void Triangle::ConvertIntersection(const RTCRayHit& ray_hit, SurfaceInteraction& inter) const{
+    auto& mem = m_meshVisual->m_memory;
+    const auto id0 = m_index.m_id[0];
+    const auto id1 = m_index.m_id[1];
+    const auto id2 = m_index.m_id[2];
+
+    const auto& mv0 = mem->m_vertices[id0];
+    const auto& mv1 = mem->m_vertices[id1];
+    const auto& mv2 = mem->m_vertices[id2];
+
+    // get three vertexes
+    const auto& op0 = mv0.m_position;
+    const auto& op1 = mv1.m_position;
+    const auto& op2 = mv2.m_position;
+
+    const auto u = ray_hit.hit.u;
+    const auto v = ray_hit.hit.v;
+    const auto w = 1.f - u - v;
+    inter.gnormal = normalize(cross((op2 - op0), (op1 - op0)));
+    inter.normal = (w * mv0.m_normal + u * mv1.m_normal + v * mv2.m_normal).Normalize();
+    inter.tangent = (w * mv0.m_tangent + u * mv1.m_tangent + v * mv2.m_tangent).Normalize();
+
+    const auto uv = w * mv0.m_texCoord + u * mv1.m_texCoord + v * mv2.m_texCoord;
+    inter.u = uv.x;
+    inter.v = uv.y;
+    inter.t = ray_hit.ray.tfar;
+
+    const auto& ray = ray_hit.ray;
+    inter.intersect = Vector(ray.org_x + ray.dir_x * inter.t, 
+                             ray.org_y + ray.dir_y * inter.t, 
+                             ray.org_z + ray.dir_z * inter.t);
+    inter.view = -Vector(ray.dir_x, ray.dir_y, ray.dir_z);
+}
+
+EmbreeGeometry* Triangle::BuildEmbreeGeometry(RTCDevice device, Embree& ebmree) const{
+    // triangle will be pushed to Embree through MeshVisual, not here.
+    return nullptr;
+}
+
+#endif

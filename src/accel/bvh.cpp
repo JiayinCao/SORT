@@ -22,6 +22,7 @@
 #include "math/interaction.h"
 #include "scatteringevent/scatteringevent.h"
 #include "core/memory.h"
+#include "core/scene.h"
 
 SORT_STATS_DEFINE_COUNTER(sBvhNodeCount)
 SORT_STATS_DEFINE_COUNTER(sBvhLeafNodeCount)
@@ -39,30 +40,32 @@ SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Maximum Primitive in Leaf", sBvhMa
 SORT_STATS_AVG_COUNT("Spatial-Structure(BVH)", "Average Primitive Count in Leaf", sBvhPrimitiveCount , sBvhLeafNodeCount );
 SORT_STATS_AVG_COUNT("Spatial-Structure(BVH)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-void Bvh::Build(const std::vector<const Primitive*>& primitives, const BBox& bbox){
+void Bvh::Build(const Scene& scene){
     SORT_PROFILE("Build Bvh");
 
-    m_primitives = &primitives;
-    if (primitives.empty())
+    const auto prim_cnt = scene.GetPrimitiveCount();
+    if (!prim_cnt)
         return;
 
-    m_bvhpri = std::make_unique<Bvh_Primitive[]>(m_primitives->size());
+    ScenePrimitiveIterator iter(scene);
 
-    m_bbox = bbox;
+    m_bvhpri = std::make_unique<Bvh_Primitive[]>(prim_cnt);
+    m_bbox = scene.GetBBox();
 
     // generate BVH primitives
-    const auto primitive_cnt = m_primitives->size();
-    for (auto i = 0u; i < primitive_cnt; ++i)
-        m_bvhpri[i].SetPrimitive((*m_primitives)[i]);
+    auto i = 0u;
+    while(auto primitive = iter.Next())
+        m_bvhpri[i++].SetPrimitive(primitive);
+    sAssert(i == prim_cnt, SPATIAL_ACCELERATOR);
 
     // recursively split node
     m_root = std::make_unique<Bvh_Node>();
-    splitNode( m_root.get() , 0u , (unsigned)m_primitives->size() , 1u );
+    splitNode( m_root.get() , 0u , (unsigned)prim_cnt , 1u );
 
     m_isValid = true;
 
     SORT_STATS(++sBvhNodeCount);
-    SORT_STATS(sBvhPrimitiveCount=primitive_cnt);
+    SORT_STATS(sBvhPrimitiveCount=prim_cnt);
 }
 
 void Bvh::splitNode( Bvh_Node* node , unsigned start , unsigned end , unsigned depth ){

@@ -19,6 +19,7 @@
 #include "core/memory.h"
 #include "core/stats.h"
 #include "scatteringevent/bssrdf/bssrdf.h"
+#include "core/scene.h"
 
 SORT_STATIC_FORCEINLINE Fast_Bvh_Node_Ptr makeFastBvhNode( unsigned int start , unsigned int end ){
 #ifdef SIMD_BVH_IMPLEMENTATION
@@ -105,24 +106,26 @@ SORT_STATIC_FORCEINLINE BBox calcBoundingBox(const Fbvh_Node* const node , const
     return node_bbox;
 }
 
-void Fbvh::Build(const std::vector<const Primitive*>& primitives, const BBox& bbox){
+void Fbvh::Build(const Scene& scene){
     SORT_PROFILE("Build Fbvh");
 
-    m_primitives = &primitives;
-    if( primitives.empty() )
+    const auto primitive_cnt = scene.GetPrimitiveCount();
+    if (!primitive_cnt)
         return;
 
-    m_bvhpri = std::make_unique<Bvh_Primitive[]>(m_primitives->size());
+    ScenePrimitiveIterator iter(scene);
 
-    m_bbox = bbox;
+    m_bvhpri = std::make_unique<Bvh_Primitive[]>(primitive_cnt);
+    m_bbox = scene.GetBBox();
 
     // generate BVH primitives
-    const auto primitive_cnt = m_primitives->size();
-    for (auto i = 0u; i < primitive_cnt; ++i)
-        m_bvhpri[i].SetPrimitive((*m_primitives)[i]);
+    auto i = 0u;
+    while(auto primitive = iter.Next())
+        m_bvhpri[i++].SetPrimitive(primitive);
+    sAssert(i == primitive_cnt, SPATIAL_ACCELERATOR);
     
     // recursively split node
-    m_root = makeFastBvhNode( 0 , (unsigned)m_primitives->size() );
+    m_root = makeFastBvhNode(0 , primitive_cnt);
     splitNode( m_root.get() , m_bbox , 1u );
 
     // if the algorithm reaches here, it is a valid QBVH

@@ -29,16 +29,6 @@ class VisualEntity : public Entity{
 public:
     DEFINE_RTTI( VisualEntity , Entity );
 
-    //! @brief  Fill the scene with primitives.
-    //!
-    //! Each entity may have multiple visuals. Visual will be responsible for filling the scene with primivites.
-    //!
-    //! @param  scene       The scene to be filled.
-    void   FillScene( class Scene& scene ) override {
-        for_each( m_visuals.begin() , m_visuals.end() ,
-            [&]( const std::unique_ptr<Visual>& visual ) { visual->FillScene(scene); } );
-    }
-
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the entity. Loading from an IStreamBase, which could be coming from file, memory or network.

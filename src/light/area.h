@@ -61,7 +61,7 @@ public:
     //! even if with a ray that accidentally hits the delta light sources.
     //!
     //! @param  intersect       The intersection information.
-    //! @param  wo              The direction goes from the intersection to the light source.
+    //! @param  wo              The direction goes from the light source to the intersecion, NOT the ray points to the light source!
     //! @param  directPdfA      The pdf w.r.t area to pick the point, intersection between the direction and the light source.
     //! @param  emissionPdf     The pdf w.r.t solid angle to pick to sample such a position and direction goes to the intersection.
     //! @return                 The radiance goes from the light source to the intersection, black if there is no intersection.

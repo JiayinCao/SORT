@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include "light_entity.h"
+#include "light/hdrskylight.h"
 #include "shape/quad.h"
 #include "shape/disk.h"
 #include "core/primitive.h"
@@ -65,16 +66,29 @@ void SpotLightEntity::FillScene(class Scene& scene) {
     scene.AddLight(m_light.get());
 }
 
+SkyLightEntity::SkyLightEntity() {
+    // Default ambient light has 0.5 as radiance
+    m_light->intensity = 0.5f;
+}
+
 void SkyLightEntity::Serialize(IStreamBase& stream) {
     stream >> m_light->m_light2world;
-    auto energy = 1.0f;
-    stream >> energy >> m_light->intensity;
-    m_light->intensity *= energy;
+    auto sky_intensity = 1.0f;
+    auto sky_color = Spectrum();
+    stream >> sky_intensity >> sky_color;
+    sky_color *= sky_intensity;
 
-    // the following code needs to be changed later.
+    // If a hdr texture is setup, use HdrSkyLight, rather than ambient lighting
     std::string filename;
     stream >> filename;
-    m_light->sky.Load(filename);
+    if(!filename.empty()){
+        // Only if we can load the hdr texture, we will swap it with the ambient light
+        auto hdr_sky = std::make_unique<HdrSkyLight>();
+        if(hdr_sky->LoadHdrImage(filename))
+            m_light = std::move(hdr_sky);
+    }
+
+    m_light->intensity = sky_color;
 }
 
 void SkyLightEntity::FillScene(class Scene& scene) {
@@ -135,10 +149,11 @@ void AreaLightEntity::Serialize(IStreamBase& stream) {
         slog( WARNING , LIGHT , "Unrecognized area light type (%u)." , area_type.m_sid );
     }
 
-    m_primitive = std::make_unique<Primitive>(nullptr, nullptr, m_light->m_shape.get(), m_light.get());
+    auto primitive = std::make_unique<Primitive>(nullptr, nullptr, m_light->m_shape.get(), m_light.get());
+    auto visual = std::make_unique<SinglePrimitiveVisual>(std::move(primitive));
+    m_visuals.push_back(std::move(visual));
 }
 
 void AreaLightEntity::FillScene(class Scene& scene) {
     scene.AddLight(m_light.get());
-    scene.AddPrimitive(m_primitive.get());
 }
