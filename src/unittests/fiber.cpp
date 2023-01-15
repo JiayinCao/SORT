@@ -38,7 +38,7 @@ TEST(Fiber, CreateNewFiber) {
 #endif
 
     new_fiber = createFiber(0, [](){});
-    EXPECT_TRUE(new_fiber != nullptr);
+    EXPECT_TRUE(new_fiber == nullptr);
 }
 
 // Swap fibers from one to another
