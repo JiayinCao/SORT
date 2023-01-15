@@ -18,7 +18,7 @@
 #include <stdint.h>
 #include "core/define.h"
 
-#if defined(SORT_IN_MAC) || defined(SORT_IN_LINUX)
+#if defined(SORT_X64_TARGET) && (defined(SORT_IN_MAC) || defined(SORT_IN_LINUX))
 
 #include "fiber_impl_asm_x64.h"
 
