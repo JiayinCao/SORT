@@ -17,8 +17,6 @@
 
 #pragma once
 
-#include <iostream>
-
 #if defined(_WIN32) || defined(_WIN64)
     #define SORT_IN_WINDOWS
 #elif defined(__linux__)
@@ -32,7 +30,7 @@
     #define SORT_IN_MAC
 
     // Make sure the compiler is C++14 compatible. Otherwise, make it clear that it is necessary to compile SORT in an error message.
-    #if (__cplusplus < 201300L)
+    #if defined(__cplusplus) && (__cplusplus < 201300L)
         #  error "SORT heavily uses features of C++14/11, please make sure you have a C++14 compatible compiler."
     #endif
 #endif
