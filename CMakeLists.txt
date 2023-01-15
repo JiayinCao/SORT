@@ -148,7 +148,7 @@ include_directories( "${generated_src_dir}" )
 set(all_files ${project_headers} ${project_cpps} ${project_cs} ${project_ccs})
 
 # for now, only fiber implementation uses assembly language
-if(APPLE)
+if(APPLE OR UNIX)
     list(APPEND all_files ${project_asm})
 endif()
 
