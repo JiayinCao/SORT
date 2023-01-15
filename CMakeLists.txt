@@ -27,7 +27,7 @@ message(STATUS "CMake Version: " ${CMAKE_MAJOR_VERSION} "." ${CMAKE_MINOR_VERSIO
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # this will avoid generate ZERO_CHECK project
-# set(CMAKE_SUPPRESS_REGENERATION true)
+set(CMAKE_SUPPRESS_REGENERATION true)
 
 # define platform
 if (WIN32)
