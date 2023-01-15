@@ -51,11 +51,14 @@ std::unique_ptr<Fiber> createFiberFromThread() {
 
 std::unique_ptr<Fiber> createFiber(unsigned int stackSize,
                                    const std::function<void()>& func) {
+    if (!stackSize)
+        return nullptr;
 
     auto ptr = std::make_unique<Fiber>();
 
-    // stackSize is rounded up to the system's allocation granularity (typically 64 KB).
-    ptr->m_context.m_fiber = CreateFiberEx(stackSize - 1, stackSize, FIBER_FLAG_FLOAT_SWITCH,
+    ptr->m_context.m_fiber = CreateFiberEx(stackSize - 1, 
+                                           stackSize, 
+                                           FIBER_FLAG_FLOAT_SWITCH,
                                            RunFiber, ptr.get());
     ptr->m_target_func = func;
 
