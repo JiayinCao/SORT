@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <string>
 #include "core/define.h"
 
 #ifdef SORT_IN_WINDOWS
