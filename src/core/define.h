@@ -85,7 +85,7 @@
     #if defined(SORT_IN_MAC)
         #define DISABLE_WARNINGS           DISABLE_WARNING(-Wnon-c-typedef-for-linkage)
     #else
-        #define DISABLE_WARNINGS           \\ it is not needed yet
+        #define DISABLE_WARNINGS           
     #endif
 #endif
 
