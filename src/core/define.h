@@ -82,7 +82,11 @@
     #define DISABLE_WARNING_POP            DO_PRAGMA(GCC diagnostic pop) 
     #define DISABLE_WARNING(warningName)   DO_PRAGMA(GCC diagnostic ignored #warningName)
 
-    #define DISABLE_WARNINGS               DISABLE_WARNING(-Wnon-c-typedef-for-linkage)
+    #if defined(SORT_IN_MAC)
+        #define DISABLE_WARNINGS           DISABLE_WARNING(-Wnon-c-typedef-for-linkage)
+    #else
+        #define DISABLE_WARNINGS           \\ it is not needed yet
+    #endif
 #endif
 
 #define BEGIN_EXTERNAL_INCLUDES \
