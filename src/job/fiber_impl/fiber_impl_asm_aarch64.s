@@ -20,9 +20,9 @@
 #include "fiber_impl_asm_aarch64_shared.h"
 
 .text
-.global _switch_fiber
+.global ASM_ENTRY_WRAPPER(switch_fiber)
 .align 4
-_switch_fiber:
+ASM_ENTRY_WRAPPER(switch_fiber):
     str x16, [x0, #FIBER_REG_X16]
     str x17, [x0, #FIBER_REG_X17]
     str x18, [x0, #FIBER_REG_X18]

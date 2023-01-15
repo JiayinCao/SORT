@@ -150,7 +150,6 @@ set(all_files ${project_headers} ${project_cpps} ${project_cs} ${project_ccs})
 # for now, only fiber implementation uses assembly language
 if(APPLE)
     list(APPEND all_files ${project_asm})
-    set_source_files_properties(${project_asm} PROPERTIES LANGUAGE C)
 endif()
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src FILES ${all_files})

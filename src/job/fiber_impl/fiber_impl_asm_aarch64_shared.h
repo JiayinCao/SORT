@@ -43,3 +43,5 @@
 #define FIBER_REG_V14   0xb8
 #define FIBER_REG_V15   0xc0
 #define FIBER_REG_SP    0xc8
+
+#define ASM_ENTRY_WRAPPER(x) _##x
