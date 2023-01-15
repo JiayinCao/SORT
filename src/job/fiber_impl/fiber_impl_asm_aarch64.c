@@ -17,9 +17,10 @@
 
 #include <stdint.h>
 #include "core/define.h"
-#include "fiber_impl_asm_aarch64.h"
 
 #if defined(SORT_ARM64_TARGET) && defined(SORT_IN_MAC)
+
+#include "fiber_impl_asm_aarch64.h"
 
 // fiber entry function
 static inline void fiber_entry(void (*target)(void*), void* arg) {

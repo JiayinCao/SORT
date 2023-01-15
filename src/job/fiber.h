@@ -15,6 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
+#include <functional>
 #include "core/define.h"
 #include "core/memory.h"
 

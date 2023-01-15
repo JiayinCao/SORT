@@ -23,7 +23,7 @@
     #define SORT_IN_LINUX
 
     // Make sure the compiler is C++14 compatible. Otherwise, make it clear that it is necessary to compile SORT in an error message.
-    #if (__cplusplus < 201300L)
+    #if defined(__cplusplus) && (__cplusplus < 201300L)
         #  error "SORT heavily uses features of C++14/11, please make sure you have a C++14 compatible compiler."
     #endif
 #elif defined(__APPLE__)
