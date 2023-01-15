@@ -20,11 +20,17 @@
 #include "core/memory.h"
 
 #if defined(SORT_IN_WINDOWS)
-   #include "fiber_impl/fiber_impl_win.h"
+    #include "fiber_impl/fiber_impl_win.h"
+
+    #define SORT_FIBER_ASM_IMPLEMENTATION   0
 #elif defined(SORT_IN_LINUX)
-   #include "fiber_impl/fiber_impl_linux.h"
+    #include "fiber_impl/fiber_impl_linux.h"
+
+    #define SORT_FIBER_ASM_IMPLEMENTATION   1
 #elif defined(SORT_IN_MAC)
-   #include "fiber_impl/fiber_impl_mac.h"
+    #include "fiber_impl/fiber_impl_mac.h"
+
+    #define SORT_FIBER_ASM_IMPLEMENTATION   1
 #endif
 
 
@@ -37,20 +43,19 @@ struct Fiber {
     //! @brief  Destructor
     ~Fiber();
 
-    //! @brief  Reset the fiber
-    void Reset(const std::function<void()>& func);
-
     // fiber context, this is platform dependent
     FiberContext            m_context;
 
+    // real fiber function to be executed
+    std::function<void()>   m_target_func;
+
+#if SORT_FIBER_ASM_IMPLEMENTATION
     // pointer to stack
     void*                   m_stack_ptr = nullptr;
 
     // stack size
     unsigned int            m_stack_size = 0;
-
-    // real fiber function to be executed
-    std::function<void()>   m_target_func;
+#endif
 };
 
 //! @brief  Convert the current thread to fiber.

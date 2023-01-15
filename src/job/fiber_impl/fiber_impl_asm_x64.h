@@ -20,6 +20,16 @@
 // type of each register, has to be 64 bits
 typedef unsigned long long  Register;
 
+//! @brief  Fiber context that saves all the callee saved registers
+/**
+ * The specific set of register is architecture and OS dependent. SORT uses this implementation for
+ * Intel Mac and X64 Ubuntu, which use 'System V AMD64 ABI'.
+ * https://en.wikipedia.org/wiki/X86_calling_conventions#cite_note-AMD-28
+ * 
+ * System V Application Binary Interface AMD64 Architecture Processor Supplement
+ * Page 23, AMD64 ABI Draft 1.0
+ * https://github.com/hjl-tools/x86-psABI/wiki/x86-64-psABI-1.0.pdf
+ */
 struct FiberContext {
     // callee-saved registers
     Register rbx;

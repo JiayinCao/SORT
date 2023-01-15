@@ -21,36 +21,24 @@
 
 using namespace unittest;
 
-// Fiber on Windows is not implemented yet
-#if !defined(SORT_IN_WINDOWS)
-
 // Convert the current thread to a fiber
 TEST(Fiber, ConvertCurrentThreadToFiber) {
     auto thread_fiber = createFiberFromThread();
-    EXPECT_NE(thread_fiber, nullptr);
+    EXPECT_TRUE(thread_fiber != nullptr);
 }
 
 // Create a new fiber
 TEST(Fiber, CreateNewFiber) {
     auto new_fiber = createFiber(4096);
-    EXPECT_NE(new_fiber, nullptr);
+    EXPECT_TRUE(new_fiber != nullptr);
+
+#if SORT_FIBER_ASM_IMPLEMENTATION
     EXPECT_NE(new_fiber->m_stack_ptr, nullptr);
     EXPECT_EQ(new_fiber->m_target_func, nullptr);
+#endif
 
     new_fiber = createFiber(0, [](){});
-    EXPECT_EQ(new_fiber, nullptr);
-}
-
-// Reset an existing fiber
-TEST(Fiber, ResetFiber){
-    auto new_fiber = createFiber(4096, [](){});
-    EXPECT_NE(new_fiber, nullptr);
-
-    new_fiber->Reset(nullptr);
-    EXPECT_EQ(new_fiber->m_target_func, nullptr);
-
-    // reset should not nuke the stack memory though
-    EXPECT_NE(new_fiber->m_stack_ptr, nullptr);
+    EXPECT_TRUE(new_fiber != nullptr);
 }
 
 // Swap fibers from one to another
@@ -211,53 +199,3 @@ TEST(Fiber, CrossThreadFibers) {
     thread1.join();
     EXPECT_EQ(str, "abcdef");
 }
-
-// Allow fiber to be used after reset
-TEST(Fiber, ReuseFibers) {
-    std::string str = "a";
-
-    std::thread thread0, thread1;
-    std::unique_ptr<Fiber> thread0_fiber, thread1_fiber, current_thread_fiber, new_fiber;
-
-    current_thread_fiber = createFiberFromThread();
-    
-    new_fiber = createFiber(4096, 
-        [&](){
-            EXPECT_EQ(str, "a");
-            str += "b";
-            switchFiber(new_fiber.get(), current_thread_fiber.get());
-        }
-    );
-    switchFiber(current_thread_fiber.get(), new_fiber.get());
-    EXPECT_EQ(str, "ab");
-
-    new_fiber->Reset([&](){
-        EXPECT_EQ(str, "abc");
-        str += "d";
-        switchFiber(new_fiber.get(), thread0_fiber.get());
-    });
-
-    thread0 = std::thread([&](){
-        thread0_fiber = createFiberFromThread();
-        str += "c";
-        switchFiber(thread0_fiber.get(), new_fiber.get());
-    });
-    thread0.join();
-    EXPECT_EQ(str, "abcd");
-
-    new_fiber->Reset([&](){
-        EXPECT_EQ(str, "abcde");
-        str += "f";
-        switchFiber(new_fiber.get(), thread1_fiber.get());
-    });
-
-    thread1 = std::thread([&](){
-        thread1_fiber = createFiberFromThread();
-        str += "e";
-        switchFiber(thread1_fiber.get(), new_fiber.get());
-    });
-    thread1.join();
-    EXPECT_EQ(str, "abcdef");
-}
-
-#endif

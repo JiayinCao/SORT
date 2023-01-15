@@ -31,13 +31,6 @@ Fiber::~Fiber() {
     }
 }
 
-void Fiber::Reset(const std::function<void()>& func){
-    m_target_func = func;
-
-    create_fiber(&m_context, m_stack_ptr, static_cast<uint32_t>(m_stack_size),
-                 reinterpret_cast<void (*)(void*)>(RunFiber), this);
-}
-
 std::unique_ptr<Fiber> createFiberFromThread(){
     std::unique_ptr<Fiber> ptr = std::make_unique<Fiber>();
     ptr->m_context = {};
