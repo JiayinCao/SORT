@@ -15,14 +15,10 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-
 #if defined(__x86_64__)
 
 #include "fiber_impl_asm_x64_shared.h"
 
-// void marl_fiber_swap(marl_fiber_context* from, const marl_fiber_context* to)
-// rdi: from
-// rsi: to
 .text
 .global ASM_ENTRY_WRAPPER(switch_fiber)
 .align 4

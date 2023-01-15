@@ -48,8 +48,8 @@ static_assert(sizeof(Register) == 8);
 #define CHECK_OFFSET(REGISTER, OFFSET)    \
     static_assert(offsetof(FiberContext, REGISTER) == OFFSET,      "Incorrect register offset")
 
-CHECK_OFFSET(rbx,  FIBER_REG_RBX);
-CHECK_OFFSET(rbp,  FIBER_REG_RBP);
+CHECK_OFFSET(rbx, FIBER_REG_RBX);
+CHECK_OFFSET(rbp, FIBER_REG_RBP);
 CHECK_OFFSET(r12, FIBER_REG_R12);
 CHECK_OFFSET(r13, FIBER_REG_R13);
 CHECK_OFFSET(r14, FIBER_REG_R14);
