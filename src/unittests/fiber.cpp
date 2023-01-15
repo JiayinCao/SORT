@@ -23,7 +23,7 @@ using namespace unittest;
 
 // only Apple Silicon Mac has fiber implementation now
 // next step is to support X64, Intel Mac and Ubuntu, they should be quite similar
-#if defined(SORT_ARM64_TARGET) && defined(SORT_IN_MAC)
+#if defined(SORT_IN_MAC)
 
 // Convert the current thread to a fiber
 TEST(Fiber, ConvertCurrentThreadToFiber) {

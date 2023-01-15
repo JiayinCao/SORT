@@ -17,31 +17,21 @@
 
 // This file simply defines some macros to be shared by assembly language and C code
 
-#define FIBER_REG_X0    0x00
-#define FIBER_REG_X1    0x08
-#define FIBER_REG_X16   0x10
-#define FIBER_REG_X17   0x18
-#define FIBER_REG_X18   0x20
-#define FIBER_REG_X19   0x28
-#define FIBER_REG_X20   0x30
-#define FIBER_REG_X21   0x38
-#define FIBER_REG_X22   0x40
-#define FIBER_REG_X23   0x48
-#define FIBER_REG_X24   0x50
-#define FIBER_REG_X25   0x58
-#define FIBER_REG_X26   0x60
-#define FIBER_REG_X27   0x68
-#define FIBER_REG_X28   0x70
-#define FIBER_REG_X29   0x78
-#define FIBER_REG_X30   0x80
-#define FIBER_REG_V8    0x88
-#define FIBER_REG_V9    0x90
-#define FIBER_REG_V10   0x98
-#define FIBER_REG_V11   0xa0
-#define FIBER_REG_V12   0xa8
-#define FIBER_REG_V13   0xb0
-#define FIBER_REG_V14   0xb8
-#define FIBER_REG_V15   0xc0
-#define FIBER_REG_SP    0xc8
+#include "core/define.h"
 
-#define ASM_ENTRY_WRAPPER(x) _##x
+#define FIBER_REG_RBX 0x00
+#define FIBER_REG_RBP 0x08
+#define FIBER_REG_R12 0x10
+#define FIBER_REG_R13 0x18
+#define FIBER_REG_R14 0x20
+#define FIBER_REG_R15 0x28
+#define FIBER_REG_RDI 0x30
+#define FIBER_REG_RSI 0x38
+#define FIBER_REG_RSP 0x40
+#define FIBER_REG_RIP 0x48
+
+#if defined(SORT_IN_MAC)
+    #define ASM_ENTRY_WRAPPER(x) _##x
+#else
+    #define ASM_ENTRY_WRAPPER(x) x
+#endif

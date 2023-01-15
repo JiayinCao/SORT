@@ -17,7 +17,7 @@
 
 #include "../fiber.h"
 
-#if defined(SORT_ARM64_TARGET) && defined(SORT_IN_MAC)
+#if defined(SORT_IN_MAC)
 
 static inline void RunFiber(Fiber* fiber){
     if(fiber->m_target_func)
