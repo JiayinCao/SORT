@@ -43,17 +43,17 @@ struct Fiber {
     //! @brief  Destructor
     ~Fiber();
 
-    // fiber context, this is platform dependent
+    /**< fiber context, this is platform dependent. */
     FiberContext            m_context;
 
-    // real fiber function to be executed
+    /**< Real fiber function to be executed. */
     std::function<void()>   m_target_func;
 
 #if SORT_FIBER_ASM_IMPLEMENTATION
-    // pointer to stack
+    /**< Pointer to stack. */
     void*                   m_stack_ptr = nullptr;
 
-    // stack size
+    /**< Stack size. */
     unsigned int            m_stack_size = 0;
 #endif
 };
@@ -76,12 +76,15 @@ std::unique_ptr<Fiber> createFiberFromThread();
 //! @return             Newly created fiber.
 std::unique_ptr<Fiber> createFiber(unsigned int stackSize, const std::function<void()>& func = nullptr);
 
-//! @brief Switch from one fiber to another different fiber
+//! @brief  Switch from one fiber to another different fiber
 //!
 //! Warning, the upper level logic should have checked for same fiber switch.
 //! The low level implementation defined here won't do such a check. In the case of
 //! switching to a same fiber, it should not crash the system. But there could be some
 //! loss of performance.
+//! Another more important thing that derserve our attention is that the high level code will
+//! have to make sure the fromFiber is the current executing fiber, otherwise there will be
+//! undefined behavior.
 //!
 //! @param fromFiber    This fiber must the be executing fiber. It would potentially crash the 
 //!                     renderer otherwise. And data in this fiber will be recaptured right

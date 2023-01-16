@@ -55,6 +55,7 @@ enum class LOG_TYPE{
     LOG_TASK,
     LOG_MEMORY,
     LOG_SOCKET,
+    LOG_SCHEDULER,
 };
 
 //! @brief  LogDispatcher is an interface for dispatching log messages to different places.

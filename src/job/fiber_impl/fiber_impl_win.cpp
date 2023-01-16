@@ -30,15 +30,14 @@ void WINAPI RunFiber(PVOID arg) {
 
 Fiber::~Fiber() {
     if (m_context.m_fiber != nullptr) {
-        if (m_context.m_isFiberFromThread) {
+        if (m_context.m_isFiberFromThread)
             ConvertFiberToThread();
-        }
-        else {
+        else
             DeleteFiber(m_context.m_fiber);
-        }
 
         m_context.m_fiber = nullptr;
         m_context.m_isFiberFromThread = false;
+        m_target_func = nullptr;
     }
 }
 
