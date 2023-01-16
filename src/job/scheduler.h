@@ -41,11 +41,11 @@ struct SchedulerConfig {
 struct Task {
     using Function = std::function<void()>;
 
-    FORCEINLINE Task() : function(nullptr) {}
-    FORCEINLINE Task(const Function& function) : function(function) {}
-    FORCEINLINE Task(Function&& function) : function(std::move(function)) {}
+    SORT_FORCEINLINE Task() : function(nullptr) {}
+    SORT_FORCEINLINE Task(const Function& function) : function(function) {}
+    SORT_FORCEINLINE Task(Function&& function) : function(std::move(function)) {}
 
-    FORCEINLINE void operator()() const { function(); }
+    SORT_FORCEINLINE void operator()() const { function(); }
 
     ~Task() {
         int k = 0;
@@ -169,7 +169,7 @@ private:
 
 //! @brief  Schedule a task in the job system
 template <typename Function, typename... Args>
-FORCEINLINE void schedule_parallel(Function&& f, Args&&... args) {
+SORT_FORCEINLINE void schedule_parallel(Function&& f, Args&&... args) {
     Scheduler::GetBound()->Enqueue(
         Task(std::bind(std::forward<Function>(f), 
                        std::forward<Args>(args)...))
