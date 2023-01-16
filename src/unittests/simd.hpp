@@ -20,6 +20,7 @@
 #include "thirdparty/gtest/gtest.h"
 #include "simd/simd_wrapper.h"
 #include "unittest_common.h"
+#include "job/fiber.h"
 
 using namespace unittest;
 
@@ -507,6 +508,39 @@ TEST(SIMD_TEST, simd_minreduction_ps) {
 
     for( auto i = 0 ; i < SIMD_CHANNEL ; ++i )
         EXPECT_EQ( reduction[0] , correct_reduction[0] );
+}
+
+// make sure the simd operations won't get affected by fiber suspention
+TEST(SIMD_TEST, fiber_split) {
+    std::unique_ptr<Fiber> fiber, thread_fiber;
+
+    // capture the current thread so that we can swap
+    thread_fiber = createFiberFromThread();
+
+    fiber = createFiber(4096, 
+        [&](){
+            float data[SIMD_CHANNEL];
+            for( auto i = 0 ; i < SIMD_CHANNEL ; ++i )
+                data[i] = 2.0f * ( (float)i - 1.5f ) * ( (float)i - 1.5f );
+
+            const auto simd_data = simd_set_ps( data );
+            const auto reduction = simd_minreduction_ps( simd_data );
+            
+            switchFiber(fiber.get(), thread_fiber.get());
+
+            const auto correct_reduction = simd_set_ps1( 0.5f );
+            for( auto i = 0 ; i < SIMD_CHANNEL ; ++i )
+                EXPECT_EQ( reduction[0] , correct_reduction[0] );
+
+            switchFiber(fiber.get(), thread_fiber.get());
+        }
+    );
+
+    // swap to that fiber
+    switchFiber(thread_fiber.get(), fiber.get());
+
+    // resume the fiber to verify the simd operations
+    switchFiber(thread_fiber.get(), fiber.get());
 }
 
 #endif

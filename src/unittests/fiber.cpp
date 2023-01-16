@@ -45,22 +45,34 @@ TEST(Fiber, CreateNewFiber) {
 TEST(Fiber, SwapFiber) {
     std::unique_ptr<Fiber> fiber0, fiber1, fiber2, thread_fiber;
     std::string str = "a";
+    float flt = 1.0f;
 
     // capture the current thread so that we can swap
     thread_fiber = createFiberFromThread();
 
     fiber0 = createFiber(4096, 
         [&](){
+            float local_flt = 1.f;
+
             EXPECT_EQ(str, "a");
+            EXPECT_EQ(flt, 1.f);
             str += "b";
+            flt += 1.f;
+
+            local_flt += 2.f;
             switchFiber(fiber0.get(), fiber1.get());
+
+            EXPECT_EQ(local_flt, 3.f);
+            switchFiber(fiber0.get(), thread_fiber.get());
         }
     );
 
     fiber1 = createFiber(4096, 
         [&](){
             EXPECT_EQ(str, "ab");
+            EXPECT_EQ(flt, 2.f);
             str += "c";
+            flt += 2.f;
             switchFiber(fiber1.get(), fiber2.get());
         }
     );
@@ -68,7 +80,9 @@ TEST(Fiber, SwapFiber) {
     fiber2 = createFiber(4096, 
         [&](){
             EXPECT_EQ(str, "abc");
+            EXPECT_EQ(flt, 4.f);
             str += "d";
+            flt += 4.f;
             switchFiber(fiber2.get(), thread_fiber.get());
         }
     );
@@ -77,6 +91,10 @@ TEST(Fiber, SwapFiber) {
     switchFiber(thread_fiber.get(), fiber0.get());
 
     EXPECT_EQ(str, "abcd");
+    EXPECT_EQ(flt, 8.f);
+
+    // swap to the first fiber again
+    switchFiber(thread_fiber.get(), fiber0.get());
 }
 
 // Swap within one fiber multiple times to make sure it consumes
