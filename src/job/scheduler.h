@@ -15,6 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
+#include <atomic>
 #include <thread>
 #include <memory>
 #include <vector>
