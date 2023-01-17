@@ -44,37 +44,41 @@ TEST(SchedulerTest, SingleTaskScheduling) {
     SchedulerWrapper sw;
 
     int k = 0;
-
-    sw.scheduler.Begin();
     schedule_parallel([&]() {
         EXPECT_EQ(k, 0);
         ++k;
     });
+
+    sw.scheduler.Begin();
     sw.scheduler.Stop();
 
     EXPECT_EQ(k, 1);
 }
 
 // Schedule a task in a task.
-TEST(SchedulerTest, DISABLED_RecursiveSchedule) {
-    int i = 0;
-    while(i++ < 1000){
-        SchedulerWrapper sw;
+TEST(SchedulerTest, RecursiveSchedule) {
+    SchedulerWrapper sw;
 
-        int k = 0;
-        sw.scheduler.Begin();
-        schedule_parallel([&]() {
-            EXPECT_EQ(k, 0);
-            ++k;
+    int k = 0;
+    schedule_parallel([&]() {
+        EXPECT_EQ(k, 0);
+        ++k;
 
-            // make sure we can schedule task in a task
+        // make sure we can schedule task in a task
+        schedule_parallel([&](){
+            EXPECT_EQ(k, 1);
+            k += 2;
+
+            // go one level deeper
             schedule_parallel([&](){
-                EXPECT_EQ(k, 1);
-                k += 2;
+                EXPECT_EQ(k, 3);
+                k += 4;
             });
         });
-        sw.scheduler.Stop();
+    });
 
-        EXPECT_EQ(k, 3);
-    }
+    sw.scheduler.Begin();
+    sw.scheduler.Stop();
+
+    EXPECT_EQ(k, 7);
 }

@@ -41,18 +41,23 @@ void Scheduler::SlaveWorker::InitializeSlaveWorker(Scheduler* scheduler) {
     // The first thing each thread would do is to conver the current thread into a fiber
     thread_fiber = createFiberFromThread();
 
-    // Creat the back ground fiber that pulls task all the time
-    background_fiber = createFiber(scheduler->m_config.slave_fiber_stack_size, [this, scheduler](){
-        while(auto task = scheduler->pullTask()){
-            auto tc = scheduler->acquireTaskContext();
-            tc->task = task.get();
+    // Create the back ground fiber that pulls task all the time
+    background_fiber = createFiber(scheduler->m_config.slave_fiber_stack_size, 
+        [this, scheduler](){
+            while(auto task = scheduler->pullTask()){
+                auto tc = scheduler->acquireTaskContext();
+                tc->task = task.get();
 
-            // switch to the fiber for execution
-            scheduler->switchToFiber(tc->fiber.get());
+                // switch to the fiber for execution
+                scheduler->switchToFiber(tc->fiber.get());
+
+                // if the tc is in idle status, release the lock
+                // if(tc->status == TaskContext::TCStatus::Idle)
+                //    scheduler->m_tc_pool_mutex.unlock();
+            }
+            scheduler->switchToFiber(g_slaveworker_context.thread_fiber);
         }
-
-        scheduler->switchToFiber(g_slaveworker_context.thread_fiber);
-    });
+    );
 
     // Keep track of the current executing fiber
     g_slaveworker_context.current_fiber = thread_fiber.get();
@@ -132,8 +137,19 @@ TaskContext* Scheduler::acquireTaskContext() {
                 if(tc_ptr->task->function)
                     tc_ptr->task->function();
                 
-                // we are done with the task, now return
+                // reset the task context state to prevent reuse
                 tc_ptr->status = TaskContext::TCStatus::Idle;
+
+                // Since the task is done, feed task context back to the pool for reuse
+                // before doing that acquire the mutex first.
+                // Note, this can't be done inside recycleTaskContext as the mutex has to
+                // be held after the fiber switch. Otherwise, it is possible that before
+                // the fiber switch happens, some other threads take away this idle 
+                // task context and cause incorrect fiber switch first.
+                // tc_ptr->scheduler->m_tc_pool_mutex.lock();
+                // tc_ptr->scheduler->recycleTaskContext(tc_ptr);
+
+                // we are done with the task, now return
                 tc_ptr->scheduler->switchToFiber(g_slaveworker_context.background_fiber);
             }
         });
@@ -146,6 +162,10 @@ TaskContext* Scheduler::acquireTaskContext() {
     auto ret = m_idle_tc_pool.back();
     m_idle_tc_pool.pop_back();
     return ret;
+}
+
+void Scheduler::recycleTaskContext(TaskContext* tc){
+    m_idle_tc_pool.push_back(tc);
 }
 
 void Scheduler::switchToFiber(Fiber* fiber) {

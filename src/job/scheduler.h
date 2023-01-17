@@ -189,10 +189,13 @@ private:
     inline static Scheduler*            s_bound_scheduler = nullptr;
 
     //! @brief      Helper function to acquire a task context.
-    TaskContext*  acquireTaskContext();
+    TaskContext*    acquireTaskContext();
+
+    //! @brief      Recycle task context, this is not guarded by mutex, the caller should do it
+    void            recycleTaskContext(TaskContext* tc);
 
     //! @brief      Helper function to switch to a new fiber
-    void    switchToFiber(Fiber* fiber);
+    void            switchToFiber(Fiber* fiber);
 
     //! @brief      Pop a task that is pending
     std::unique_ptr<Task>   pullTask();
