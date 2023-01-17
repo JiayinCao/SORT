@@ -77,9 +77,6 @@ struct TaskContext {
 
     /**< The task the context will be executing. */
     const Task* task = nullptr;
-
-    /**< Cached scheduler. */
-    class Scheduler* scheduler = nullptr;
 };
 
 //! @brief  Scheduler of the job system in SORT

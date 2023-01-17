@@ -52,8 +52,8 @@ void Scheduler::SlaveWorker::InitializeSlaveWorker(Scheduler* scheduler) {
                 scheduler->switchToFiber(tc->fiber.get());
 
                 // if the tc is in idle status, release the lock
-                // if(tc->status == TaskContext::TCStatus::Idle)
-                //    scheduler->m_tc_pool_mutex.unlock();
+                if(tc->status == TaskContext::TCStatus::Idle)
+                    scheduler->m_tc_pool_mutex.unlock();
             }
             scheduler->switchToFiber(g_slaveworker_context.thread_fiber);
         }
@@ -146,11 +146,11 @@ TaskContext* Scheduler::acquireTaskContext() {
                 // be held after the fiber switch. Otherwise, it is possible that before
                 // the fiber switch happens, some other threads take away this idle 
                 // task context and cause incorrect fiber switch first.
-                // tc_ptr->scheduler->m_tc_pool_mutex.lock();
-                // tc_ptr->scheduler->recycleTaskContext(tc_ptr);
+                Scheduler::GetBound()->m_tc_pool_mutex.lock();
+                Scheduler::GetBound()->recycleTaskContext(tc_ptr);
 
                 // we are done with the task, now return
-                tc_ptr->scheduler->switchToFiber(g_slaveworker_context.background_fiber);
+                Scheduler::GetBound()->switchToFiber(g_slaveworker_context.background_fiber);
             }
         });
 
