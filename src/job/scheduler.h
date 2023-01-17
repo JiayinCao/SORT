@@ -48,13 +48,38 @@ struct Task {
 
     SORT_FORCEINLINE void operator()() const { function(); }
 
-    ~Task() {
-        int k = 0;
-        k = 1;
-    }
-
     /**< Target function. */
     Function   function;
+};
+
+//! @brief TaskContext is the place that task runs on.
+/**
+ * The scheduler has to find a task context before executing the task. Without a
+ * task context, the task can't be executed. In theory there could be unlimited
+ * number of task context. However, in practice, it is limited by its memory 
+ * usage, which is not too much actually, around 4k stack memory for fibers and
+ * potentially another arena for memory allocation in TSL.
+ * Task context is reused once a task is done executing and the context can be 
+ * shared with a next task that the scheduler picks up.
+ */
+struct TaskContext {
+    /**< The fiber the task will run on. */
+    std::unique_ptr<Fiber>  fiber;
+
+    /**< Status of the context. */
+    enum class TCStatus : unsigned char {
+        Idle,
+        Executing,
+        Pending,
+        Paused
+    };
+    TCStatus status = TCStatus::Idle;
+
+    /**< The task the context will be executing. */
+    const Task* task = nullptr;
+
+    /**< Cached scheduler. */
+    class Scheduler* scheduler = nullptr;
 };
 
 //! @brief  Scheduler of the job system in SORT
@@ -121,6 +146,11 @@ public:
              right after they finish their work. */
         std::unique_ptr<Fiber>  thread_fiber;
 
+        /**< Background fiber that keeps pulling tasks. This is not entirely needed, but I like
+             the way it hides the mainthread and making all the threads identical leaving no special
+             main thread. */
+        std::unique_ptr<Fiber>  background_fiber;
+
         /**< Dedicated thread for this slaveworker. */
         std::thread             thread;
 
@@ -135,13 +165,13 @@ private:
     /**< Slave workers. */
     std::vector<SlaveWorker>            m_slaves;
 
-    /**< Fiber pool for keeping its life time. */
-    std::list<std::unique_ptr<Fiber>>   m_fiber_pool;
+    /**< Task context pool for keeping its life time. */
+    std::list<std::unique_ptr<TaskContext>> m_tc_pool;
 
-    /**< Fiber pool. */
-    std::list<Fiber*>                   m_idle_fiber_pool;
+    /**< Available task context pool. */
+    std::list<TaskContext*>             m_idle_tc_pool;
     /**< Mutex to guard fiber pool. */
-    std::mutex                          m_fiber_pool_mutex;
+    std::mutex                          m_tc_pool_mutex;
 
     /**< Task pool. */
     std::list<std::unique_ptr<Task>>    m_pending_task_pool;
@@ -158,8 +188,8 @@ private:
     /**< The currently bound scheduler. */
     inline static Scheduler*            s_bound_scheduler = nullptr;
 
-    //! @brief      Helper function to acquire an idle fiber
-    Fiber*  acquireIdleFiber();
+    //! @brief      Helper function to acquire a task context.
+    TaskContext*  acquireTaskContext();
 
     //! @brief      Helper function to switch to a new fiber
     void    switchToFiber(Fiber* fiber);

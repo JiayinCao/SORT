@@ -16,10 +16,7 @@
  */
 
 #include "thirdparty/gtest/gtest.h"
-#include "unittest_common.h"
 #include "job/scheduler.h"
-
-using namespace unittest;
 
 //! @brief  Helper class that setup the bind and unbind for the class
 struct SchedulerWrapper {
@@ -42,7 +39,7 @@ TEST(SchedulerTest, EmptyScheduling) {
     sw.scheduler.Stop();
 }
 
-// This test should at least pass without inifitely waiting
+// Schedule one single task
 TEST(SchedulerTest, SingleTaskScheduling) {
     SchedulerWrapper sw;
 
@@ -56,4 +53,28 @@ TEST(SchedulerTest, SingleTaskScheduling) {
     sw.scheduler.Stop();
 
     EXPECT_EQ(k, 1);
+}
+
+// Schedule a task in a task.
+TEST(SchedulerTest, DISABLED_RecursiveSchedule) {
+    int i = 0;
+    while(i++ < 1000){
+        SchedulerWrapper sw;
+
+        int k = 0;
+        sw.scheduler.Begin();
+        schedule_parallel([&]() {
+            EXPECT_EQ(k, 0);
+            ++k;
+
+            // make sure we can schedule task in a task
+            schedule_parallel([&](){
+                EXPECT_EQ(k, 1);
+                k += 2;
+            });
+        });
+        sw.scheduler.Stop();
+
+        EXPECT_EQ(k, 3);
+    }
 }

@@ -30,6 +30,9 @@ struct SlaveWorkerContext {
     Fiber* current_fiber = nullptr;
 
     /**< Background fiber. */
+    Fiber* background_fiber = nullptr;
+
+    /**< Thread fiber. */
     Fiber* thread_fiber = nullptr;
 };
 thread_local SlaveWorkerContext   g_slaveworker_context;
@@ -38,12 +41,26 @@ void Scheduler::SlaveWorker::InitializeSlaveWorker(Scheduler* scheduler) {
     // The first thing each thread would do is to conver the current thread into a fiber
     thread_fiber = createFiberFromThread();
 
+    // Creat the back ground fiber that pulls task all the time
+    background_fiber = createFiber(scheduler->m_config.slave_fiber_stack_size, [this, scheduler](){
+        while(auto task = scheduler->pullTask()){
+            auto tc = scheduler->acquireTaskContext();
+            tc->task = task.get();
+
+            // switch to the fiber for execution
+            scheduler->switchToFiber(tc->fiber.get());
+        }
+
+        scheduler->switchToFiber(g_slaveworker_context.thread_fiber);
+    });
+
     // Keep track of the current executing fiber
     g_slaveworker_context.current_fiber = thread_fiber.get();
+    g_slaveworker_context.background_fiber = background_fiber.get();
     g_slaveworker_context.thread_fiber = thread_fiber.get();
 
     // switch to a fiber for tasks
-    scheduler->switchToFiber(scheduler->acquireIdleFiber());
+    scheduler->switchToFiber(background_fiber.get());
 }
 
 SchedulerConfig::SchedulerConfig() {
@@ -102,24 +119,32 @@ void Scheduler::Enqueue(Task&& task) {
     ++m_total_pending_task;
 }
 
-Fiber* Scheduler::acquireIdleFiber() {
-    std::lock_guard<std::mutex> lock(m_fiber_pool_mutex);
+TaskContext* Scheduler::acquireTaskContext() {
+    std::lock_guard<std::mutex> lock(m_tc_pool_mutex);
 
-    if (m_idle_fiber_pool.empty()) {
-        m_fiber_pool.push_back(createFiber(m_config.slave_fiber_stack_size, [this]() {
-            while (auto task = pullTask()) {
-                (*task)();
+    if (m_idle_tc_pool.empty()) {
+        std::unique_ptr<TaskContext>    tc = std::make_unique<TaskContext>();
+        auto tc_ptr = tc.get();
+        tc->fiber = createFiber(m_config.slave_fiber_stack_size, [this, tc_ptr](){
+            while(true){
+                tc_ptr->status = TaskContext::TCStatus::Executing;
+
+                if(tc_ptr->task->function)
+                    tc_ptr->task->function();
+                
+                // we are done with the task, now return
+                tc_ptr->status = TaskContext::TCStatus::Idle;
+                tc_ptr->scheduler->switchToFiber(g_slaveworker_context.background_fiber);
             }
+        });
 
-            // making sure it switch back tot he thread fiber
-            switchToFiber(g_slaveworker_context.thread_fiber);
-        }));
+        m_tc_pool.push_back(std::move(tc));
 
-        m_idle_fiber_pool.push_back(m_fiber_pool.back().get());
+        m_idle_tc_pool.push_back(m_tc_pool.back().get());
     }
 
-    auto ret = m_idle_fiber_pool.back();
-    m_idle_fiber_pool.pop_back();
+    auto ret = m_idle_tc_pool.back();
+    m_idle_tc_pool.pop_back();
     return ret;
 }
 
