@@ -111,7 +111,19 @@ li{
   transform: scale(1);
 }
 
+/* Keep curated column starts stable as images are added. */
+.gallery > div {
+  break-inside: avoid;
+}
+
+.gallery .gallery-column-start {
+  break-before: column;
+}
+
 @media (max-width: 450px) {
+  .gallery .gallery-column-start {
+    break-before: auto;
+  }
   .gallery {
   -webkit-column-count: 1;
   -moz-column-count: 1;
@@ -128,4 +140,14 @@ li{
   padding-right: 1.1rem;
   }
   padding-bottom: 90px;
+}
+
+.gallery img {
+  height: auto;
+}
+
+.gallery-rights {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  word-break: normal;
 }

@@ -1,5 +1,6 @@
 <html lang="en">
 <head>
+  <meta charset="utf-8">
   <title>SORT (Simple Open-source Ray Tracing) [Gallery]</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -62,9 +63,6 @@
             <li class="nav-item">
               <a class="nav-link" href="./building.html">Building SORT</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="./references.html">References</a>
-            </li>
           </ul>
           <ul class="navbar-nav navbar-right">
             <li class="nav-item">
@@ -76,7 +74,9 @@
     </nav>
 
     <div class="content-container">
-      <p>Following images are good examples that demonstrate the rendering techniques implemented in SORT. All shading work in the arts below, excluding texturing, is done by myself.</p>
+      <p>Following images are good examples that demonstrate the rendering techniques implemented in SORT. Scene and asset credits are available in the enlarged views.</p>
+
+      <p id="gallery-rights" class="gallery-rights">This notice applies to all images in this gallery. Third-party scenes, models, textures, artwork, and trademarks belong to their respective rights holders. Rendered with SORT; no affiliation or endorsement is implied. Asset-specific credits and license terms apply. Display here grants no additional rights to reuse third-party content.</p>
 
         <div class="gallery" id="gallery">
 
@@ -153,6 +153,12 @@
         </div>
 
         <div class="mb-3">
+            <a href="./assets/gallery/predator.png" data-lightbox="image-1" data-title="Asset courtesy of <a href='https://www.artstation.com/ali_jalali'> Ali Jalali</a>.">
+                <img src="./assets/gallery/thumb/predator.jpg"/>
+            </a>
+        </div>
+
+        <div class="mb-3 gallery-column-start">
             <a href="./assets/gallery/digital_emily.png" data-lightbox="image-1"  data-title="<a href='https://vgl.ict.usc.edu/Data/DigitalEmily2/'> Digital Emily</a>.">
                 <img src="./assets/gallery/thumb/digital_emily.jpg"/>
             </a>
@@ -218,9 +224,15 @@
             </a>
         </div>
 
-        <div class="mb-3">
+        <div class="mb-3 gallery-column-start">
             <a href="./assets/gallery/kitchen.png" data-lightbox="image-1" data-title="Asset courtesy of <a href='https://www.blendswap.com/blend/5156'> Jay</a>.">
                 <img src="./assets/gallery/thumb/kitchen.jpg"/>
+            </a>
+        </div>
+
+        <div class="mb-3">
+            <a href="./assets/gallery/watercolor.png" data-lightbox="image-1" data-title="WaterColor scene by <a href='https://www.lucydreams.it/'>Angelo Ferretti / Lucydreams</a>, distributed through <a href='https://github.com/mmp/pbrt-v4-scenes#watercolor'>pbrt-v4-scenes</a> under <a href='https://creativecommons.org/licenses/by-nd/2.0/'>CC BY-ND 2.0</a>.">
+                <img src="./assets/gallery/thumb/watercolor.jpg" alt="WaterColor interior scene rendered with SORT" width="640" height="480"/>
             </a>
         </div>
 
@@ -290,11 +302,6 @@
             </a>
         </div>
 
-        <div class="mb-3">
-            <a href="./assets/gallery/predator.png" data-lightbox="image-1" data-title="Asset courtesy of <a href='https://www.artstation.com/ali_jalali'> Ali Jalali</a>.">
-                <img src="./assets/gallery/thumb/predator.jpg"/>
-            </a>
-        </div>
         
       </div>
       <!-- Grid row -->
@@ -302,7 +309,7 @@
       <hr width="50%" size="8" align="center">
       <hr noshade>
 
-      <p align="center">Copyright© 2011-2023 Jiayin Cao. All rights reserved.</p>
+      <p align="center">Site copyright© 2011-2026 Jiayin Cao. Third-party content is subject to its respective rights and licenses.</p>
       <br /> 
     </div>
   </body>
