@@ -199,3 +199,40 @@ li{
 .lightbox .lb-hdr-controls:focus-visible,
 .lightbox .lb-data .lb-close:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 .lightbox .lb-hdr-canvas[hidden], .lightbox .lb-hdr-controls[hidden] { display: none; }
+
+/* Overlay the loading message without changing image or caption dimensions. */
+.lightbox .lb-hdr-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 11;
+  padding: 5px 10px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, .7);
+  color: #fff;
+  font: 12px/1.4 sans-serif;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.lightbox .lb-hdr-loading[hidden] { display: none; }
+
+.lightbox .lb-hdr-spinner {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  border: 2px solid rgba(255, 255, 255, .3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: lb-hdr-spin .8s linear infinite;
+}
+@keyframes lb-hdr-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lightbox .lb-hdr-spinner { animation: none; }
+}

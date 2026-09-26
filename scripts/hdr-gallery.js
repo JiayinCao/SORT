@@ -47,6 +47,13 @@ function installHDR() {
   controls.setAttribute('aria-pressed', 'true');
   controls.title = 'HDR on — click to turn off';
   root.querySelector('.lb-closeContainer').prepend(controls);
+  const loading = document.createElement('span');
+  loading.className = 'lb-hdr-loading';
+  loading.hidden = true;
+  loading.setAttribute('role', 'status');
+  loading.setAttribute('aria-live', 'polite');
+  loading.innerHTML = '<span class="lb-hdr-spinner" aria-hidden="true"></span><span>Loading HDR…</span>';
+  outer.append(loading);
   let hdrEnabled = true;
   let active = null;
   let isOpen = false;
@@ -88,7 +95,7 @@ function installHDR() {
   function release() {
     const state = active;
     active = null;
-    canvas.hidden = controls.hidden = true;
+    canvas.hidden = controls.hidden = loading.hidden = true;
     if (!state) return;
     state.worker?.terminate();
     state.context?.unconfigure();
@@ -144,6 +151,7 @@ function installHDR() {
     if (!source || image.src !== href) return;
     const s = {};
     active = s;
+    loading.hidden = false;
     hdrEnabled = true;
     try {
       // Download/decode alongside GPU setup, instead of waiting for shader compilation.
@@ -191,6 +199,7 @@ function installHDR() {
       await device.queue.onSubmittedWorkDone();
       if (active !== s) return;
       canvas.hidden = controls.hidden = false;
+      loading.hidden = true;
       lightbox.sizeOverlay();
     } catch (error) { fail(s, error); }
   }

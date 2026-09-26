@@ -6,7 +6,7 @@ On a display reporting HDR, an EXR-backed image first shows its standard PNG, th
 
 HDR loads preprocessed `.hdr.gz` assets (6–11 MB each), generated from the original EXRs. They preserve exactly the same sanitized RGB half-float samples the original viewer uploaded, including values above white; resolution and orientation are unchanged. The format stores RGB in six byte planes, omits the always-opaque alpha channel, and uses gzip compression. Native decompression and a small unpacking loop replace the large JavaScript EXR decoder on the normal path. If an optimized asset fails to load or decode, the worker lazily loads EXRLoader and falls back to the original EXR.
 
-Download/decode runs concurrently with GPU setup. A 64 MiB LRU cache keeps recently decoded images for the page session; revisiting them skips both downloading and decoding. Navigating or closing terminates unfinished worker work and releases GPU resources. Late asynchronous results cannot replace another image. The PNG remains underneath for fallback. No HDR downloads occur on a display that reports SDR.
+Download/decode runs concurrently with GPU setup. A 64 MiB LRU cache keeps recently decoded images for the page session; revisiting them skips both downloading and decoding. Navigating or closing terminates unfinished worker work and releases GPU resources. Late asynchronous results cannot replace another image. The PNG remains underneath for fallback. A small “Loading HDR…” overlay at the bottom of the image stays visible until HDR is ready, then disappears; failure, navigation, or closing also clears it without changing image dimensions. No HDR downloads occur on a display that reports SDR.
 
 ## Regenerating optimized assets
 
