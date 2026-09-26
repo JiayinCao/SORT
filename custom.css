@@ -151,3 +151,51 @@ li{
   line-height: 1.5;
   word-break: normal;
 }
+
+/* HDR uses the same Lightbox frame and navigation as standard images. */
+.lb-hdr-canvas {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+}
+/* Keep image actions together in the existing caption/close row. */
+.lightbox .lb-data { display: flex; align-items: flex-start; gap: 12px; }
+.lightbox .lb-data .lb-details { float: none; width: auto; min-width: 0; flex: 1; }
+.lightbox .lb-closeContainer { display: flex; align-items: center; gap: 6px; margin-left: auto; flex-shrink: 0; }
+.lightbox .lb-hdr-controls,
+.lightbox .lb-data .lb-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  height: 30px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #666;
+  border-radius: 4px;
+  background: #202020;
+  color: #ccc;
+  cursor: pointer;
+  opacity: 1;
+  float: none;
+  filter: none;
+  box-sizing: border-box;
+}
+.lightbox .lb-hdr-controls { width: 44px; font: 700 11px/1 sans-serif; letter-spacing: .06em; }
+.lightbox .lb-hdr-controls[aria-pressed="true"] { background: #f3d58a; border-color: #f3d58a; color: #202020; }
+.lightbox .lb-data .lb-close { width: 30px; }
+.lightbox .lb-data .lb-close::before,
+.lightbox .lb-data .lb-close::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 1.5px;
+  background: currentColor;
+  transform: rotate(45deg);
+}
+.lightbox .lb-data .lb-close::after { transform: rotate(-45deg); }
+.lightbox .lb-hdr-controls:hover,
+.lightbox .lb-data .lb-close:hover { border-color: #eee; }
+.lightbox .lb-hdr-controls:focus-visible,
+.lightbox .lb-data .lb-close:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.lightbox .lb-hdr-canvas[hidden], .lightbox .lb-hdr-controls[hidden] { display: none; }
