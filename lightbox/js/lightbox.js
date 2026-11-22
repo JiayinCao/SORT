@@ -202,7 +202,10 @@
     var self    = this;
     var $window = $(window);
 
-    $window.on('resize', $.proxy(this.sizeOverlay, this));
+    $window.off('resize.lightbox').on('resize.lightbox', function() {
+      self.sizeOverlay();
+      self.fitImage();
+    });
 
     this.sizeOverlay();
 
@@ -245,11 +248,12 @@
       }
     }
 
-    // Keep the viewer anchored to the viewport when focus or image sizing changes scroll.
+    // Center the image and caption together in the viewport.
     this.$lightbox.css({
       position: 'fixed',
-      top: this.options.positionFromTop + 'px',
-      left: '0px'
+      top: '50%',
+      left: '0px',
+      transform: 'translateY(-50%)'
     }).fadeIn(this.options.fadeDuration);
 
     // Disable scrolling of the page while open
@@ -264,10 +268,10 @@
   Lightbox.prototype.changeImage = function(imageNumber) {
     var self = this;
     var filename = this.album[imageNumber].link;
-    var filetype = filename.split('.').slice(-1)[0];
     var $image = this.$lightbox.find('.lb-image');
     var imageLoadId = this.imageLoadId = (this.imageLoadId || 0) + 1;
     this.currentImageIndex = imageNumber;
+    this.currentImageSize = null;
 
     // Keep navigation active during loading; only the latest request may display.
     this.enableKeyboardNav();
@@ -284,82 +288,41 @@
     var preloader = new Image();
     preloader.onload = function() {
       if (self.imageLoadId !== imageLoadId) return;
-      var $preloader;
-      var imageHeight;
-      var imageWidth;
-      var maxImageHeight;
-      var maxImageWidth;
-      var windowHeight;
-      var windowWidth;
-
       $image.attr({
         'alt': self.album[imageNumber].alt,
         'src': filename
       });
-
-      $preloader = $(preloader);
-
-      $image.width(preloader.width);
-      $image.height(preloader.height);
-      windowWidth = $(window).width();
-      windowHeight = $(window).height();
-
-      // Calculate the max image dimensions for the current viewport.
-      // Take into account the border around the image and an additional 10px gutter on each side.
-      maxImageWidth  = windowWidth - self.containerPadding.left - self.containerPadding.right - self.imageBorderWidth.left - self.imageBorderWidth.right - 20;
-      maxImageHeight = windowHeight - self.containerPadding.top - self.containerPadding.bottom - self.imageBorderWidth.top - self.imageBorderWidth.bottom - self.options.positionFromTop - 70;
-
-      /*
-      SVGs that don't have width and height attributes specified are reporting width and height
-      values of 0 in Firefox 47 and IE11 on Windows. To fix, we set the width and height to the max
-      dimensions for the viewport rather than 0 x 0.
-
-      https://github.com/lokesh/lightbox2/issues/552
-      */
-
-      if (filetype === 'svg') {
-        if ((preloader.width === 0) || preloader.height === 0) {
-          $image.width(maxImageWidth);
-          $image.height(maxImageHeight);
-        }
-      }
-
-      // Fit image inside the viewport.
-      if (self.options.fitImagesInViewport) {
-
-        // Check if image size is larger then maxWidth|maxHeight in settings
-        if (self.options.maxWidth && self.options.maxWidth < maxImageWidth) {
-          maxImageWidth = self.options.maxWidth;
-        }
-        if (self.options.maxHeight && self.options.maxHeight < maxImageHeight) {
-          maxImageHeight = self.options.maxHeight;
-        }
-
-      } else {
-        maxImageWidth = self.options.maxWidth || preloader.width || maxImageWidth;
-        maxImageHeight = self.options.maxHeight || preloader.height || maxImageHeight;
-      }
-
-      // Is the current image's width or height is greater than the maxImageWidth or maxImageHeight
-      // option than we need to size down while maintaining the aspect ratio.
-      if ((preloader.width > maxImageWidth) || (preloader.height > maxImageHeight)) {
-        if ((preloader.width / maxImageWidth) > (preloader.height / maxImageHeight)) {
-          imageWidth  = maxImageWidth;
-          imageHeight = parseInt(preloader.height / (preloader.width / imageWidth), 10);
-          $image.width(imageWidth);
-          $image.height(imageHeight);
-        } else {
-          imageHeight = maxImageHeight;
-          imageWidth = parseInt(preloader.width / (preloader.height / imageHeight), 10);
-          $image.width(imageWidth);
-          $image.height(imageHeight);
-        }
-      }
-      self.sizeContainer($image.width(), $image.height());
+      self.currentImageSize = { width: preloader.width, height: preloader.height };
+      self.fitImage();
     };
 
     // Preload image before showing
     preloader.src = this.album[imageNumber].link;
+  };
+
+  // Refit the decoded image on resize without downloading it or restarting HDR.
+  Lightbox.prototype.fitImage = function() {
+    var source = this.currentImageSize;
+    if (!source) return;
+    var frameWidth = this.containerPadding.left + this.containerPadding.right + this.imageBorderWidth.left + this.imageBorderWidth.right;
+    var frameHeight = this.containerPadding.top + this.containerPadding.bottom + this.imageBorderWidth.top + this.imageBorderWidth.bottom;
+    var captionHeight = Math.max(70, this.$lightbox.find('.lb-dataContainer').outerHeight() || 0);
+    var maxWidth = Math.max(1, $(window).width() - frameWidth - 20);
+    var maxHeight = Math.max(1, $(window).height() - frameHeight - captionHeight - 20);
+    if (this.options.maxWidth) maxWidth = Math.min(maxWidth, this.options.maxWidth);
+    if (this.options.maxHeight) maxHeight = Math.min(maxHeight, this.options.maxHeight);
+    if (!this.options.fitImagesInViewport) {
+      maxWidth = this.options.maxWidth || source.width || maxWidth;
+      maxHeight = this.options.maxHeight || source.height || maxHeight;
+    }
+    var width = source.width || maxWidth;
+    var height = source.height || maxHeight;
+    var scale = Math.min(1, maxWidth / width, maxHeight / height);
+    width = Math.max(1, Math.floor(width * scale));
+    height = Math.max(1, Math.floor(height * scale));
+    this.$image.width(width).height(height);
+    this.$outerContainer.stop(true);
+    this.sizeContainer(width, height);
   };
 
   // Stretch overlay to fit the viewport
@@ -550,7 +513,8 @@
     this.disableKeyboardNav();
     this.$outerContainer.stop(true);
     this.$image.stop(true);
-    $(window).off('resize', this.sizeOverlay);
+    this.currentImageSize = null;
+    $(window).off('resize.lightbox');
     this.$lightbox.fadeOut(this.options.fadeDuration);
     this.$overlay.fadeOut(this.options.fadeDuration);
 

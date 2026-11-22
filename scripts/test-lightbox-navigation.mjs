@@ -10,8 +10,10 @@ function setup() {
   const loads = [];
   const document = {};
   const window = {};
+  const viewport = { width: 800, height: 600 };
   let imageAttributes = {};
   let resized = 0;
+  let fitted;
   const chain = {
     ready() {}, on(name, callback) { handlers.set(name, callback); return this; },
     off(name) { handlers.delete(name); return this; },
@@ -19,11 +21,14 @@ function setup() {
     hide() { return this; }, addClass() { return this; }, removeClass() { return this; },
     width(value) { return value === undefined ? 800 : this; },
     height(value) { return value === undefined ? 600 : this; },
+    outerHeight() { return 35; },
     attr(value) { imageAttributes = value; return this; },
     find() { return this; }
   };
   const $ = target => ({
     ...chain,
+    width(value) { return value === undefined ? viewport.width : this; },
+    height(value) { return value === undefined ? viewport.height : this; },
     is: () => ['INPUT', 'TEXTAREA', 'SELECT'].includes(target?.tagName)
   });
   $.extend = Object.assign;
@@ -41,14 +46,14 @@ function setup() {
   lightbox.$outerContainer = $(null);
   lightbox.$image = $(null);
   lightbox.containerPadding = lightbox.imageBorderWidth = { left: 0, right: 0, top: 0, bottom: 0 };
-  lightbox.sizeContainer = () => resized++;
+  lightbox.sizeContainer = (width, height) => { resized++; fitted = { width, height }; };
   const key = (keyCode, extra = {}) => {
     const event = { keyCode, target: { tagName: 'BODY' }, prevented: false,
       preventDefault() { this.prevented = true; }, stopPropagation() {}, ...extra };
     handlers.get('keydown.lightbox')?.(event);
     return event;
   };
-  return { lightbox, handlers, loads, key,
+  return { lightbox, handlers, loads, key, viewport, fitted: () => fitted,
     attributes: () => imageAttributes, resized: () => resized };
 }
 
@@ -98,4 +103,23 @@ test('browser shortcuts and editable fields retain their arrow keys', () => {
     assert.equal(state.key(39, extra).prevented, false);
     assert.equal(state.lightbox.currentImageIndex, 0);
   }
+});
+
+test('resizing refits the current image without new downloads and preserves its aspect ratio', () => {
+  const state = setup();
+  state.lightbox.currentImageSize = { width: 1920, height: 1080 };
+  state.lightbox.fitImage();
+  assert(state.fitted().width <= 780 && state.fitted().height <= 510);
+  state.viewport.width = 400;
+  state.viewport.height = 900;
+  state.lightbox.fitImage();
+  const portrait = state.fitted();
+  assert.equal(portrait.width, 380);
+  assert(Math.abs(portrait.height - portrait.width * 1080 / 1920) < 1);
+  state.viewport.width = 1600;
+  state.viewport.height = 1000;
+  state.lightbox.fitImage();
+  assert(state.fitted().width > portrait.width);
+  assert(state.fitted().height <= 910);
+  assert.equal(state.loads.length, 0);
 });

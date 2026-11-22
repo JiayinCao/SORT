@@ -2,6 +2,12 @@
  * Globals
  */
 
+/* Suppress double-tap zoom site-wide while keeping scrolling and pinch zoom. */
+html,
+body {
+  touch-action: manipulation;
+}
+
 /* Links */
 a,
 a:focus,
@@ -157,6 +163,26 @@ li{
   pointer-events: none;
 }
 .hdr-home > canvas[hidden] { display: none; }
+
+/* Keep the scene credit inside the banner and above its HDR canvas. */
+.home-scene-credit {
+  position: absolute;
+  z-index: 1;
+  right: 0.75rem;
+  bottom: 0.5rem;
+  left: 0.75rem;
+  color: #f3ebdd;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: right;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
+  word-break: normal;
+}
+.home-scene-credit a { color: inherit; font-weight: inherit; }
+.home-scene-credit a:hover,
+.home-scene-credit a:focus-visible { text-decoration: underline; }
+.home-scene-credit a:focus-visible { outline: 1px solid currentColor; outline-offset: 2px; }
 
 .gallery-rights {
   font-size: 0.875rem;
