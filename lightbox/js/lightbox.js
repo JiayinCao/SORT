@@ -100,17 +100,9 @@
 
     var self = this;
 
-    // The two root notes generated, #lightboxOverlay and #lightbox are given
-    // tabindex attrs so they are focusable. We attach our keyboard event
-    // listeners to these two elements, and not the document. Clicking anywhere
-    // while Lightbox is opened will keep the focus on or inside one of these
-    // two elements.
-    //
-    // We do this so we can prevent propogation of the Esc keypress when
-    // Lightbox is open. This prevents it from intefering with other components
-    // on the page below.
-    //
-    // Github issue: https://github.com/lokesh/lightbox2/issues/663
+    // Keep both root nodes focusable. Keyboard navigation is attached to the
+    // document only while the viewer is open, so hiding a focused control does
+    // not interrupt navigation. Handled keys do not propagate to the page.
     $('<div id="lightboxOverlay" tabindex="-1" class="lightboxOverlay"></div><div id="lightbox" tabindex="-1" class="lightbox"><div class="lb-outerContainer"><div class="lb-container"><img class="lb-image" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" alt=""/><div class="lb-nav"><a class="lb-prev" aria-label="Previous image" href="" ></a><a class="lb-next" aria-label="Next image" href="" ></a></div><div class="lb-loader"><a class="lb-cancel"></a></div></div></div><div class="lb-dataContainer"><div class="lb-data"><div class="lb-details"><span class="lb-caption"></span><span class="lb-number"></span></div><div class="lb-closeContainer"><button type="button" class="lb-close" aria-label="Close image" title="Close image"></button></div></div></div></div>').appendTo($('body'));
 
     // Cache jQuery objects
@@ -253,12 +245,11 @@
       }
     }
 
-    // Position Lightbox
-    var top  = $window.scrollTop() + this.options.positionFromTop;
-    var left = $window.scrollLeft();
+    // Keep the viewer anchored to the viewport when focus or image sizing changes scroll.
     this.$lightbox.css({
-      top: top + 'px',
-      left: left + 'px'
+      position: 'fixed',
+      top: this.options.positionFromTop + 'px',
+      left: '0px'
     }).fadeIn(this.options.fadeDuration);
 
     // Disable scrolling of the page while open
@@ -275,9 +266,13 @@
     var filename = this.album[imageNumber].link;
     var filetype = filename.split('.').slice(-1)[0];
     var $image = this.$lightbox.find('.lb-image');
+    var imageLoadId = this.imageLoadId = (this.imageLoadId || 0) + 1;
+    this.currentImageIndex = imageNumber;
 
-    // Disable keyboard nav during transitions
-    this.disableKeyboardNav();
+    // Keep navigation active during loading; only the latest request may display.
+    this.enableKeyboardNav();
+    this.$outerContainer.stop(true);
+    $image.stop(true);
 
     // Show loading state
     this.$overlay.fadeIn(this.options.fadeDuration);
@@ -288,6 +283,7 @@
     // When image to show is preloaded, we send the width and height to sizeContainer()
     var preloader = new Image();
     preloader.onload = function() {
+      if (self.imageLoadId !== imageLoadId) return;
       var $preloader;
       var imageHeight;
       var imageWidth;
@@ -364,7 +360,6 @@
 
     // Preload image before showing
     preloader.src = this.album[imageNumber].link;
-    this.currentImageIndex = imageNumber;
   };
 
   // Stretch overlay to fit the viewport
@@ -389,6 +384,7 @@
   // This method also shows the the image.
   Lightbox.prototype.sizeContainer = function(imageWidth, imageHeight) {
     var self = this;
+    var imageLoadId = this.imageLoadId;
 
     var oldWidth  = this.$outerContainer.outerWidth();
     var oldHeight = this.$outerContainer.outerHeight();
@@ -396,12 +392,13 @@
     var newHeight = imageHeight + this.containerPadding.top + this.containerPadding.bottom + this.imageBorderWidth.top + this.imageBorderWidth.bottom;
 
     function postResize() {
+      if (self.imageLoadId !== imageLoadId) return;
       self.$lightbox.find('.lb-dataContainer').width(newWidth);
       self.$lightbox.find('.lb-prevLink').height(newHeight);
       self.$lightbox.find('.lb-nextLink').height(newHeight);
 
-      // Set focus on one of the two root nodes so keyboard events are captured.
-      self.$overlay.focus();
+      // Capture keyboard events without scrolling the full-page overlay into view.
+      self.$overlay[0].focus({ preventScroll: true });
 
       self.showImage();
     }
@@ -509,13 +506,13 @@
   };
 
   Lightbox.prototype.enableKeyboardNav = function() {
-    this.$lightbox.on('keyup.keyboard', $.proxy(this.keyboardAction, this));
-    this.$overlay.on('keyup.keyboard', $.proxy(this.keyboardAction, this));
+    // Focus can move off controls when they hide during an image transition.
+    // One document listener handles key presses anywhere while the viewer is open.
+    $(document).off('keydown.lightbox').on('keydown.lightbox', $.proxy(this.keyboardAction, this));
   };
 
   Lightbox.prototype.disableKeyboardNav = function() {
-    this.$lightbox.off('.keyboard');
-    this.$overlay.off('.keyboard');
+    $(document).off('keydown.lightbox');
   };
 
   Lightbox.prototype.keyboardAction = function(event) {
@@ -524,9 +521,12 @@
     var KEYCODE_RIGHTARROW = 39;
 
     var keycode = event.keyCode;
+    if (keycode !== KEYCODE_ESC && keycode !== KEYCODE_LEFTARROW && keycode !== KEYCODE_RIGHTARROW) return;
+    if (event.altKey || event.ctrlKey || event.metaKey ||
+        $(event.target).is('input, textarea, select') || event.target.isContentEditable) return;
+    event.preventDefault();
+    event.stopPropagation();
     if (keycode === KEYCODE_ESC) {
-      // Prevent bubbling so as to not affect other components on the page.
-      event.stopPropagation();
       this.end();
     } else if (keycode === KEYCODE_LEFTARROW) {
       if (this.currentImageIndex !== 0) {
@@ -545,7 +545,11 @@
 
   // Closing time. :-(
   Lightbox.prototype.end = function() {
+    // Invalidate pending loads and resize callbacks before they can reopen the viewer.
+    this.imageLoadId = (this.imageLoadId || 0) + 1;
     this.disableKeyboardNav();
+    this.$outerContainer.stop(true);
+    this.$image.stop(true);
     $(window).off('resize', this.sizeOverlay);
     this.$lightbox.fadeOut(this.options.fadeDuration);
     this.$overlay.fadeOut(this.options.fadeDuration);
