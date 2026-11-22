@@ -9,7 +9,8 @@ function installHDR(image) {
   const canvas = document.createElement('canvas');
   canvas.hidden = true;
   canvas.setAttribute('aria-hidden', 'true');
-  image.parentElement.append(canvas);
+  // Keep the credit last in paint order, including Safari's GPU compositing path.
+  image.insertAdjacentElement('afterend', canvas);
   let active = null;
 
   function release() {
