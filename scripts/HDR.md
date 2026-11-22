@@ -1,4 +1,6 @@
-# Gallery HDR viewer
+# Gallery and home-page HDR
+
+The home-page Moana banner uses the same packed half-float format, worker, and shared WebGPU shader as the gallery. Its source is `assets/home/raw/Moana_12kspp.exr`; its generated asset lives under `assets/home/hdr/`. The PNG banner stays visible while HDR initializes and is the fallback for SDR displays, unsupported browsers, and GPU or loading failures. The HDR canvas follows the responsive image size without changing the page layout. Display changes re-evaluate HDR, and leaving the page releases its worker and GPU resources.
 
 HDR progressively enhances the existing Lightbox2 viewer. All thumbnails, previous/next arrows, keyboard navigation, captions, image sizing, and close behavior use the original lightbox. There is no separate dialog or launch button.
 
@@ -10,14 +12,14 @@ Download/decode runs concurrently with GPU setup. A 64 MiB LRU cache keeps recen
 
 ## Regenerating optimized assets
 
-After adding or replacing an EXR, make sure its gallery link has the correct `data-exr`, then run:
+After adding or replacing an EXR, make sure its gallery link or home-page image has the correct `data-exr`, then run:
 
 ```sh
 node scripts/build-hdr-assets.mjs
 node scripts/test-hdr-assets.mjs
 ```
 
-The builder generates files under `assets/gallery/hdr/` and updates `data-hdr` links in `gallery.html`. Content hashes in filenames prevent stale optimized images after an EXR changes. Publish the generated files together with the HTML and scripts; GitHub Pages requires no server processing. Original EXRs remain available for fallback. Older generated files are not automatically deleted.
+The builder generates files under `assets/gallery/hdr/` and `assets/home/hdr/` and updates `data-hdr` references in `gallery.html` and `index.html`. Content hashes in filenames prevent stale optimized images after an EXR changes. Existing assets with identical decoded pixels are retained even if the local zlib version would compress them differently. Publish the generated files together with the HTML and scripts; GitHub Pages requires no server processing. Original EXRs remain available for fallback. Older generated files are not automatically deleted.
 
 The viewer uses WebGPU `rgba16float` with `toneMapping.mode = extended`. It preserves scene-linear highlights, keeps the original 0 EV exposure and applies the extended sRGB transfer function, and presents opaque output. The SDR comparison uses the identical EXR and exposure with standard canvas tone mapping (clipping above white), so it isolates display range rather than comparing against a differently graded PNG. These EXRs have no chromaticities metadata; sRGB/Rec.709 primaries are assumed. Future EXRs with other primaries need a color conversion.
 
@@ -33,6 +35,7 @@ Serve the repository with `python3 -m http.server 8765 --bind 127.0.0.1`, then o
 - Navigate between HDR and ordinary images with mouse and keyboard, including while decoding. Verify there is no stale HDR overlay or control panel.
 - Check that unsupported browsers and SDR displays keep the ordinary lightbox without HDR controls.
 - Move the window between HDR and SDR screens; enhancement should follow the display capability.
+- Open `/index.html` and verify the Moana banner enhances automatically on HDR displays, remains correctly oriented and responsive, and keeps its PNG fallback on SDR displays or when HDR fails.
 
 All five current assets (Orange Juice, Dam Break, WaterColor, Kroken, Intel Sponza camera 1) passed exact half-float pixel comparisons against the original EXR rendering path. Combined downloads fell from 117.45 MB to 45.79 MB (61% smaller). Orange Juice is slightly larger in the preprocessed format but avoids EXR decode time. Local Node measurements were 276–523 ms for EXR decoding versus 27–51 ms for native gzip decompression and unpacking; these are CPU measurements, not browser or network timings.
 

@@ -146,6 +146,18 @@ li{
   height: auto;
 }
 
+/* The ordinary banner reserves space and stays visible until HDR is ready. */
+.hdr-home { position: relative; }
+.hdr-home > img { display: block; width: 100%; height: auto; }
+.hdr-home > canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.hdr-home > canvas[hidden] { display: none; }
+
 .gallery-rights {
   font-size: 0.875rem;
   line-height: 1.5;

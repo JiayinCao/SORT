@@ -5,10 +5,11 @@ import { EXRLoader } from './vendor/three/EXRLoader.js';
 import { encodeHDR, decodeHDR } from './hdr-format.js';
 
 const root = new URL('../', import.meta.url);
-const html = await readFile(new URL('gallery.html', root), 'utf8');
+const html = (await Promise.all(['gallery.html', 'index.html'].map(page =>
+  readFile(new URL(page, root), 'utf8')))).join('\n');
 let totalRaw = 0;
 let totalOptimized = 0;
-for (const [tag] of html.matchAll(/<a\b[^>]*\bdata-exr="[^"]+"[^>]*>/g)) {
+for (const [tag] of html.matchAll(/<[\w-]+\b[^>]*\bdata-exr="[^"]+"[^>]*>/g)) {
   const exrPath = /data-exr="([^"]+)"/.exec(tag)[1];
   const hdrPath = /data-hdr="([^"]+)"/.exec(tag)?.[1];
   assert(hdrPath, `Missing optimized asset: ${exrPath}`);
